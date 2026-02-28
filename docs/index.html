@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oil & Gas Intelligence Dashboard — Project Showcase</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0E1117;
+            --bg-card: #161B22;
+            --bg-elevated: #1A1F2E;
+            --cyan: #00D4AA;
+            --teal: #14B8A6;
+            --gold: #F59E0B;
+            --amber: #FB923C;
+            --coral: #F87171;
+            --blue: #60A5FA;
+            --purple: #A78BFA;
+            --text-primary: #F9FAFB;
+            --text-secondary: #D1D5DB;
+            --text-muted: #9CA3AF;
+            --border: rgba(255,255,255,0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 80px 0 50px;
+            position: relative;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(0,212,170,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-icon {
+            font-size: 3.5rem;
+            margin-bottom: 16px;
+            filter: drop-shadow(0 0 20px rgba(0,212,170,0.3));
+        }
+        .hero h1 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--cyan), var(--teal));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero .tagline {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 24px;
+        }
+        .hero .live-link {
+            display: inline-block;
+            padding: 12px 32px;
+            background: linear-gradient(135deg, var(--cyan), var(--teal));
+            color: var(--bg-primary);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .hero .live-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,212,170,0.3);
+        }
+        .hero .repo-link {
+            display: inline-block;
+            margin-left: 12px;
+            padding: 12px 24px;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .hero .repo-link:hover {
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            padding: 28px 0;
+            margin: 20px 0 50px;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+        }
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 2px;
+        }
+
+        /* Section Headers */
+        .section-header {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 60px 0 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .section-header .icon {
+            font-size: 1.2rem;
+        }
+        .section-header::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* Architecture Diagram */
+        .diagram-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            margin: 24px 0;
+            overflow-x: auto;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .card.visible {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            border-color: rgba(255,255,255,0.15);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+        .card-header {
+            padding: 20px 20px 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .card-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        .card-subtitle {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+        .card-body {
+            padding: 0 20px 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+        }
+        .card.expanded .card-body {
+            max-height: 500px;
+            padding: 0 20px 20px;
+        }
+        .card-body ul {
+            list-style: none;
+            padding: 0;
+        }
+        .card-body li {
+            padding: 6px 0 6px 14px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            position: relative;
+        }
+        .card-body li::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 12px;
+            width: 4px; height: 4px;
+            border-radius: 50%;
+        }
+        .card-expand {
+            padding: 0 20px 16px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .card.expanded .card-expand { display: none; }
+
+        /* Data Pipeline */
+        .pipeline {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 32px 16px;
+            margin: 24px 0;
+            flex-wrap: wrap;
+        }
+        .pipeline-node {
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+            min-width: 100px;
+        }
+        .pipeline-arrow {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+        }
+
+        /* Data Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+            font-size: 0.85rem;
+        }
+        .data-table th {
+            text-align: left;
+            padding: 12px 16px;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border-bottom: 1px solid var(--border);
+        }
+        .data-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+        .data-table tr:hover td {
+            background: rgba(255,255,255,0.02);
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .badge-real { background: rgba(0,212,170,0.15); color: var(--cyan); }
+        .badge-sample { background: rgba(251,146,60,0.15); color: var(--amber); }
+
+        /* Tech Stack */
+        .tech-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 24px 0;
+        }
+        .tech-tag {
+            padding: 8px 16px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding: 24px 0;
+            margin: 24px 0;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0; bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+        .timeline-item {
+            position: relative;
+            padding: 0 0 32px 52px;
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+        .timeline-item.visible {
+            opacity: 1;
+            transform: translateX(0);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: 12px; top: 4px;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            border: 3px solid;
+        }
+        .timeline-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+        .timeline-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 48px 0;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            border-top: 1px solid var(--border);
+            margin-top: 60px;
+        }
+
+        @media (max-width: 640px) {
+            .hero h1 { font-size: 1.6rem; }
+            .stats-bar { gap: 20px; }
+            .stat-value { font-size: 1.2rem; }
+            .card-grid { grid-template-columns: 1fr; }
+            .pipeline { flex-direction: column; }
+            .pipeline-arrow { transform: rotate(90deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Hero -->
+    <div class="hero">
+        <div class="hero-icon">&#9981;</div>
+        <h1>Oil & Gas Intelligence Dashboard</h1>
+        <p class="tagline">Real-time crude pricing, crack spreads, refining margins, OPEC production tracking, and AI-powered news sentiment — built for energy sector decision-makers.</p>
+        <a class="live-link" href="https://oil-dashboard-rwgb6gft2xvuudkjeewkce.streamlit.app/" target="_blank">&#9654; Live Dashboard</a>
+        <a class="repo-link" href="https://github.com/parthreddy123/oil-dashboard" target="_blank">&#128736; Source Code</a>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+        <div class="stat">
+            <div class="stat-value" style="color:var(--cyan);">8</div>
+            <div class="stat-label">Dashboard Pages</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" style="color:var(--teal);">6</div>
+            <div class="stat-label">Data Scrapers</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" style="color:var(--gold);">1,100+</div>
+            <div class="stat-label">Real Data Points</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" style="color:var(--blue);">11</div>
+            <div class="stat-label">OPEC Countries</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" style="color:var(--purple);">149</div>
+            <div class="stat-label">News Articles Tagged</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" style="color:var(--coral);">$13.49</div>
+            <div class="stat-label">Live GRM (USD/bbl)</div>
+        </div>
+    </div>
+
+    <!-- Architecture -->
+    <div class="section-header"><span class="icon">&#128736;</span> System Architecture</div>
+    <div class="diagram-container">
+        <div class="mermaid">
+graph LR
+    subgraph Sources["Data Sources"]
+        EIA["EIA API<br/>Crude &amp; Products"]
+        OP["OilPrice.com<br/>Dubai/Oman"]
+        FX["ExchangeRate API<br/>USD/INR"]
+        PPAC["PPAC Gov.in<br/>India Refinery PDFs"]
+        NEWS["Google News<br/>RSS Feeds"]
+    end
+
+    subgraph Pipeline["Processing Pipeline"]
+        SCRAPE["Scrapers<br/>6 modules"]
+        TAG["Impact Tagger<br/>Keyword + Negation"]
+        CALC["Calculations<br/>Crack Spreads, GRM"]
+        SNAP["Snapshot Builder<br/>Weekly KPIs"]
+    end
+
+    subgraph Storage["Storage"]
+        DB[("SQLite<br/>11 Tables<br/>WAL Mode")]
+    end
+
+    subgraph Dashboard["Streamlit Dashboard"]
+        BRIEF["Morning Brief"]
+        CRUDE["Crude Prices"]
+        PROD["Products &amp; Cracks"]
+        REFINE["Indian Refineries"]
+        TRADE["Trade Flows"]
+        GLOBAL["Global View"]
+        NEWSPAGE["News &amp; Impact"]
+    end
+
+    EIA --> SCRAPE
+    OP --> SCRAPE
+    FX --> SCRAPE
+    PPAC --> SCRAPE
+    NEWS --> SCRAPE
+    SCRAPE --> DB
+    DB --> TAG
+    TAG --> DB
+    DB --> CALC
+    CALC --> DB
+    DB --> SNAP
+    SNAP --> DB
+    DB --> Dashboard
+
+    style Sources fill:#1a2332,stroke:#60A5FA,color:#F9FAFB
+    style Pipeline fill:#1a2332,stroke:#00D4AA,color:#F9FAFB
+    style Storage fill:#1a2332,stroke:#F59E0B,color:#F9FAFB
+    style Dashboard fill:#1a2332,stroke:#A78BFA,color:#F9FAFB
+        </div>
+    </div>
+
+    <!-- Data Pipeline -->
+    <div class="section-header"><span class="icon">&#128640;</span> Data Pipeline</div>
+    <div class="pipeline">
+        <div class="pipeline-node" style="background:rgba(96,165,250,0.15);color:var(--blue);border:1px solid rgba(96,165,250,0.3);">APIs & Scrapers</div>
+        <div class="pipeline-arrow">&#10132;</div>
+        <div class="pipeline-node" style="background:rgba(0,212,170,0.15);color:var(--cyan);border:1px solid rgba(0,212,170,0.3);">Parse & Clean</div>
+        <div class="pipeline-arrow">&#10132;</div>
+        <div class="pipeline-node" style="background:rgba(245,158,11,0.15);color:var(--gold);border:1px solid rgba(245,158,11,0.3);">SQLite DB</div>
+        <div class="pipeline-arrow">&#10132;</div>
+        <div class="pipeline-node" style="background:rgba(167,139,250,0.15);color:var(--purple);border:1px solid rgba(167,139,250,0.3);">Calculations</div>
+        <div class="pipeline-arrow">&#10132;</div>
+        <div class="pipeline-node" style="background:rgba(248,113,113,0.15);color:var(--coral);border:1px solid rgba(248,113,113,0.3);">Dashboard</div>
+    </div>
+
+    <!-- Dashboard Pages -->
+    <div class="section-header"><span class="icon">&#128202;</span> Dashboard Pages</div>
+    <div class="card-grid">
+
+        <div class="card" onclick="this.classList.toggle('expanded')">
+            <div class="card-header">
+                <div class="card-icon" style="background:rgba(0,212,170,0.15);">&#9749;</div>
+                <div>
+                    <div class="card-title">Morning Brief</div>
+                    <div class="card-subtitle">CEO executive summary</div>
+                </div>
+            </div>
+            <div class="card-expand">Click to expand</div>
+            <div class="card-body">
+                <ul>
+                    <li style="border-left:3px solid var(--cyan);">5 live KPIs: Brent, Dubai/Oman, Spread, Indian Basket, GRM</li>
+                    <li style="border-left:3px solid var(--cyan);">Threshold-based alerts (Brent high/low, GRM, spread widening)</li>
+                    <li style="border-left:3px solid var(--cyan);">7-day Brent & Dubai/Oman price chart</li>
+                    <li style="border-left:3px solid var(--cyan);">Product crack spread bars with color coding</li>
+                    <li style="border-left:3px solid var(--cyan);">Top 5 market-moving news by impact score</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card" onclick="this.classList.toggle('expanded')">
+            <div class="card-header">
+                <div class="card-icon" style="background:rgba(96,165,250,0.15);">&#128202;</div>
+                <div>
+                    <div class="card-title">Market Overview</div>
+                    <div class="card-subtitle">Multi-benchmark price tracking</div>
+                </div>
+            </div>
+            <div class="card-expand">Click to expand</div>
+            <div class="card-body">
+                <ul>
+                    <li style="border-left:3px solid var(--blue);">Brent, WTI, Dubai/Oman KPI cards with WoW/MoM change</li>
+                    <li style="border-left:3px solid var(--blue);">Indian crude basket (72% Dubai + 28% Brent)</li>
+                    <li style="border-left:3px solid var(--blue);">Interactive multi-benchmark price chart with date range filters</li>
+                    <li style="border-left:3px solid var(--blue);">Brent-Dubai spread visualization</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card" onclick="this.classList.toggle('expanded')">
+            <div class="card-header">
+                <div class="card-icon" style="background:rgba(245,158,11,0.15);">&#128738;</div>
+                <div>
+                    <div class="card-title">Crude Prices</div>
+                    <div class="card-subtitle">365-day historical analysis</div>
+                </div>
+            </div>
+            <div class="card-expand">Click to expand</div>
+            <div class="card-body">
+                <ul>
+                    <li style="border-left:3px solid var(--gold);">730 daily Brent & WTI prices from EIA API</li>
+                    <li style="border-left:3px solid var(--gold);">Brent-Dubai and Brent-WTI spread charts</li>
+                    <li style="border-left:3px solid var(--gold);">Rolling volatility and moving averages</li>
+                    <li style="border-left:3px solid var(--gold);">Time range selectors (1W, 1M, 3M, 6M, 1Y)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card" onclick="this.classList.toggle('expanded')">
+            <div class="card-header">
+                <div class="card-icon" style="background:rgba(248,113,113,0.15);">&#127981;</div>
+                <div>
+                    <div class="card-title">Indian Refineries</div>
+                    <div class="card-subtitle">Throughput & utilization</div>
+                </div>
+            </div>
+            <div class="card-expand">Click to expand</div>
+            <div class="card-body">
+                <ul>
+                    <li style="border-left:3px solid var(--coral);">16 refineries: RIL, IOCL, BPCL, HPCL, MRPL, Nayara, CPCL</li>
+                    <li style="border-left:3px solid var(--coral);">Capacity-weighted utilization rates (avg 99.6%)</li>
+                    <li style="border-left:3px solid var(--coral);">Throughput vs nameplate capacity comparison</li>
+                    <li style="border-left:3px solid var(--coral);">Company-level aggregation and breakdown</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card" onclick="this.classList.toggle('expanded')">
+            <div class="card-header">
+                <div class="card-icon" style="background:rgba(167,139,250,0.15);">&#128200;</div>
+                <div>
+                    <div class="card-title">Products & Cracks</div>
+                    <div class="card-subtitle">Crack spreads & GRM</div>
+                </div>
+            </div>
+            <div class="card-expand">Click to expand</div>
+            <div class="card-body">
+                <ul>
+                    <li style="border-left:3px solid var(--purple);">6-product crack spreads: petrol, diesel, ATF, LPG, naphtha, fuel oil</li>
+                    <li style="border-left:3px solid var(--purple);">Estimated GRM with Indian complex refinery yield weights</li>
+                    <li style="border-left:3px solid var(--purple);">EIA spot prices in USD/bbl (no tax distortion)</li>
+                    <li style="border-left:3px solid var(--purple);">Naphtha & fuel oil derived from market relationships</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card" onclick="this.classList.toggle('expanded')">
+            <div class="card-header">
+                <div class="card-icon" style="background:rgba(20,184,166,0.15);">&#128674;</div>
+                <div>
+                    <div class="card-title">Trade Flows</div>
+                    <div class="card-subtitle">Crude import analysis</div>
+                </div>
+            </div>
+            <div class="card-expand">Click to expand</div>
+            <div class="card-body">
+                <ul>
+                    <li style="border-left:3px solid var(--teal);">India crude import breakdown by source country</li>
+                    <li style="border-left:3px solid var(--teal);">Volume (TMT) and value (M USD) tracking</li>
+                    <li style="border-left:3px solid var(--teal);">Top suppliers: Iraq, Saudi Arabia, Russia, UAE, Kuwait</li>
+                    <li style="border-left:3px solid var(--teal);">Claude AI PDF extraction pipeline (PPAC reports)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card" onclick="this.classList.toggle('expanded')">
+            <div class="card-header">
+                <div class="card-icon" style="background:rgba(251,146,60,0.15);">&#128240;</div>
+                <div>
+                    <div class="card-title">News & Impact</div>
+                    <div class="card-subtitle">AI sentiment analysis</div>
+                </div>
+            </div>
+            <div class="card-expand">Click to expand</div>
+            <div class="card-body">
+                <ul>
+                    <li style="border-left:3px solid var(--amber);">149 articles from Google News & OilPrice RSS</li>
+                    <li style="border-left:3px solid var(--amber);">Keyword scoring with 250+ terms across 10 categories</li>
+                    <li style="border-left:3px solid var(--amber);">Negation detection (context-aware per text segment)</li>
+                    <li style="border-left:3px solid var(--amber);">Bullish/bearish/neutral classification with confidence scores</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card" onclick="this.classList.toggle('expanded')">
+            <div class="card-header">
+                <div class="card-icon" style="background:rgba(96,165,250,0.15);">&#127758;</div>
+                <div>
+                    <div class="card-title">Global View</div>
+                    <div class="card-subtitle">OPEC & demand/supply</div>
+                </div>
+            </div>
+            <div class="card-expand">Click to expand</div>
+            <div class="card-body">
+                <ul>
+                    <li style="border-left:3px solid var(--blue);">132 production records across 11 OPEC+ countries</li>
+                    <li style="border-left:3px solid var(--blue);">World petroleum production vs consumption balance</li>
+                    <li style="border-left:3px solid var(--blue);">Country-level mb/d production tracking</li>
+                    <li style="border-left:3px solid var(--blue);">Monthly frequency from EIA international series</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Key Calculations -->
+    <div class="section-header"><span class="icon">&#129518;</span> Key Calculations</div>
+    <div class="diagram-container" style="padding:24px 32px;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Formula</th>
+                    <th>Source</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="font-weight:600;color:var(--text-primary);">Indian Crude Basket</td>
+                    <td><code style="color:var(--cyan);">0.72 &times; Dubai + 0.28 &times; Brent</code></td>
+                    <td>PPAC official methodology</td>
+                </tr>
+                <tr>
+                    <td style="font-weight:600;color:var(--text-primary);">Crack Spread</td>
+                    <td><code style="color:var(--cyan);">Product Price (USD/bbl) - Brent (USD/bbl)</code></td>
+                    <td>EIA spot prices</td>
+                </tr>
+                <tr>
+                    <td style="font-weight:600;color:var(--text-primary);">GRM</td>
+                    <td><code style="color:var(--cyan);">&Sigma;(crack<sub>i</sub> &times; yield_weight<sub>i</sub>) / &Sigma;(yield_weight<sub>i</sub>)</code></td>
+                    <td>Indian complex refinery yields</td>
+                </tr>
+                <tr>
+                    <td style="font-weight:600;color:var(--text-primary);">INR/L &rarr; USD/bbl</td>
+                    <td><code style="color:var(--cyan);">(price_inr - tax) / fx_rate &times; 158.987</code></td>
+                    <td>ExchangeRate API + tax est.</td>
+                </tr>
+                <tr>
+                    <td style="font-weight:600;color:var(--text-primary);">USD/gal &rarr; USD/bbl</td>
+                    <td><code style="color:var(--cyan);">price_gallon &times; 42</code></td>
+                    <td>Standard conversion</td>
+                </tr>
+                <tr>
+                    <td style="font-weight:600;color:var(--text-primary);">News Impact Score</td>
+                    <td><code style="color:var(--cyan);">base_score &times; min(|matches|, 3) / 3</code></td>
+                    <td>Keyword scoring + negation</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Data Sources -->
+    <div class="section-header"><span class="icon">&#128230;</span> Data Sources & Coverage</div>
+    <div class="diagram-container" style="padding:24px 32px;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Source</th>
+                    <th>Records</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Brent & WTI Crude</td>
+                    <td>EIA API v2</td>
+                    <td>730</td>
+                    <td><span class="badge badge-real">REAL</span></td>
+                </tr>
+                <tr>
+                    <td>Dubai/Oman Crude</td>
+                    <td>OilPrice.com</td>
+                    <td>1</td>
+                    <td><span class="badge badge-real">REAL</span></td>
+                </tr>
+                <tr>
+                    <td>Product Spot Prices</td>
+                    <td>EIA API (RBOB, ULSD, Jet, Propane)</td>
+                    <td>120</td>
+                    <td><span class="badge badge-real">REAL</span></td>
+                </tr>
+                <tr>
+                    <td>OPEC Production</td>
+                    <td>EIA International</td>
+                    <td>132</td>
+                    <td><span class="badge badge-real">REAL</span></td>
+                </tr>
+                <tr>
+                    <td>FX Rates (USD/INR)</td>
+                    <td>ExchangeRate API</td>
+                    <td>1</td>
+                    <td><span class="badge badge-real">REAL</span></td>
+                </tr>
+                <tr>
+                    <td>News Articles</td>
+                    <td>Google News + OilPrice RSS</td>
+                    <td>149</td>
+                    <td><span class="badge badge-real">REAL</span></td>
+                </tr>
+                <tr>
+                    <td>Refinery Data</td>
+                    <td>PPAC (Claude AI extraction)</td>
+                    <td>32</td>
+                    <td><span class="badge badge-sample">SAMPLE</span></td>
+                </tr>
+                <tr>
+                    <td>Trade Flows</td>
+                    <td>PPAC (Claude AI extraction)</td>
+                    <td>16</td>
+                    <td><span class="badge badge-sample">SAMPLE</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- GRM Yield Weights -->
+    <div class="section-header"><span class="icon">&#9881;</span> Refinery Yield Weights (GRM)</div>
+    <div class="diagram-container" style="padding:24px 32px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+            <div style="text-align:center;padding:16px 20px;border-radius:10px;background:rgba(0,212,170,0.1);border:1px solid rgba(0,212,170,0.2);min-width:100px;">
+                <div style="font-size:1.4rem;font-weight:800;color:var(--cyan);">42%</div>
+                <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">Diesel</div>
+            </div>
+            <div style="text-align:center;padding:16px 20px;border-radius:10px;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.2);min-width:100px;">
+                <div style="font-size:1.4rem;font-weight:800;color:var(--blue);">22%</div>
+                <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">Petrol</div>
+            </div>
+            <div style="text-align:center;padding:16px 20px;border-radius:10px;background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);min-width:100px;">
+                <div style="font-size:1.4rem;font-weight:800;color:var(--purple);">12%</div>
+                <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">Naphtha</div>
+            </div>
+            <div style="text-align:center;padding:16px 20px;border-radius:10px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);min-width:100px;">
+                <div style="font-size:1.4rem;font-weight:800;color:var(--gold);">10%</div>
+                <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">ATF</div>
+            </div>
+            <div style="text-align:center;padding:16px 20px;border-radius:10px;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.2);min-width:100px;">
+                <div style="font-size:1.4rem;font-weight:800;color:var(--coral);">8%</div>
+                <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">Fuel Oil</div>
+            </div>
+            <div style="text-align:center;padding:16px 20px;border-radius:10px;background:rgba(20,184,166,0.1);border:1px solid rgba(20,184,166,0.2);min-width:100px;">
+                <div style="font-size:1.4rem;font-weight:800;color:var(--teal);">6%</div>
+                <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">LPG</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tech Stack -->
+    <div class="section-header"><span class="icon">&#128187;</span> Tech Stack</div>
+    <div class="tech-grid">
+        <div class="tech-tag">Python 3.12</div>
+        <div class="tech-tag">Streamlit</div>
+        <div class="tech-tag">Plotly</div>
+        <div class="tech-tag">Pandas</div>
+        <div class="tech-tag">SQLite (WAL)</div>
+        <div class="tech-tag">EIA API v2</div>
+        <div class="tech-tag">Claude API (Haiku)</div>
+        <div class="tech-tag">BeautifulSoup</div>
+        <div class="tech-tag">pdfplumber</div>
+        <div class="tech-tag">APScheduler</div>
+        <div class="tech-tag">feedparser</div>
+        <div class="tech-tag">YAML config</div>
+    </div>
+
+    <!-- Development Timeline -->
+    <div class="section-header"><span class="icon">&#128197;</span> Development Timeline</div>
+    <div class="timeline">
+        <div class="timeline-item">
+            <div class="timeline-dot" style="border-color:var(--cyan);background:var(--bg-primary);"></div>
+            <div class="timeline-title" style="color:var(--cyan);">Phase 1: Core Infrastructure</div>
+            <div class="timeline-desc">Streamlit app shell, SQLite schema, EIA crude price scraper, dark theme UI with 8 page architecture</div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-dot" style="border-color:var(--blue);background:var(--bg-primary);"></div>
+            <div class="timeline-title" style="color:var(--blue);">Phase 2: Real Data Pipeline</div>
+            <div class="timeline-desc">EIA API integration (Brent, WTI, products, OPEC), FX rate scraper, Dubai/Oman pricing, Indian basket formula fix</div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-dot" style="border-color:var(--purple);background:var(--bg-primary);"></div>
+            <div class="timeline-title" style="color:var(--purple);">Phase 3: Calculations & Analytics</div>
+            <div class="timeline-desc">Crack spread engine, 6-product GRM with yield weights, tax deduction model, capacity-weighted utilization</div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-dot" style="border-color:var(--gold);background:var(--bg-primary);"></div>
+            <div class="timeline-title" style="color:var(--gold);">Phase 4: News Intelligence</div>
+            <div class="timeline-desc">250+ keyword taxonomy, 10 impact categories, negation detection, title-weighted scoring, bullish/bearish classification</div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-dot" style="border-color:var(--coral);background:var(--bg-primary);"></div>
+            <div class="timeline-title" style="color:var(--coral);">Phase 5: Quality Audit</div>
+            <div class="timeline-desc">LLM-powered MBB-style review, quant analyst calculation audit. Fixed 3 critical bugs, 8 high-severity issues, 4 medium issues</div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-dot" style="border-color:var(--teal);background:var(--bg-primary);"></div>
+            <div class="timeline-title" style="color:var(--teal);">Phase 6: Cloud Deployment</div>
+            <div class="timeline-desc">Streamlit Community Cloud deployment, GitHub Pages project showcase, secrets management, pre-built DB bundling</div>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    <div>Oil & Gas Intelligence Dashboard &mdash; Built with Claude Code</div>
+    <div style="margin-top:4px;">Generated March 2026</div>
+</footer>
+
+<script>
+    mermaid.initialize({
+        theme: 'dark',
+        themeVariables: {
+            primaryColor: '#1A1F2E',
+            primaryTextColor: '#F9FAFB',
+            primaryBorderColor: '#00D4AA',
+            lineColor: '#4B5563',
+            secondaryColor: '#161B22',
+            tertiaryColor: '#0E1117',
+            fontSize: '13px',
+        }
+    });
+
+    // Scroll-triggered animations
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, i) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => {
+                    entry.target.classList.add('visible');
+                }, i * 80);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.card, .timeline-item').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
