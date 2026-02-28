@@ -1,0 +1,70 @@
+database:
+  path: data/oil_dashboard.db
+
+eia:
+  base_url: https://api.eia.gov/v2
+  series:
+    brent: PET.RBRTE.D
+    wti: PET.RWTC.D
+    us_refinery_utilization: PET.WPULEUS3.W
+    us_refinery_input: PET.WGIRIUS2.W
+
+oilprice:
+  prices_url: https://oilprice.com/ajax/chart_data
+  rss_url: https://oilprice.com/rss/main
+
+ppac:
+  base_url: https://ppac.gov.in
+  reports_page: /content/152_1_ProductionPetroleum.aspx
+
+opec:
+  momr_url: https://www.opec.org/opec_web/en/publications/338.htm
+
+news:
+  google_rss_base: https://news.google.com/rss/search?q=
+  queries:
+    - "oil prices today"
+    - "crude oil market"
+    - "India refinery"
+    - "OPEC production"
+    - "oil and gas India"
+    - "petroleum India"
+    - "global oil demand supply"
+  max_articles_per_query: 15
+
+companies:
+  iocl:
+    name: Indian Oil Corporation
+    url: https://iocl.com/NewsDetail.aspx
+  bpcl:
+    name: Bharat Petroleum
+    url: https://www.bharatpetroleum.in/media/press-releases.aspx
+  hpcl:
+    name: Hindustan Petroleum
+    url: https://www.hindustanpetroleum.com/pressreleases
+  ril:
+    name: Reliance Industries
+    url: https://www.ril.com/news-media/press-releases
+  ongc:
+    name: ONGC
+    url: https://www.ongcindia.com/wps/wcm/connect/en/media/press-release/
+
+schedule:
+  prices_interval_hours: 24
+  news_interval_hours: 6
+  gov_data_interval_days: 7
+  opec_interval_days: 30
+
+cache:
+  directory: data/cache
+  expiry_hours: 24
+
+indian_basket:
+  oman_dubai_weight: 0.72
+  brent_weight: 0.28
+
+product_prices:
+  petrol_rsp_source: ppac
+  diesel_rsp_source: ppac
+  atf_source: ppac
+  lng_source: eia

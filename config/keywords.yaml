@@ -1,0 +1,272 @@
+impact_categories:
+  bullish_supply:
+    base_score: 0.6
+    keywords:
+      - shutdown
+      - outage
+      - sanctions
+      - OPEC cut
+      - production cut
+      - force majeure
+      - pipeline disruption
+      - refinery fire
+      - hurricane
+      - geopolitical tension
+      - supply disruption
+      - export ban
+      - war
+      - attack
+      - drone strike
+      - embargo
+      - quota reduction
+      - maintenance shutdown
+      - unplanned outage
+      - curtailment
+      - disruption
+      - explosion
+      - fire
+      - leak
+      - conflict
+      - tensions
+      - strikes
+      - blockade
+      - sabotage
+      - militants
+      - Middle East
+      - Iran
+      - Red Sea
+      - Strait of Hormuz
+      - Houthi
+      - Ukraine
+      - Russia sanctions
+      - Libya
+      - Nigeria
+      - Venezuela
+      - OPEC compliance
+      - voluntary cut
+      - output decline
+      - depletion
+      - underinvestment
+      - capex cut
+      - drilling decline
+      - rig count drop
+      - tanker shortage
+      - freight surge
+
+  bearish_supply:
+    base_score: -0.6
+    keywords:
+      - production increase
+      - surplus
+      - OPEC+ increase
+      - output boost
+      - new production
+      - record output
+      - oversupply
+      - glut
+      - inventory build
+      - stockpile increase
+      - shale boom
+      - new discovery
+      - capacity expansion
+      - export increase
+      - SPR release
+      - strategic reserve release
+      - output hike
+      - production ramp
+      - quota increase
+      - supply growth
+      - new wells
+      - shale output
+      - Permian
+      - inventory surplus
+      - contango
+      - floating storage
+      - price war
+      - OPEC unwind
+      - easing cuts
+      - market share war
+
+  bullish_demand:
+    base_score: 0.5
+    keywords:
+      - demand growth
+      - China stimulus
+      - economic recovery
+      - GDP growth
+      - travel surge
+      - driving season
+      - refinery run increase
+      - consumption increase
+      - manufacturing growth
+      - industrial recovery
+      - aviation recovery
+      - jet fuel demand
+      - reopening
+      - infrastructure spending
+      - China demand
+      - India demand
+      - India growth
+      - PMI expansion
+      - jobs growth
+      - consumer spending
+      - holiday travel
+      - peak season
+      - summer driving
+      - diesel demand
+      - petrochemical demand
+      - naphtha demand
+      - fuel consumption
+      - air travel record
+      - import increase
+      - China import
+      - India import
+      - refinery restart
+      - rate cut
+      - interest rate cut
+      - stimulus package
+      - fiscal stimulus
+      - monetary easing
+
+  bearish_demand:
+    base_score: -0.5
+    keywords:
+      - recession
+      - EV adoption
+      - demand decline
+      - slowdown
+      - lockdown
+      - travel restriction
+      - economic downturn
+      - unemployment
+      - inflation
+      - interest rate hike
+      - consumption drop
+      - fuel efficiency
+      - renewable energy
+      - green transition
+      - demand destruction
+      - contraction
+      - stagflation
+      - weak demand
+      - demand slump
+      - PMI contraction
+      - China slowdown
+      - property crisis
+      - trade war
+      - tariff
+      - debt crisis
+      - bankruptcy
+      - layoffs
+      - electric vehicle
+      - EV sales
+      - solar
+      - wind power
+      - carbon tax
+      - net zero
+      - decarbonization
+      - mild winter
+      - warm weather
+      - demand concern
+      - growth concern
+
+  refining_positive:
+    base_score: 0.4
+    keywords:
+      - margin improvement
+      - crack spread widening
+      - refinery margin
+      - GRM increase
+      - product shortage
+      - diesel premium
+      - gasoline premium
+      - utilization increase
+      - throughput increase
+      - capacity addition India
+      - new refinery India
+      - expansion project
+      - GRM improvement
+      - strong margins
+      - refining profit
+      - diesel crack
+      - gasoline crack
+      - jet crack
+      - naphtha crack
+      - product tightness
+      - low inventory
+      - product export
+      - Singapore margin
+      - complex refinery
+      - Reliance
+      - IOCL
+      - BPCL
+      - Indian refiner
+      - refinery earnings
+      - quarterly profit
+      - results beat
+
+  refining_negative:
+    base_score: -0.4
+    keywords:
+      - margin squeeze
+      - crack spread narrowing
+      - GRM decline
+      - overcapacity
+      - refinery closure
+      - utilization drop
+      - throughput decline
+      - product oversupply
+      - competition increase
+      - capacity surplus
+      - weak margins
+      - margin pressure
+      - GRM compression
+      - refining loss
+      - turnaround
+      - planned turnaround
+      - unplanned shutdown
+      - feedstock cost
+      - high crude cost
+      - product glut
+      - export restriction
+      - windfall tax
+      - results miss
+      - quarterly loss
+      - profit warning
+
+  india_regulatory_positive:
+    base_score: 0.3
+    keywords:
+      - price hike
+      - fuel price increase
+      - deregulation
+      - subsidy removal
+      - marketing margin
+      - OMC profit
+      - excise cut
+      - import duty reduction
+      - FDI in petroleum
+      - strategic reserve India
+      - policy reform
+      - disinvestment
+
+  india_regulatory_negative:
+    base_score: -0.3
+    keywords:
+      - price cut
+      - fuel price reduction
+      - price freeze
+      - election
+      - subsidy burden
+      - under-recovery
+      - OMC loss
+      - excise hike
+      - windfall tax India
+      - export duty
+      - import restriction
+      - price control
+      - administered pricing
+
+scoring:
+  max_keyword_matches: 3
+  formula: "base_score * min(matches, max_keyword_matches) / max_keyword_matches"
