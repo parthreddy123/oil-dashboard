@@ -27,6 +27,7 @@ def main():
     parser.add_argument("--company", action="store_true", help="Run Company scraper")
     parser.add_argument("--fx", action="store_true", help="Run FX rate scraper")
     parser.add_argument("--dubai", action="store_true", help="Run Dubai/Oman scraper")
+    parser.add_argument("--benchmarks", action="store_true", help="Run Murban/OPEC Basket benchmark scraper")
     parser.add_argument("--tag", action="store_true", help="Run impact tagger")
     parser.add_argument("--retag", action="store_true", help="Re-tag ALL articles (after keyword changes)")
     parser.add_argument("--snapshot", action="store_true", help="Build weekly snapshot")
@@ -85,6 +86,11 @@ def main():
 
     if args.dubai:
         from scrapers.dubai_scraper import run
+        run()
+        ran_something = True
+
+    if args.benchmarks:
+        from scrapers.benchmark_scraper import run
         run()
         ran_something = True
 

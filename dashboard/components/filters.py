@@ -4,9 +4,9 @@ import streamlit as st
 from datetime import datetime, timedelta
 
 
-def date_range_filter(key_prefix="", default_days=90):
+def date_range_filter(key_prefix="", default_days=90, default_preset_index=2):
     presets = {"1W": 7, "1M": 30, "3M": 90, "6M": 180, "YTD": None, "1Y": 365, "Custom": -1}
-    preset = st.selectbox("Time Period", list(presets.keys()), index=2, key=f"{key_prefix}_preset")
+    preset = st.selectbox("Time Period", list(presets.keys()), index=default_preset_index, key=f"{key_prefix}_preset")
 
     today = datetime.now().date()
     if preset == "YTD":
@@ -43,10 +43,11 @@ def company_filter(key_prefix=""):
 def benchmark_filter(key_prefix=""):
     labels = {
         "brent": "Brent", "oman_dubai": "Dubai/Oman",
-        "wti": "WTI", "indian_basket": "Indian Basket",
+        "wti": "WTI", "murban": "Murban (est.)",
+        "opec_basket": "OPEC Basket (est.)", "indian_basket": "Indian Basket",
     }
     return st.multiselect(
-        "Benchmarks", list(labels.keys()), default=["brent", "oman_dubai"],
+        "Benchmarks", list(labels.keys()), default=["brent", "oman_dubai", "murban"],
         key=f"{key_prefix}_benchmark",
         format_func=lambda x: labels[x],
     )

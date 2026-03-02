@@ -35,7 +35,7 @@ with st.sidebar:
         "Morning Brief": "&#9749;",
         "Overview": "&#128202;", "Crude Prices": "&#128738;", "Indian Refineries": "&#127981;",
         "Products & Cracks": "&#128200;", "Trade Flows": "&#128674;",
-        "News & Impact": "&#128240;", "Global View": "&#127758;",
+        "News & Impact": "&#128240;", "Geopolitical & Global": "&#127758;",
     }
     page = st.radio("NAVIGATION", list(NAV_ITEMS.keys()), index=0,
                      format_func=lambda x: f"{NAV_ITEMS[x]}  {x}")
@@ -106,7 +106,7 @@ elif page == "Trade Flows":
     from dashboard.pages.p05_trade_flows import render
 elif page == "News & Impact":
     from dashboard.pages.p06_news_impact import render
-elif page == "Global View":
+elif page == "Geopolitical & Global":
     from dashboard.pages.p07_global_view import render
 
 render()

@@ -16,7 +16,7 @@ def render():
 
     with st.sidebar:
         st.subheader("Filters")
-        start_date, end_date = date_range_filter("crude")
+        start_date, end_date = date_range_filter("crude", default_preset_index=1)
         benchmarks = benchmark_filter("crude")
 
     all_data = []
@@ -34,8 +34,12 @@ def render():
 
     # --- Price Chart ---
     st.subheader("Price Trends")
+    BM_LABELS = {
+        "brent": "Brent", "oman_dubai": "Dubai/Oman", "wti": "WTI",
+        "murban": "Murban", "opec_basket": "OPEC Basket", "indian_basket": "Indian Basket",
+    }
     pivot = df.pivot_table(index="date", columns="benchmark", values="price").reset_index()
-    y_cols = {bm: bm.upper() for bm in benchmarks if bm in pivot.columns}
+    y_cols = {bm: BM_LABELS.get(bm, bm.upper()) for bm in benchmarks if bm in pivot.columns}
     fig = line_chart(pivot, "date", y_cols, "Crude Oil Benchmark Prices", height=460,
                     show_range_selector=True)
     st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
@@ -74,12 +78,13 @@ def render():
             continue
         latest = bm_df.iloc[0]
         avg, high, low, std, rng = bm_df.mean(), bm_df.max(), bm_df.min(), bm_df.std(), bm_df.max() - bm_df.min()
+        label = BM_LABELS.get(bm, bm.upper())
 
         st.markdown(f"""
         <div style="margin-bottom:1rem;">
             <div style="font-size:0.78rem;font-weight:700;color:{CYAN};text-transform:uppercase;
                 letter-spacing:0.08em;margin-bottom:8px;padding-bottom:4px;
-                border-bottom:1px solid rgba(0,212,170,0.2);">{bm.upper()}</div>
+                border-bottom:1px solid rgba(0,212,170,0.2);">{label}</div>
             <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;">
                 <div><div style="font-size:0.62rem;color:{TEXT_MUTED};text-transform:uppercase;letter-spacing:0.08em;">Latest</div>
                     <div style="font-size:1.05rem;font-weight:700;color:{TEXT_PRIMARY};font-variant-numeric:tabular-nums;">${latest:.2f}</div></div>
@@ -95,4 +100,8 @@ def render():
                     <div style="font-size:1.05rem;font-weight:600;color:{TEXT_SECONDARY};">${rng:.2f}</div></div>
             </div>
         </div>""", unsafe_allow_html=True)
+
+    if any(bm in benchmarks for bm in ["murban", "opec_basket"]):
+        st.caption("Murban and OPEC Basket are estimates derived from Dubai/Oman and Brent using "
+                   "typical historical differentials. For authoritative prices, consult Platts/Argus.")
 

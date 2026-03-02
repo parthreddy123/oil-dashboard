@@ -24,6 +24,7 @@ def run_all_scrapers():
         ("oilprice", "scrapers.oilprice_scraper"),
         ("fx", "scrapers.fx_scraper"),
         ("dubai", "scrapers.dubai_scraper"),
+        ("benchmarks", "scrapers.benchmark_scraper"),
         ("news", "scrapers.news_aggregator"),
         ("ppac", "scrapers.ppac_scraper"),
         ("opec", "scrapers.opec_scraper"),
