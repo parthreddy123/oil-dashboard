@@ -140,12 +140,26 @@ hr { border-color: rgba(255, 255, 255, 0.06) !important; }
 
 /* Mobile responsive overrides */
 @media (max-width: 768px) {
-    .block-container { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
-    [data-testid="stHorizontalBlock"] { flex-wrap: wrap !important; gap: 0.5rem !important; }
-    [data-testid="stColumn"] { min-width: 45% !important; flex: 1 1 45% !important; }
-    [data-testid="stMetric"] { padding: 0.6rem 0.8rem !important; }
-    [data-testid="stMetric"] [data-testid="stMetricValue"] { font-size: 1.1rem !important; }
+    .block-container { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+    [data-testid="stSidebar"] { min-width: 0 !important; width: 240px !important; }
+
+    /* KPI cards: 2 per row instead of 5 */
+    [data-testid="stHorizontalBlock"] { flex-wrap: wrap !important; gap: 0.4rem !important; }
+    [data-testid="stColumn"] { min-width: 47% !important; flex: 1 1 47% !important; }
+
+    /* Compact cards */
+    [data-testid="stMetric"] { padding: 0.5rem 0.6rem !important; }
+    [data-testid="stMetric"] label { font-size: 0.6rem !important; }
+    [data-testid="stMetric"] [data-testid="stMetricValue"] { font-size: 1rem !important; }
+    [data-testid="stMetric"] [data-testid="stMetricDelta"] { font-size: 0.7rem !important; }
+
+    /* Typography */
     h1 { font-size: 1.3rem !important; }
+    h2 { font-size: 1.1rem !important; }
+
+    /* Charts: reduce minimum height */
+    [data-testid="stPlotlyChart"] { padding: 0.25rem !important; }
+    iframe { max-height: 280px !important; }
 }
 </style>
 """

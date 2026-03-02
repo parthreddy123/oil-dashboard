@@ -9,6 +9,7 @@ from database.db_manager import (
     get_trade_flows, get_crack_spreads, get_news_articles,
     get_global_events, get_metric_snapshots, get_latest_scrape, get_latest_price,
     get_fx_rate as _get_fx_rate, get_latest_narrative as _get_latest_narrative,
+    get_connection,
 )
 
 
@@ -67,3 +68,27 @@ def cached_fx_rate(pair="USD/INR"):
 @st.cache_data(ttl=300)
 def cached_strategic_narrative():
     return _get_latest_narrative()
+
+
+@st.cache_data(ttl=300)
+def cached_crack_spreads_brief():
+    """Get latest crack spreads + GRM for Morning Brief (single cached query)."""
+    cracks = {}
+    grm = None
+    with get_connection(readonly=True) as conn:
+        rows = conn.execute(
+            """SELECT product, spread, estimated_grm FROM crack_spreads
+               WHERE date=(SELECT MAX(date) FROM crack_spreads)
+               AND source = 'yfinance_sg_est'"""
+        ).fetchall()
+        if not rows:
+            rows = conn.execute(
+                """SELECT product, spread, estimated_grm FROM crack_spreads
+                   WHERE date=(SELECT MAX(date) FROM crack_spreads)
+                   AND source = 'calculated'"""
+            ).fetchall()
+        for r in rows:
+            cracks[r["product"]] = float(r["spread"])
+            if grm is None and r["estimated_grm"] is not None:
+                grm = float(r["estimated_grm"])
+    return {"cracks": cracks, "grm": grm}

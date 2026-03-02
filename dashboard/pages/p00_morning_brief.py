@@ -5,14 +5,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 import streamlit as st
 import pandas as pd
-import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from dashboard.data_access import (
     cached_crude_prices, cached_news_articles, cached_metric_snapshots,
-    cached_strategic_narrative,
+    cached_strategic_narrative, cached_crack_spreads_brief,
 )
-
-logger = logging.getLogger(__name__)
 from dashboard.components.kpi_card import kpi_card
 from dashboard.components.news_card import news_card
 from dashboard.components.price_chart import line_chart
@@ -21,8 +18,6 @@ from dashboard.components.theme import (
     TEXT_PRIMARY, TEXT_SECONDARY, TEXT_MUTED, TEXT_DIM,
     BG_CARD, BG_ELEVATED, BORDER_SUBTLE, PLOTLY_CONFIG,
 )
-from processing.calculations import calculate_crack_spreads, estimate_grm
-from database.db_manager import get_connection
 
 # Alert thresholds
 THRESHOLDS = {
@@ -139,30 +134,6 @@ def _render_narrative(snapshots, cracks, grm, articles):
         </div>""", unsafe_allow_html=True)
 
 
-def _maybe_refresh_narrative():
-    """Auto-regenerate narrative if stale (>6 hours old) or missing."""
-    narrative_row = cached_strategic_narrative()
-    if narrative_row and narrative_row.get("narrative_html"):
-        try:
-            created = datetime.fromisoformat(str(narrative_row.get("created_at", "")))
-            if datetime.now() - created < timedelta(hours=6):
-                return narrative_row
-        except Exception:
-            return narrative_row
-
-    # Stale or missing — try to regenerate in the background
-    try:
-        from processing.narrative_generator import generate_narrative
-        html = generate_narrative()
-        if html:
-            st.cache_data.clear()
-            return cached_strategic_narrative()
-    except Exception as e:
-        logger.warning(f"Auto-refresh narrative failed: {e}")
-
-    return narrative_row
-
-
 def _render_llm_narrative(narrative_row):
     """Render the LLM-generated strategic narrative as a styled bullet list."""
     html = narrative_row["narrative_html"]
@@ -225,26 +196,9 @@ def render():
             snapshots[row["metric_name"]] = row
 
     # Use cached crack spreads and GRM from DB
-    # Prefer Singapore estimated cracks vs Dubai (most relevant for India/APAC)
-    cracks = {}
-    grm = None
-    with get_connection() as conn:
-        rows = conn.execute(
-            """SELECT product, spread, estimated_grm FROM crack_spreads
-               WHERE date=(SELECT MAX(date) FROM crack_spreads)
-               AND source = 'yfinance_sg_est'"""
-        ).fetchall()
-        if not rows:
-            # Fallback to calculated cracks (vs Brent)
-            rows = conn.execute(
-                """SELECT product, spread, estimated_grm FROM crack_spreads
-                   WHERE date=(SELECT MAX(date) FROM crack_spreads)
-                   AND source = 'calculated'"""
-            ).fetchall()
-        for r in rows:
-            cracks[r["product"]] = float(r["spread"])
-            if grm is None and r["estimated_grm"] is not None:
-                grm = float(r["estimated_grm"])
+    crack_data = cached_crack_spreads_brief()
+    cracks = crack_data["cracks"]
+    grm = crack_data["grm"]
 
     # --- Alerts Section ---
     alerts = _check_alerts(snapshots, grm)
@@ -310,8 +264,8 @@ def render():
     # Fetch news once — reuse for narrative and news section below
     all_articles = cached_news_articles(limit=50)
 
-    # --- Strategic Narrative (LLM-powered, auto-refreshes if stale) ---
-    narrative_row = _maybe_refresh_narrative()
+    # --- Strategic Narrative (LLM-powered, generated on Refresh Data) ---
+    narrative_row = cached_strategic_narrative()
     if narrative_row and narrative_row.get("narrative_html"):
         _render_llm_narrative(narrative_row)
     else:

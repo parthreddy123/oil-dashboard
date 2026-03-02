@@ -89,13 +89,18 @@ def kpi_card(title, value, unit="", change=None, change_label="vs last week",
         visibility: visible !important;
         opacity: 1 !important;
     }}
+    @media (max-width: 768px) {{
+        .kpi-box {{ padding: 10px 12px 8px !important; min-height: 70px !important; }}
+        .kpi-title {{ font-size: 0.58rem !important; margin-bottom: 4px !important; }}
+        .kpi-value {{ font-size: 1.1rem !important; }}
+    }}
     </style>
-    <div style="position:relative;background:linear-gradient(135deg,{BG_CARD},{BG_ELEVATED});
+    <div class="kpi-box" style="position:relative;background:linear-gradient(135deg,{BG_CARD},{BG_ELEVATED});
         border:1px solid {BORDER_SUBTLE};border-left:3px solid {accent_color};
         border-radius:10px;padding:16px 18px 14px;margin-bottom:6px;min-height:100px;">
-        <div style="color:{TEXT_SECONDARY};font-size:0.7rem;font-weight:600;
+        <div class="kpi-title" style="color:{TEXT_SECONDARY};font-size:0.7rem;font-weight:600;
             text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">{title}{tooltip_html}</div>
-        <div style="color:{TEXT_PRIMARY};font-size:1.6rem;font-weight:700;
+        <div class="kpi-value" style="color:{TEXT_PRIMARY};font-size:1.6rem;font-weight:700;
             letter-spacing:-0.02em;line-height:1.1;font-variant-numeric:tabular-nums;">
             {display_value}{unit_html}</div>
         {delta_html}{spark_html}
