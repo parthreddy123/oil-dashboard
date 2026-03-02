@@ -75,10 +75,11 @@ def apply_theme(fig, height=400, show_range_selector=False):
 
 
 PLOTLY_CONFIG = {
-    "displayModeBar": True,
+    "displayModeBar": "hover",
     "modeBarButtonsToRemove": ["lasso2d", "select2d"],
     "toImageButtonOptions": {"format": "png", "filename": "oil_dashboard_chart", "scale": 2},
     "displaylogo": False,
+    "responsive": True,
 }
 
 
@@ -138,28 +139,95 @@ hr { border-color: rgba(255, 255, 255, 0.06) !important; }
 ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #4B5563; }
 
-/* Mobile responsive overrides */
+/* ===== Mobile responsive — complete overhaul ===== */
 @media (max-width: 768px) {
-    .block-container { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+    /* --- Layout & spacing --- */
+    .block-container {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+        padding-top: 0.75rem !important;
+    }
+
+    /* Sidebar: narrower, auto-collapse friendly */
     [data-testid="stSidebar"] { min-width: 0 !important; width: 240px !important; }
+    [data-testid="stSidebar"] [data-testid="stMarkdown"] { font-size: 0.8rem; }
 
-    /* KPI cards: 2 per row instead of 5 */
-    [data-testid="stHorizontalBlock"] { flex-wrap: wrap !important; gap: 0.4rem !important; }
-    [data-testid="stColumn"] { min-width: 47% !important; flex: 1 1 47% !important; }
+    /* --- Force columns to STACK vertically --- */
+    [data-testid="stHorizontalBlock"] {
+        flex-direction: column !important;
+        gap: 0.4rem !important;
+    }
+    /* KPI row: 2 per row (override the stack for KPI-like short blocks) */
+    [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"] .kpi-box) {
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+    }
+    [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"] .kpi-box) > [data-testid="stColumn"] {
+        min-width: 47% !important;
+        flex: 1 1 47% !important;
+    }
 
-    /* Compact cards */
+    /* Each stacked column takes full width */
+    [data-testid="stColumn"] {
+        width: 100% !important;
+        flex: 1 1 100% !important;
+    }
+
+    /* --- KPI cards compact --- */
+    .kpi-box {
+        padding: 10px 12px 8px !important;
+        min-height: 70px !important;
+    }
+    .kpi-title { font-size: 0.6rem !important; margin-bottom: 4px !important; }
+    .kpi-value { font-size: 1.15rem !important; }
+
     [data-testid="stMetric"] { padding: 0.5rem 0.6rem !important; }
     [data-testid="stMetric"] label { font-size: 0.6rem !important; }
     [data-testid="stMetric"] [data-testid="stMetricValue"] { font-size: 1rem !important; }
     [data-testid="stMetric"] [data-testid="stMetricDelta"] { font-size: 0.7rem !important; }
 
-    /* Typography */
+    /* --- Typography --- */
     h1 { font-size: 1.3rem !important; }
-    h2 { font-size: 1.1rem !important; }
+    h2 { font-size: 1.05rem !important; margin-top: 0.8rem !important; }
+    h3 { font-size: 0.95rem !important; }
 
-    /* Charts: reduce minimum height */
-    [data-testid="stPlotlyChart"] { padding: 0.25rem !important; }
-    iframe { max-height: 280px !important; }
+    /* --- Charts: full width, shorter --- */
+    [data-testid="stPlotlyChart"] {
+        padding: 0.15rem !important;
+        border-radius: 8px !important;
+    }
+    /* Plotly iframes — shorter on mobile */
+    [data-testid="stPlotlyChart"] iframe,
+    [data-testid="stPlotlyChart"] > div {
+        max-height: 300px !important;
+    }
+
+    /* --- Tables: horizontal scroll --- */
+    [data-testid="stDataFrame"] {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+    [data-testid="stDataFrame"] table { font-size: 0.72rem !important; }
+
+    /* --- News cards: stack badge below text --- */
+    /* Dividers: tighter */
+    hr { margin-top: 0.5rem !important; margin-bottom: 0.5rem !important; }
+
+    /* --- Tabs & radio: scrollable on mobile --- */
+    [data-testid="stRadio"] > div { flex-wrap: wrap !important; gap: 0.3rem !important; }
+    [data-testid="stRadio"] label { font-size: 0.75rem !important; }
+    [data-testid="stSelectbox"] label { font-size: 0.72rem !important; }
+
+    /* --- Download buttons --- */
+    .stDownloadButton > button { font-size: 0.72rem !important; padding: 0.3rem 0.8rem !important; }
+}
+
+/* Smaller phones */
+@media (max-width: 480px) {
+    .block-container { padding-left: 0.3rem !important; padding-right: 0.3rem !important; }
+    .kpi-box { padding: 8px 10px 6px !important; min-height: 60px !important; }
+    .kpi-value { font-size: 1rem !important; }
+    h1 { font-size: 1.15rem !important; }
 }
 </style>
 """

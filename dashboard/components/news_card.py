@@ -41,21 +41,40 @@ def news_card(title, summary, source, published_date, impact_tag, impact_score, 
     title_html = f'<a href="{url}" target="_blank" style="color:{TEXT_PRIMARY};text-decoration:none;">{title}</a>' if url else title
     summary_text = (summary[:180] + "...") if summary and len(summary) > 180 else (summary or "")
 
+    # Inline badge for mobile (shows after source line)
+    inline_badge = (
+        '<span style="display:inline-flex;align-items:center;gap:3px;margin-left:6px;'
+        'background:rgba(' + str(int(c[1:3],16)) + ',' + str(int(c[3:5],16)) + ',' + str(int(c[5:7],16)) + ',0.1);'
+        'border:1px solid rgba(' + str(int(c[1:3],16)) + ',' + str(int(c[3:5],16)) + ',' + str(int(c[5:7],16)) + ',0.25);'
+        'border-radius:4px;padding:1px 5px;font-size:0.55rem;font-weight:700;color:' + c + ';'
+        'letter-spacing:0.04em;vertical-align:middle;">'
+        + cfg['icon'] + ' ' + cfg['label'] + '</span>'
+    )
+
     st.markdown(f"""
-    <div style="background:linear-gradient(135deg,{BG_CARD},{BG_ELEVATED});
+    <style>
+    @media (min-width: 769px) {{ .nc-inline-badge {{ display:none !important; }} }}
+    @media (max-width: 768px) {{
+        .nc-sidebar-badge {{ display:none !important; }}
+        .nc-card {{ padding: 10px 12px !important; gap: 0 !important; }}
+        .nc-title {{ font-size: 0.8rem !important; }}
+    }}
+    </style>
+    <div class="nc-card" style="background:linear-gradient(135deg,{BG_CARD},{BG_ELEVATED});
         border:1px solid rgba(255,255,255,0.05);border-left:3px solid {c};
         border-radius:8px;padding:12px 14px;margin-bottom:8px;display:flex;
         justify-content:space-between;align-items:flex-start;gap:12px;">
         <div style="flex:1;min-width:0;">
-            <div style="font-size:0.85rem;font-weight:600;color:{TEXT_PRIMARY};line-height:1.35;margin-bottom:4px;">
+            <div class="nc-title" style="font-size:0.85rem;font-weight:600;color:{TEXT_PRIMARY};line-height:1.35;margin-bottom:4px;">
                 {title_html}</div>
             {"<div style='font-size:0.73rem;color:" + TEXT_MUTED + ";line-height:1.4;margin-bottom:5px;'>" + summary_text + "</div>" if summary_text else ""}
             <div style="font-size:0.66rem;color:{TEXT_DIM};">
                 <span style="font-weight:600;color:{TEXT_MUTED};">{source}</span>
                 {"<span> &middot; " + time_str + "</span>" if time_str else ""}
+                <span class="nc-inline-badge">{inline_badge}</span>
             </div>
         </div>
-        <div style="flex-shrink:0;text-align:center;min-width:50px;">
+        <div class="nc-sidebar-badge" style="flex-shrink:0;text-align:center;min-width:50px;">
             <div style="background:rgba({int(c[1:3],16)},{int(c[3:5],16)},{int(c[5:7],16)},0.1);
                 border:1px solid rgba({int(c[1:3],16)},{int(c[3:5],16)},{int(c[5:7],16)},0.25);
                 border-radius:6px;padding:5px 7px;">
