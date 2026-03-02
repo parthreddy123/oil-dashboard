@@ -23,7 +23,7 @@ def render():
         flow_type = st.selectbox("Flow Type", ["crude_import", "product_export", "product_import"],
                                  format_func=lambda x: x.replace("_", " ").title(), key="trade_flow_type")
 
-    flows = cached_trade_flows(flow_type=flow_type, start_date=str(start_date), end_date=str(end_date), limit=500)
+    flows = cached_trade_flows(flow_type=flow_type, start_date=str(start_date), end_date=str(end_date), limit=200)
     if not flows:
         st.info("No trade flow data. Run a data refresh.")
         return

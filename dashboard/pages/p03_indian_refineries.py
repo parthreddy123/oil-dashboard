@@ -19,7 +19,7 @@ def render():
         st.subheader("Filters")
         company = company_filter("refinery")
 
-    refinery_data = cached_refinery_data(company=company, limit=500)
+    refinery_data = cached_refinery_data(company=company, limit=200)
     if not refinery_data:
         st.info("No refinery data. Click 'Refresh Data' to load PPAC data.")
         return

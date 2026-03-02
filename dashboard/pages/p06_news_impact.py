@@ -5,7 +5,6 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 import streamlit as st
 import pandas as pd
-import plotly.graph_objects as go
 from dashboard.data_access import cached_news_articles
 from dashboard.components.news_card import news_feed
 from dashboard.components.price_chart import scatter_chart
@@ -100,6 +99,7 @@ def render():
     with c1:
         st.subheader("Sentiment Breakdown")
         if total > 0:
+            import plotly.graph_objects as go
             fig = go.Figure()
             fig.add_trace(go.Bar(y=["Sentiment"], x=[bullish_count], name="Bullish",
                                 orientation="h", marker_color=EMERALD,

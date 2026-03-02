@@ -1,8 +1,5 @@
 """Professional dark-themed Plotly chart components."""
 
-import plotly.graph_objects as go
-import plotly.express as px
-import pandas as pd
 from dashboard.components.theme import (
     SERIES_COLORS, BG_CARD, BG_ELEVATED, BORDER_SUBTLE,
     TEXT_PRIMARY, TEXT_SECONDARY, TEXT_MUTED,
@@ -10,11 +7,25 @@ from dashboard.components.theme import (
     apply_theme, PLOTLY_CONFIG,
 )
 
+# Lazy-load plotly — defers ~40MB import until first chart render
+_go = None
+_px = None
+
+
+def _ensure_plotly():
+    global _go, _px
+    if _go is None:
+        import plotly.graph_objects as go_mod
+        import plotly.express as px_mod
+        _go = go_mod
+        _px = px_mod
+
 
 def line_chart(df, x_col, y_cols, title="", y_title="Price (USD/bbl)",
                height=420, show_range_selector=False, annotate_last=True, fill_area=False):
     """Professional multi-line chart with annotations and crosshairs."""
-    fig = go.Figure()
+    _ensure_plotly()
+    fig = _go.Figure()
     if isinstance(y_cols, list):
         y_cols = {col: col for col in y_cols}
 
@@ -22,7 +33,7 @@ def line_chart(df, x_col, y_cols, title="", y_title="Price (USD/bbl)",
         if col not in df.columns:
             continue
         color = SERIES_COLORS[i % len(SERIES_COLORS)]
-        fig.add_trace(go.Scatter(
+        fig.add_trace(_go.Scatter(
             x=df[x_col], y=df[col], name=name,
             line=dict(color=color, width=2.2),
             fill="tozeroy" if (fill_area and i == 0) else None,
@@ -52,15 +63,16 @@ def line_chart(df, x_col, y_cols, title="", y_title="Price (USD/bbl)",
 def bar_chart(df, x_col, y_col, title="", color_col=None, height=400,
               horizontal=False, show_values=True, color_scale=None):
     """Dark-themed bar chart."""
+    _ensure_plotly()
     orientation = "h" if horizontal else "v"
     kw = dict(x=y_col if horizontal else x_col, y=x_col if horizontal else y_col,
               title=title, orientation=orientation, height=height)
     if color_col and color_scale:
-        fig = px.bar(df, **kw, color=color_col, color_continuous_scale=color_scale)
+        fig = _px.bar(df, **kw, color=color_col, color_continuous_scale=color_scale)
     elif color_col:
-        fig = px.bar(df, **kw, color=color_col, color_discrete_sequence=SERIES_COLORS)
+        fig = _px.bar(df, **kw, color=color_col, color_discrete_sequence=SERIES_COLORS)
     else:
-        fig = px.bar(df, **kw)
+        fig = _px.bar(df, **kw)
         fig.update_traces(marker_color=CYAN)
     if show_values:
         fig.update_traces(texttemplate="%{value:,.1f}", textposition="outside",
@@ -71,8 +83,9 @@ def bar_chart(df, x_col, y_col, title="", color_col=None, height=400,
 
 def waterfall_chart(categories, values, title="", height=420):
     """Waterfall chart for GRM / balance breakdown."""
+    _ensure_plotly()
     measure = ["relative"] * (len(categories) - 1) + ["total"]
-    fig = go.Figure(go.Waterfall(
+    fig = _go.Figure(_go.Waterfall(
         x=categories, y=values, measure=measure,
         connector=dict(line=dict(color="rgba(255,255,255,0.1)", width=1, dash="dot")),
         increasing=dict(marker=dict(color=EMERALD)),
@@ -89,7 +102,8 @@ def waterfall_chart(categories, values, title="", height=420):
 
 def treemap_chart(df, path_cols, values_col, title="", height=500):
     """Dark-themed treemap."""
-    fig = px.treemap(df, path=path_cols, values=values_col, title=title,
+    _ensure_plotly()
+    fig = _px.treemap(df, path=path_cols, values=values_col, title=title,
                      color=values_col, color_continuous_scale=["#0E1117", "#00D4AA"], height=height)
     fig.update_traces(textfont=dict(color=TEXT_PRIMARY, size=12), marker=dict(cornerradius=4),
                       hovertemplate="<b>%{label}</b><br>Value: %{value:,.0f}<br>Share: %{percentParent:.1%}<extra></extra>")
@@ -101,8 +115,9 @@ def treemap_chart(df, path_cols, values_col, title="", height=500):
 def scatter_chart(df, x_col, y_col, color_col=None, size_col=None,
                   title="", hover_cols=None, height=420):
     """Themed scatter plot."""
+    _ensure_plotly()
     color_map = {"bullish": EMERALD, "bearish": CORAL, "neutral": TEXT_MUTED}
-    fig = px.scatter(df, x=x_col, y=y_col, color=color_col, size=size_col,
+    fig = _px.scatter(df, x=x_col, y=y_col, color=color_col, size=size_col,
                      title=title, hover_data=hover_cols, height=height,
                      color_discrete_map=color_map if color_col else None)
     fig.update_traces(marker=dict(line=dict(width=0.5, color="rgba(255,255,255,0.1)")))
@@ -112,6 +127,7 @@ def scatter_chart(df, x_col, y_col, color_col=None, size_col=None,
 
 def gauge_chart(value, title="", min_val=0, max_val=100, threshold=90, height=260):
     """Dark-themed gauge for utilization rates."""
+    _ensure_plotly()
     if value >= threshold:
         bar_color = CORAL
     elif value >= max_val * 0.7:
@@ -119,7 +135,7 @@ def gauge_chart(value, title="", min_val=0, max_val=100, threshold=90, height=26
     else:
         bar_color = EMERALD
 
-    fig = go.Figure(go.Indicator(
+    fig = _go.Figure(_go.Indicator(
         mode="gauge+number", value=value,
         number=dict(font=dict(color=TEXT_PRIMARY, size=32), suffix="%"),
         title=dict(text=title, font=dict(color=TEXT_SECONDARY, size=13)),
@@ -142,7 +158,8 @@ def gauge_chart(value, title="", min_val=0, max_val=100, threshold=90, height=26
 
 def donut_chart(labels, values, title="", center_text="", height=420, colors=None):
     """Donut chart (replaces pie charts)."""
-    fig = go.Figure(go.Pie(
+    _ensure_plotly()
+    fig = _go.Figure(_go.Pie(
         labels=labels, values=values, hole=0.55,
         marker=dict(colors=colors or SERIES_COLORS[:len(labels)],
                     line=dict(color=BG_ELEVATED, width=2)),

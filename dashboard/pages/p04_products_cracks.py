@@ -23,7 +23,7 @@ def render():
 
     # --- Product Prices ---
     st.subheader("Product Prices")
-    products = cached_product_prices(start_date=str(start_date), end_date=str(end_date), limit=500)
+    products = cached_product_prices(start_date=str(start_date), end_date=str(end_date), limit=200)
 
     if products:
         df = pd.DataFrame(products)
@@ -127,7 +127,7 @@ def render():
     # --- Historical ---
     st.divider()
     st.subheader("Historical Crack Spreads")
-    hist = cached_crack_spreads(start_date=str(start_date), end_date=str(end_date), limit=500)
+    hist = cached_crack_spreads(start_date=str(start_date), end_date=str(end_date), limit=200)
     if hist:
         df_c = pd.DataFrame(hist)
         df_c["date"] = pd.to_datetime(df_c["date"])

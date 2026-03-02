@@ -29,7 +29,7 @@ SERIES_COLORS = [CYAN, TEAL, AMBER, CORAL, PURPLE, "#EC4899", "#14B8A6", "#F9731
 PLOTLY_LAYOUT = dict(
     paper_bgcolor=BG_ELEVATED,
     plot_bgcolor=BG_ELEVATED,
-    font=dict(family="Inter, system-ui, -apple-system, sans-serif", color=TEXT_SECONDARY, size=12),
+    font=dict(family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif", color=TEXT_SECONDARY, size=12),
     title=dict(font=dict(color=TEXT_PRIMARY, size=15), x=0, xanchor="left", pad=dict(l=10)),
     legend=dict(
         bgcolor="rgba(0,0,0,0)", bordercolor=BORDER_SUBTLE,
@@ -85,11 +85,9 @@ PLOTLY_CONFIG = {
 # -- Global CSS for Streamlit --
 GLOBAL_CSS = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
 .block-container { padding-top: 1.5rem !important; padding-bottom: 1rem !important; max-width: 100% !important; }
 
-[data-testid="stAppViewContainer"] { font-family: 'Inter', -apple-system, sans-serif; }
+[data-testid="stAppViewContainer"] { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
 [data-testid="stHeader"] { background-color: rgba(0,0,0,0); }
 
 [data-testid="stSidebar"] {

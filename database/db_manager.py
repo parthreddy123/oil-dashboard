@@ -14,15 +14,24 @@ def get_db_path():
 
 
 @contextmanager
-def get_connection():
-    conn = sqlite3.connect(get_db_path())
+def get_connection(readonly=False):
+    db_path = get_db_path()
+    if readonly and os.path.exists(db_path):
+        conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+    else:
+        conn = sqlite3.connect(db_path)
+        readonly = False  # fall back to read-write if DB doesn't exist yet
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
+    if readonly:
+        conn.execute("PRAGMA query_only=ON")
     try:
         yield conn
-        conn.commit()
+        if not readonly:
+            conn.commit()
     except Exception:
-        conn.rollback()
+        if not readonly:
+            conn.rollback()
         raise
     finally:
         conn.close()
@@ -161,6 +170,8 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_global_events_type_date ON global_events(event_type, date);
         CREATE INDEX IF NOT EXISTS idx_trade_flows_date ON trade_flows(date);
         CREATE INDEX IF NOT EXISTS idx_fx_rates_pair_date ON fx_rates(pair, date);
+        CREATE INDEX IF NOT EXISTS idx_crack_spreads_date ON crack_spreads(date, source);
+        CREATE INDEX IF NOT EXISTS idx_snapshots_date ON key_metrics_snapshot(snapshot_date DESC);
         """)
 
 
@@ -290,7 +301,7 @@ def get_crude_prices(benchmark=None, start_date=None, end_date=None, limit=365):
         params.append(str(end_date))
     query += " ORDER BY date DESC LIMIT ?"
     params.append(limit)
-    with get_connection() as conn:
+    with get_connection(readonly=True) as conn:
         return conn.execute(query, params).fetchall()
 
 
@@ -308,7 +319,7 @@ def get_product_prices(product=None, start_date=None, end_date=None, limit=365):
         params.append(str(end_date))
     query += " ORDER BY date DESC LIMIT ?"
     params.append(limit)
-    with get_connection() as conn:
+    with get_connection(readonly=True) as conn:
         return conn.execute(query, params).fetchall()
 
 
@@ -326,7 +337,7 @@ def get_refinery_data(company=None, start_date=None, end_date=None, limit=500):
         params.append(str(end_date))
     query += " ORDER BY date DESC LIMIT ?"
     params.append(limit)
-    with get_connection() as conn:
+    with get_connection(readonly=True) as conn:
         return conn.execute(query, params).fetchall()
 
 
@@ -344,7 +355,7 @@ def get_trade_flows(flow_type=None, start_date=None, end_date=None, limit=500):
         params.append(str(end_date))
     query += " ORDER BY date DESC LIMIT ?"
     params.append(limit)
-    with get_connection() as conn:
+    with get_connection(readonly=True) as conn:
         return conn.execute(query, params).fetchall()
 
 
@@ -362,7 +373,7 @@ def get_crack_spreads(product=None, start_date=None, end_date=None, limit=365):
         params.append(str(end_date))
     query += " ORDER BY date DESC LIMIT ?"
     params.append(limit)
-    with get_connection() as conn:
+    with get_connection(readonly=True) as conn:
         return conn.execute(query, params).fetchall()
 
 
@@ -383,7 +394,7 @@ def get_news_articles(impact_tag=None, source=None, start_date=None, end_date=No
         params.append(str(end_date))
     query += " ORDER BY published_date DESC LIMIT ?"
     params.append(limit)
-    with get_connection() as conn:
+    with get_connection(readonly=True) as conn:
         return conn.execute(query, params).fetchall()
 
 
@@ -401,7 +412,7 @@ def get_global_events(event_type=None, start_date=None, end_date=None, limit=200
         params.append(str(end_date))
     query += " ORDER BY date DESC LIMIT ?"
     params.append(limit)
-    with get_connection() as conn:
+    with get_connection(readonly=True) as conn:
         return conn.execute(query, params).fetchall()
 
 
@@ -412,7 +423,7 @@ def get_latest_scrape(scraper=None):
         query += " WHERE scraper = ?"
         params.append(scraper)
     query += " ORDER BY started_at DESC LIMIT 1"
-    with get_connection() as conn:
+    with get_connection(readonly=True) as conn:
         return conn.execute(query, params).fetchone()
 
 
@@ -424,13 +435,13 @@ def get_metric_snapshots(metric_name=None, limit=52):
         params.append(metric_name)
     query += " ORDER BY snapshot_date DESC LIMIT ?"
     params.append(limit)
-    with get_connection() as conn:
+    with get_connection(readonly=True) as conn:
         return conn.execute(query, params).fetchall()
 
 
 def get_latest_price(benchmark):
     """Get the most recent price for a benchmark."""
-    with get_connection() as conn:
+    with get_connection(readonly=True) as conn:
         row = conn.execute(
             "SELECT * FROM crude_prices WHERE benchmark = ? ORDER BY date DESC LIMIT 1",
             (benchmark,)
@@ -451,7 +462,7 @@ def upsert_fx_rate(dt, pair, rate, source=None):
 
 def get_fx_rate(pair="USD/INR", date=None):
     """Get the latest FX rate, or rate for a specific date."""
-    with get_connection() as conn:
+    with get_connection(readonly=True) as conn:
         if date:
             row = conn.execute(
                 "SELECT * FROM fx_rates WHERE pair=? AND date<=? ORDER BY date DESC LIMIT 1",
@@ -467,7 +478,7 @@ def get_fx_rate(pair="USD/INR", date=None):
 
 def get_all_benchmarks():
     """Get list of distinct benchmarks in the database."""
-    with get_connection() as conn:
+    with get_connection(readonly=True) as conn:
         rows = conn.execute("SELECT DISTINCT benchmark FROM crude_prices").fetchall()
         return [r["benchmark"] for r in rows]
 

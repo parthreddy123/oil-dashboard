@@ -13,27 +13,27 @@ from database.db_manager import (
 
 
 @st.cache_data(ttl=300)
-def cached_crude_prices(benchmark=None, start_date=None, end_date=None, limit=365):
+def cached_crude_prices(benchmark=None, start_date=None, end_date=None, limit=180):
     return [dict(r) for r in get_crude_prices(benchmark, start_date, end_date, limit)]
 
 
 @st.cache_data(ttl=300)
-def cached_product_prices(product=None, start_date=None, end_date=None, limit=365):
+def cached_product_prices(product=None, start_date=None, end_date=None, limit=180):
     return [dict(r) for r in get_product_prices(product, start_date, end_date, limit)]
 
 
 @st.cache_data(ttl=600)
-def cached_refinery_data(company=None, start_date=None, end_date=None, limit=500):
+def cached_refinery_data(company=None, start_date=None, end_date=None, limit=200):
     return [dict(r) for r in get_refinery_data(company, start_date, end_date, limit)]
 
 
 @st.cache_data(ttl=600)
-def cached_trade_flows(flow_type=None, start_date=None, end_date=None, limit=500):
+def cached_trade_flows(flow_type=None, start_date=None, end_date=None, limit=200):
     return [dict(r) for r in get_trade_flows(flow_type, start_date, end_date, limit)]
 
 
 @st.cache_data(ttl=300)
-def cached_crack_spreads(product=None, start_date=None, end_date=None, limit=365):
+def cached_crack_spreads(product=None, start_date=None, end_date=None, limit=180):
     return [dict(r) for r in get_crack_spreads(product, start_date, end_date, limit)]
 
 
@@ -43,7 +43,7 @@ def cached_news_articles(impact_tag=None, source=None, start_date=None, end_date
 
 
 @st.cache_data(ttl=600)
-def cached_global_events(event_type=None, start_date=None, end_date=None, limit=200):
+def cached_global_events(event_type=None, start_date=None, end_date=None, limit=100):
     return [dict(r) for r in get_global_events(event_type, start_date, end_date, limit)]
 
 

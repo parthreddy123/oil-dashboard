@@ -32,9 +32,11 @@ def render():
     # --- KPI Row ---
     snapshots = {row["metric_name"]: row for row in cached_metric_snapshots(limit=20)}
 
-    # Get sparkline data
-    brent_hist = cached_crude_prices(benchmark="brent", limit=14)
-    brent_sparkline = [r["price"] for r in reversed(brent_hist)] if brent_hist else None
+    # Fetch 90-day data once — reuse for sparklines (last 14) and chart below
+    brent_prices = cached_crude_prices(benchmark="brent", limit=90)
+    dubai_prices = cached_crude_prices(benchmark="oman_dubai", limit=90)
+    brent_sparkline = [r["price"] for r in reversed(brent_prices[:14])] if brent_prices else None
+    dubai_sparkline = [r["price"] for r in reversed(dubai_prices[:14])] if dubai_prices else None
 
     col1, col2, col3, col4, col5 = st.columns(5)
 
@@ -45,8 +47,6 @@ def render():
                  sparkline_data=brent_sparkline, accent_color=CYAN)
     with col2:
         d = snapshots.get("dubai_oman_price")
-        dubai_hist = cached_crude_prices(benchmark="oman_dubai", limit=14)
-        dubai_sparkline = [r["price"] for r in reversed(dubai_hist)] if dubai_hist else None
         kpi_card("Dubai/Oman", float(d["metric_value"]) if d else None, "USD/bbl",
                  sparkline_data=dubai_sparkline, accent_color=TEAL)
     with col3:
@@ -69,8 +69,6 @@ def render():
 
     with col_chart:
         st.subheader("Crude Price Trends")
-        brent_prices = cached_crude_prices(benchmark="brent", limit=90)
-        dubai_prices = cached_crude_prices(benchmark="oman_dubai", limit=90)
         wti_prices = cached_crude_prices(benchmark="wti", limit=90)
 
         if brent_prices or dubai_prices:

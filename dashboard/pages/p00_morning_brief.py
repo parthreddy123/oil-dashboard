@@ -199,10 +199,13 @@ def render():
         st.markdown("</div>", unsafe_allow_html=True)
 
     # --- Price KPIs ---
-    col1, col2, col3, col4, col5 = st.columns(5)
+    # Fetch 30-day data once — reuse for sparklines (last 14) and chart (all 30)
+    brent_30d = cached_crude_prices(benchmark="brent", limit=30)
+    dubai_30d = cached_crude_prices(benchmark="oman_dubai", limit=30)
+    brent_sparkline = [r["price"] for r in reversed(brent_30d[:14])] if brent_30d else None
+    dubai_sparkline = [r["price"] for r in reversed(dubai_30d[:14])] if dubai_30d else None
 
-    brent_hist = cached_crude_prices(benchmark="brent", limit=14)
-    brent_sparkline = [r["price"] for r in reversed(brent_hist)] if brent_hist else None
+    col1, col2, col3, col4, col5 = st.columns(5)
 
     with col1:
         b = snapshots.get("brent_price")
@@ -211,8 +214,6 @@ def render():
                  sparkline_data=brent_sparkline, accent_color=CYAN)
     with col2:
         d = snapshots.get("dubai_oman_price")
-        dubai_hist = cached_crude_prices(benchmark="oman_dubai", limit=14)
-        dubai_sparkline = [r["price"] for r in reversed(dubai_hist)] if dubai_hist else None
         kpi_card("Dubai/Oman", float(d["metric_value"]) if d else None, "USD/bbl",
                  sparkline_data=dubai_sparkline, accent_color=TEAL)
     with col3:
@@ -239,8 +240,11 @@ def render():
 
     st.divider()
 
+    # Fetch news once — reuse for narrative and news section below
+    all_articles = cached_news_articles(limit=50)
+
     # --- Strategic Narrative ---
-    _render_narrative(snapshots, cracks, grm, cached_news_articles(limit=20))
+    _render_narrative(snapshots, cracks, grm, all_articles[:20])
 
     st.divider()
 
@@ -250,8 +254,6 @@ def render():
     with col_chart:
         st.markdown(f'<div style="font-size:0.9rem;font-weight:700;color:{TEXT_PRIMARY};">'
                     f'30-Day Brent & Dubai/Oman</div>', unsafe_allow_html=True)
-        brent_30d = cached_crude_prices(benchmark="brent", limit=30)
-        dubai_30d = cached_crude_prices(benchmark="oman_dubai", limit=30)
         if brent_30d:
             df_b = pd.DataFrame(brent_30d)[["date", "price"]].rename(columns={"price": "Brent"})
             frames = [df_b]
@@ -311,9 +313,8 @@ def render():
     st.markdown(f'<div style="font-size:0.9rem;font-weight:700;color:{TEXT_PRIMARY};margin-bottom:0.5rem;">'
                 f'Top Market-Moving News</div>', unsafe_allow_html=True)
 
-    recent_articles = cached_news_articles(limit=50)
-    if recent_articles:
-        scored = sorted(recent_articles,
+    if all_articles:
+        scored = sorted(all_articles,
                         key=lambda a: abs(a.get("impact_score", 0)), reverse=True)
         top_5 = [a for a in scored if a.get("impact_score", 0) != 0][:5]
         if not top_5:
