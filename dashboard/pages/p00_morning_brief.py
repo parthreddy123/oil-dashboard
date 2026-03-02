@@ -169,43 +169,37 @@ def _render_llm_narrative(narrative_row):
     gen_date = narrative_row.get("snapshot_date", "")
     model = narrative_row.get("model_used", "")
 
-    # Style the <ul>/<li> bullets with responsive CSS for the dark theme
+    # Style the <ul>/<li> bullets for dark theme
+    li_style = (
+        'style="color:' + TEXT_SECONDARY + ';line-height:1.7;'
+        'padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);"'
+    )
+    li_icon = '<span style="color:' + TEAL + ';margin-right:6px;">&#9654;</span>'
+
     styled_html = html.replace(
         "<ul>",
-        '<ul class="sv-list" style="list-style:none;padding:0;margin:0;">'
+        '<ul style="list-style:none;padding:0;margin:0;">'
     ).replace(
         "<li>",
-        f'<li class="sv-item" style="color:{TEXT_SECONDARY};line-height:1.7;'
-        f'padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);">'
-        f'<span style="color:{TEAL};margin-right:6px;">&#9654;</span>'
+        "<li " + li_style + ">" + li_icon
     )
 
     meta_line = ""
     if gen_date:
-        meta_line = (
-            f'<div style="font-size:0.6rem;color:{TEXT_DIM};margin-top:10px;text-align:right;">'
-            f'Generated {gen_date}'
-        )
+        meta_line = '<div style="font-size:0.6rem;color:' + TEXT_DIM + ';margin-top:10px;text-align:right;">Generated ' + gen_date
         if model:
-            meta_line += f' &middot; {model}'
-        meta_line += '</div>'
+            meta_line += " &middot; " + model
+        meta_line += "</div>"
 
-    st.markdown(f"""
-    <style>
-    .sv-item {{ font-size: 0.85rem; }}
-    @media (max-width: 768px) {{
-        .sv-item {{ font-size: 0.82rem; line-height: 1.6 !important; padding: 10px 0 !important; }}
-        .sv-item b {{ display: block; margin-bottom: 4px; color: {TEXT_PRIMARY}; }}
-        .sv-box {{ padding: 14px 12px !important; }}
-    }}
-    </style>
-    <div class="sv-box" style="background:rgba(0,212,170,0.05);border:1px solid rgba(0,212,170,0.2);
-        border-radius:10px;padding:18px 22px;margin-bottom:0.5rem;">
-        <div style="font-size:0.72rem;font-weight:700;color:{TEAL};text-transform:uppercase;
-            letter-spacing:0.08em;margin-bottom:10px;">Strategic View</div>
-        {styled_html}
-        {meta_line}
-    </div>""", unsafe_allow_html=True)
+    # Build full HTML via concatenation — avoids f-string breaking on LLM curly braces
+    block = (
+        '<div style="background:rgba(0,212,170,0.05);border:1px solid rgba(0,212,170,0.2);'
+        'border-radius:10px;padding:18px 22px;margin-bottom:0.5rem;">'
+        '<div style="font-size:0.72rem;font-weight:700;color:' + TEAL + ';text-transform:uppercase;'
+        'letter-spacing:0.08em;margin-bottom:10px;">Strategic View</div>'
+        + styled_html + meta_line + '</div>'
+    )
+    st.markdown(block, unsafe_allow_html=True)
 
 
 def render():
