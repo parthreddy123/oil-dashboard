@@ -142,9 +142,19 @@ def render():
         ib = snapshots.get("indian_basket")
         kpi_card("Indian Basket", float(ib["metric_value"]) if ib else None, "USD/bbl",
                  accent_color=GOLD)
+    GRM_TOOLTIP = (
+        "<b>Gross Refining Margin</b> measures the profit a refinery earns "
+        "by converting crude oil into finished products (diesel, petrol, jet fuel, etc.)."
+        "<br><br>"
+        "<b>Formula:</b> Weighted average of product crack spreads — "
+        "Diesel 42%, Petrol 22%, Naphtha 12%, ATF 10%, Fuel Oil 8%, LPG 6%."
+        "<br><br>"
+        "A GRM of $10/bbl means the refinery earns ~$10 per barrel processed before operating costs."
+    )
+
     with col5:
         grm_color = EMERALD if grm and grm > 5 else (AMBER if grm and grm > 0 else CORAL)
-        kpi_card("Estimated GRM", grm, "USD/bbl", accent_color=grm_color)
+        kpi_card("Estimated GRM", grm, "USD/bbl", accent_color=grm_color, tooltip=GRM_TOOLTIP)
 
     st.divider()
 
@@ -196,12 +206,30 @@ def render():
             if grm is not None:
                 grm_c = EMERALD if grm > 5 else (AMBER if grm > 0 else CORAL)
                 st.markdown(f"""
-                <div style="margin-top:12px;padding:10px 14px;background:rgba(255,255,255,0.03);
-                    border-radius:8px;border:1px solid {grm_c}30;">
+                <style>
+                .grm-box-tooltip-wrap:hover .grm-box-tooltip-text {{
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                }}
+                </style>
+                <div class="grm-box-tooltip-wrap" style="position:relative;margin-top:12px;padding:10px 14px;
+                    background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid {grm_c}30;cursor:help;">
                     <div style="font-size:0.65rem;color:{TEXT_MUTED};text-transform:uppercase;
-                        letter-spacing:0.08em;">Estimated GRM</div>
+                        letter-spacing:0.08em;">Estimated GRM
+                        <span style="font-size:0.6rem;color:{TEXT_DIM};border:1px solid {TEXT_DIM};
+                            border-radius:50%;width:13px;height:13px;display:inline-flex;
+                            align-items:center;justify-content:center;vertical-align:middle;
+                            margin-left:4px;">i</span>
+                    </div>
                     <div style="font-size:1.3rem;font-weight:700;color:{grm_c};
                         font-variant-numeric:tabular-nums;">${grm:.2f}/bbl</div>
+                    <div class="grm-box-tooltip-text" style="visibility:hidden;opacity:0;position:absolute;
+                        z-index:999;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+                        width:280px;background:{BG_ELEVATED};color:{TEXT_SECONDARY};font-size:0.72rem;
+                        font-weight:400;text-transform:none;letter-spacing:normal;line-height:1.5;
+                        padding:12px 14px;border-radius:8px;border:1px solid {BORDER_SUBTLE};
+                        box-shadow:0 4px 16px rgba(0,0,0,0.4);transition:opacity 0.2s;pointer-events:none;">
+                        {GRM_TOOLTIP}</div>
                 </div>""", unsafe_allow_html=True)
         else:
             st.caption("Crack spread data unavailable. Run a refresh to populate FX rates and product prices.")

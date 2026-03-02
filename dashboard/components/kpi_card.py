@@ -30,7 +30,7 @@ def _mini_sparkline_svg(values, width=72, height=24, color=TEAL):
 
 
 def kpi_card(title, value, unit="", change=None, change_label="vs last week",
-             sparkline_data=None, accent_color=TEAL):
+             sparkline_data=None, accent_color=TEAL, tooltip=None):
     """Render a premium KPI card with gradient background, delta, and sparkline."""
     if value is None:
         display_value = "N/A"
@@ -66,12 +66,35 @@ def kpi_card(title, value, unit="", change=None, change_label="vs last week",
             f'{_mini_sparkline_svg(sparkline_data, color=s_color)}</div>'
         )
 
+    # Tooltip icon + hover popup
+    tooltip_html = ""
+    if tooltip:
+        tooltip_html = (
+            f'<span class="kpi-tooltip-wrap" style="position:relative;display:inline-block;margin-left:5px;cursor:help;">'
+            f'<span style="font-size:0.65rem;color:{TEXT_DIM};border:1px solid {TEXT_DIM};'
+            f'border-radius:50%;width:14px;height:14px;display:inline-flex;align-items:center;'
+            f'justify-content:center;vertical-align:middle;">i</span>'
+            f'<span class="kpi-tooltip-text" style="visibility:hidden;opacity:0;position:absolute;'
+            f'z-index:999;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);'
+            f'width:260px;background:{BG_ELEVATED};color:{TEXT_SECONDARY};font-size:0.7rem;'
+            f'font-weight:400;text-transform:none;letter-spacing:normal;line-height:1.5;'
+            f'padding:12px 14px;border-radius:8px;border:1px solid {BORDER_SUBTLE};'
+            f'box-shadow:0 4px 16px rgba(0,0,0,0.4);transition:opacity 0.2s;pointer-events:none;">'
+            f'{tooltip}</span></span>'
+        )
+
     st.markdown(f"""
+    <style>
+    .kpi-tooltip-wrap:hover .kpi-tooltip-text {{
+        visibility: visible !important;
+        opacity: 1 !important;
+    }}
+    </style>
     <div style="position:relative;background:linear-gradient(135deg,{BG_CARD},{BG_ELEVATED});
         border:1px solid {BORDER_SUBTLE};border-left:3px solid {accent_color};
         border-radius:10px;padding:16px 18px 14px;margin-bottom:6px;overflow:hidden;min-height:100px;">
         <div style="color:{TEXT_SECONDARY};font-size:0.7rem;font-weight:600;
-            text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">{title}</div>
+            text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">{title}{tooltip_html}</div>
         <div style="color:{TEXT_PRIMARY};font-size:1.6rem;font-weight:700;
             letter-spacing:-0.02em;line-height:1.1;font-variant-numeric:tabular-nums;">
             {display_value}{unit_html}</div>
