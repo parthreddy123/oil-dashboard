@@ -8,7 +8,7 @@ from database.db_manager import (
     get_crude_prices, get_product_prices, get_refinery_data,
     get_trade_flows, get_crack_spreads, get_news_articles,
     get_global_events, get_metric_snapshots, get_latest_scrape, get_latest_price,
-    get_fx_rate as _get_fx_rate,
+    get_fx_rate as _get_fx_rate, get_latest_narrative as _get_latest_narrative,
 )
 
 
@@ -62,3 +62,8 @@ def cached_latest_scrape(scraper=None):
 def cached_fx_rate(pair="USD/INR"):
     row = _get_fx_rate(pair)
     return dict(row) if row else None
+
+
+@st.cache_data(ttl=300)
+def cached_strategic_narrative():
+    return _get_latest_narrative()

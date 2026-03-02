@@ -8,6 +8,7 @@ import pandas as pd
 from datetime import datetime
 from dashboard.data_access import (
     cached_crude_prices, cached_news_articles, cached_metric_snapshots,
+    cached_strategic_narrative,
 )
 from dashboard.components.kpi_card import kpi_card
 from dashboard.components.news_card import news_card
@@ -135,6 +136,43 @@ def _render_narrative(snapshots, cracks, grm, articles):
         </div>""", unsafe_allow_html=True)
 
 
+def _render_llm_narrative(narrative_row):
+    """Render the LLM-generated strategic narrative as a styled bullet list."""
+    html = narrative_row["narrative_html"]
+    gen_date = narrative_row.get("snapshot_date", "")
+    model = narrative_row.get("model_used", "")
+
+    # Style the <ul>/<li> bullets with custom CSS for the dark theme
+    styled_html = html.replace(
+        "<ul>",
+        '<ul style="list-style:none;padding:0;margin:0;">'
+    ).replace(
+        "<li>",
+        f'<li style="font-size:0.85rem;color:{TEXT_SECONDARY};line-height:1.7;'
+        f'padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);">'
+        f'<span style="color:{TEAL};margin-right:6px;">&#9654;</span>'
+    )
+
+    meta_line = ""
+    if gen_date:
+        meta_line = (
+            f'<div style="font-size:0.6rem;color:{TEXT_DIM};margin-top:10px;text-align:right;">'
+            f'Generated {gen_date}'
+        )
+        if model:
+            meta_line += f' &middot; {model}'
+        meta_line += '</div>'
+
+    st.markdown(f"""
+    <div style="background:rgba(0,212,170,0.05);border:1px solid rgba(0,212,170,0.2);
+        border-radius:10px;padding:18px 22px;margin-bottom:0.5rem;">
+        <div style="font-size:0.72rem;font-weight:700;color:{TEAL};text-transform:uppercase;
+            letter-spacing:0.08em;margin-bottom:10px;">Strategic View</div>
+        {styled_html}
+        {meta_line}
+    </div>""", unsafe_allow_html=True)
+
+
 def render():
     now = datetime.now()
     st.markdown(f"""
@@ -243,8 +281,13 @@ def render():
     # Fetch news once — reuse for narrative and news section below
     all_articles = cached_news_articles(limit=50)
 
-    # --- Strategic Narrative ---
-    _render_narrative(snapshots, cracks, grm, all_articles[:20])
+    # --- Strategic Narrative (LLM-powered, full-width) ---
+    narrative_row = cached_strategic_narrative()
+    if narrative_row and narrative_row.get("narrative_html"):
+        _render_llm_narrative(narrative_row)
+    else:
+        # Fallback to rule-based narrative
+        _render_narrative(snapshots, cracks, grm, all_articles[:20])
 
     st.divider()
 

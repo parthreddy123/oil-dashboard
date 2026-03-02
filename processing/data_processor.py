@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from database.db_manager import init_db, log_scrape
 from processing.impact_tagger import tag_all_untagged
 from processing.calculations import build_weekly_snapshot
+from processing.narrative_generator import generate_narrative
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +62,17 @@ def run_post_processing():
         results["snapshot"] = {"status": "success", "count": snapshot_count}
     except Exception as e:
         results["snapshot"] = {"status": "failed", "error": str(e)}
+
+    # Generate LLM strategic narrative (runs after snapshots so all data is available)
+    try:
+        html = generate_narrative()
+        if html:
+            results["narrative"] = {"status": "success", "count": 1}
+        else:
+            results["narrative"] = {"status": "skipped", "count": 0}
+    except Exception as e:
+        results["narrative"] = {"status": "failed", "error": str(e)}
+        logger.warning(f"Narrative generation failed (non-fatal): {e}")
 
     return results
 

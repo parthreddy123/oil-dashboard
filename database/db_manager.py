@@ -169,6 +169,15 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_refinery_data_date ON refinery_data(date);
         CREATE INDEX IF NOT EXISTS idx_global_events_type_date ON global_events(event_type, date);
         CREATE INDEX IF NOT EXISTS idx_trade_flows_date ON trade_flows(date);
+        CREATE TABLE IF NOT EXISTS strategic_narratives (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            snapshot_date TEXT NOT NULL,
+            narrative_html TEXT NOT NULL,
+            model_used TEXT,
+            created_at TEXT DEFAULT (datetime('now')),
+            UNIQUE(snapshot_date)
+        );
+
         CREATE INDEX IF NOT EXISTS idx_fx_rates_pair_date ON fx_rates(pair, date);
         CREATE INDEX IF NOT EXISTS idx_crack_spreads_date ON crack_spreads(date, source);
         CREATE INDEX IF NOT EXISTS idx_snapshots_date ON key_metrics_snapshot(snapshot_date DESC);
@@ -447,6 +456,27 @@ def get_latest_price(benchmark):
             (benchmark,)
         ).fetchone()
         return row
+
+
+def upsert_narrative(snapshot_date, narrative_html, model_used=None):
+    with get_connection() as conn:
+        conn.execute(
+            """INSERT INTO strategic_narratives (snapshot_date, narrative_html, model_used)
+               VALUES (?, ?, ?)
+               ON CONFLICT(snapshot_date) DO UPDATE SET
+                 narrative_html=excluded.narrative_html, model_used=excluded.model_used,
+                 created_at=datetime('now')""",
+            (str(snapshot_date), narrative_html, model_used),
+        )
+
+
+def get_latest_narrative():
+    """Get the most recent strategic narrative."""
+    with get_connection(readonly=True) as conn:
+        row = conn.execute(
+            "SELECT * FROM strategic_narratives ORDER BY snapshot_date DESC LIMIT 1"
+        ).fetchone()
+        return dict(row) if row else None
 
 
 def upsert_fx_rate(dt, pair, rate, source=None):
