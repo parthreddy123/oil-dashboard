@@ -64,6 +64,77 @@ def _check_alerts(snapshots, grm):
     return alerts
 
 
+def _render_narrative(snapshots, cracks, grm, articles):
+    """Generate a strategic narrative combining insights from all data sources."""
+    lines = []
+
+    # Crude price context
+    b = snapshots.get("brent_price")
+    if b:
+        price = float(b["metric_value"])
+        if price > 85:
+            lines.append(f"Brent is trading elevated at **${price:.2f}/bbl**, keeping refinery input costs high.")
+        elif price < 65:
+            lines.append(f"Brent at **${price:.2f}/bbl** signals weak demand or oversupply — watch for OPEC response.")
+        else:
+            lines.append(f"Brent at **${price:.2f}/bbl** sits within a stable trading range.")
+        if b.get("change_wow"):
+            wow = float(b["change_wow"])
+            if abs(wow) > 3:
+                direction = "up" if wow > 0 else "down"
+                lines.append(f"Crude moved **{abs(wow):.1f}% {direction}** week-over-week.")
+
+    # Spread context
+    sp = snapshots.get("brent_dubai_spread")
+    if sp:
+        spread_val = float(sp["metric_value"])
+        if spread_val > 4:
+            lines.append(f"Brent-Dubai spread widened to **${spread_val:.2f}** — sweet crude premium elevated, favoring sour-crude refiners.")
+        elif spread_val < 1:
+            lines.append(f"Brent-Dubai spread compressed to **${spread_val:.2f}** — limited arb between Atlantic and Asian grades.")
+
+    # GRM context
+    if grm is not None:
+        if grm > 10:
+            lines.append(f"Refining margins are **strong at ${grm:.2f}/bbl** — product demand outpacing crude supply tightening.")
+        elif grm > 5:
+            lines.append(f"GRM at **${grm:.2f}/bbl** reflects healthy but not exceptional refining economics.")
+        elif grm > 0:
+            lines.append(f"GRM at **${grm:.2f}/bbl** is thin — refiners operating near breakeven on marginal barrels.")
+        else:
+            lines.append(f"GRM is **negative at ${grm:.2f}/bbl** — refineries losing money on every barrel processed.")
+
+    # Product crack context
+    if cracks:
+        best = max(cracks.items(), key=lambda x: x[1])
+        worst = min(cracks.items(), key=lambda x: x[1])
+        if best[1] > 0 and worst[1] < 0:
+            lines.append(f"**{best[0].title()}** leads product margins at +${best[1]:.1f}/bbl while **{worst[0].title()}** drags at ${worst[1]:.1f}/bbl.")
+
+    # Sentiment context
+    if articles:
+        bullish = sum(1 for a in articles if a.get("impact_tag") == "bullish")
+        bearish = sum(1 for a in articles if a.get("impact_tag") == "bearish")
+        total = bullish + bearish
+        if total > 0:
+            if bullish > bearish * 2:
+                lines.append(f"News sentiment is **overwhelmingly bullish** ({bullish} vs {bearish} bearish) — market expects upside.")
+            elif bearish > bullish * 2:
+                lines.append(f"News sentiment is **heavily bearish** ({bearish} vs {bullish} bullish) — downside risks dominate.")
+            elif total >= 3:
+                lines.append(f"Market sentiment is **mixed** ({bullish} bullish, {bearish} bearish) — watch for catalysts.")
+
+    if lines:
+        narrative = " ".join(lines)
+        st.markdown(f"""
+        <div style="background:rgba(0,212,170,0.05);border:1px solid rgba(0,212,170,0.2);
+            border-radius:10px;padding:14px 18px;margin-bottom:0.5rem;">
+            <div style="font-size:0.72rem;font-weight:700;color:{TEAL};text-transform:uppercase;
+                letter-spacing:0.08em;margin-bottom:8px;">Strategic View</div>
+            <div style="font-size:0.85rem;color:{TEXT_SECONDARY};line-height:1.6;">{narrative}</div>
+        </div>""", unsafe_allow_html=True)
+
+
 def render():
     now = datetime.now()
     st.markdown(f"""
@@ -168,20 +239,25 @@ def render():
 
     st.divider()
 
+    # --- Strategic Narrative ---
+    _render_narrative(snapshots, cracks, grm, cached_news_articles(limit=20))
+
+    st.divider()
+
     # --- Chart + Crack Spreads ---
     col_chart, col_cracks = st.columns([3, 2])
 
     with col_chart:
         st.markdown(f'<div style="font-size:0.9rem;font-weight:700;color:{TEXT_PRIMARY};">'
-                    f'7-Day Brent & Dubai/Oman</div>', unsafe_allow_html=True)
-        brent_7d = cached_crude_prices(benchmark="brent", limit=7)
-        dubai_7d = cached_crude_prices(benchmark="oman_dubai", limit=7)
-        if brent_7d:
-            df_b = pd.DataFrame(brent_7d)[["date", "price"]].rename(columns={"price": "Brent"})
+                    f'30-Day Brent & Dubai/Oman</div>', unsafe_allow_html=True)
+        brent_30d = cached_crude_prices(benchmark="brent", limit=30)
+        dubai_30d = cached_crude_prices(benchmark="oman_dubai", limit=30)
+        if brent_30d:
+            df_b = pd.DataFrame(brent_30d)[["date", "price"]].rename(columns={"price": "Brent"})
             frames = [df_b]
             y_cols = {"Brent": "Brent"}
-            if dubai_7d:
-                df_d = pd.DataFrame(dubai_7d)[["date", "price"]].rename(columns={"price": "Dubai"})
+            if dubai_30d:
+                df_d = pd.DataFrame(dubai_30d)[["date", "price"]].rename(columns={"price": "Dubai"})
                 frames.append(df_d)
                 y_cols["Dubai"] = "Dubai/Oman"
             df = frames[0]
@@ -216,30 +292,15 @@ def render():
             if grm is not None:
                 grm_c = EMERALD if grm > 5 else (AMBER if grm > 0 else CORAL)
                 st.markdown(f"""
-                <style>
-                .grm-box-tooltip-wrap:hover .grm-box-tooltip-text {{
-                    visibility: visible !important;
-                    opacity: 1 !important;
-                }}
-                </style>
-                <div class="grm-box-tooltip-wrap" style="position:relative;margin-top:12px;padding:10px 14px;
-                    background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid {grm_c}30;cursor:help;">
+                <div style="margin-top:12px;padding:10px 14px;
+                    background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid {grm_c}30;">
                     <div style="font-size:0.65rem;color:{TEXT_MUTED};text-transform:uppercase;
-                        letter-spacing:0.08em;">Estimated GRM
-                        <span style="font-size:0.6rem;color:{TEXT_DIM};border:1px solid {TEXT_DIM};
-                            border-radius:50%;width:13px;height:13px;display:inline-flex;
-                            align-items:center;justify-content:center;vertical-align:middle;
-                            margin-left:4px;">i</span>
-                    </div>
+                        letter-spacing:0.08em;">Estimated GRM</div>
                     <div style="font-size:1.3rem;font-weight:700;color:{grm_c};
                         font-variant-numeric:tabular-nums;">${grm:.2f}/bbl</div>
-                    <div class="grm-box-tooltip-text" style="visibility:hidden;opacity:0;position:absolute;
-                        z-index:999;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
-                        width:280px;background:{BG_ELEVATED};color:{TEXT_SECONDARY};font-size:0.72rem;
-                        font-weight:400;text-transform:none;letter-spacing:normal;line-height:1.5;
-                        padding:12px 14px;border-radius:8px;border:1px solid {BORDER_SUBTLE};
-                        box-shadow:0 4px 16px rgba(0,0,0,0.4);transition:opacity 0.2s;pointer-events:none;">
-                        {GRM_TOOLTIP}</div>
+                    <div style="font-size:0.62rem;color:{TEXT_DIM};margin-top:6px;line-height:1.4;">
+                        Weighted avg of product crack spreads: Diesel 42%, Petrol 22%,
+                        Naphtha 12%, ATF 10%, Fuel Oil 8%, LPG 6%</div>
                 </div>""", unsafe_allow_html=True)
         else:
             st.caption("Crack spread data unavailable. Run a refresh to populate FX rates and product prices.")

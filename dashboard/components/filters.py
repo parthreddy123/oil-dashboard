@@ -42,12 +42,15 @@ def company_filter(key_prefix=""):
 
 def benchmark_filter(key_prefix=""):
     labels = {
-        "brent": "Brent", "oman_dubai": "Dubai/Oman",
-        "wti": "WTI", "murban": "Murban (est.)",
-        "opec_basket": "OPEC Basket (est.)", "indian_basket": "Indian Basket",
+        "brent": "Brent", "wti": "WTI", "oman_dubai": "Dubai/Oman",
+        "murban": "Murban (est.)", "arab_light": "Arab Light (est.)",
+        "basrah_light": "Basrah Light (est.)", "tapis": "Tapis (est.)",
+        "espo": "ESPO (est.)", "opec_basket": "OPEC Basket (est.)",
+        "indian_basket": "Indian Basket",
     }
     return st.multiselect(
-        "Benchmarks", list(labels.keys()), default=["brent", "oman_dubai", "murban"],
+        "Benchmarks", list(labels.keys()),
+        default=["brent", "oman_dubai", "murban", "tapis", "espo"],
         key=f"{key_prefix}_benchmark",
         format_func=lambda x: labels[x],
     )

@@ -92,7 +92,7 @@ def kpi_card(title, value, unit="", change=None, change_label="vs last week",
     </style>
     <div style="position:relative;background:linear-gradient(135deg,{BG_CARD},{BG_ELEVATED});
         border:1px solid {BORDER_SUBTLE};border-left:3px solid {accent_color};
-        border-radius:10px;padding:16px 18px 14px;margin-bottom:6px;overflow:hidden;min-height:100px;">
+        border-radius:10px;padding:16px 18px 14px;margin-bottom:6px;min-height:100px;">
         <div style="color:{TEXT_SECONDARY};font-size:0.7rem;font-weight:600;
             text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">{title}{tooltip_html}</div>
         <div style="color:{TEXT_PRIMARY};font-size:1.6rem;font-weight:700;

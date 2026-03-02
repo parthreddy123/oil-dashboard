@@ -22,6 +22,26 @@ DERIVED_BENCHMARKS = {
         "spread": 1.00,
         "source": "estimated_from_dubai",
     },
+    "arab_light": {
+        "base": "oman_dubai",
+        "spread": 0.50,
+        "source": "estimated_from_dubai",
+    },
+    "basrah_light": {
+        "base": "oman_dubai",
+        "spread": -2.50,
+        "source": "estimated_from_dubai",
+    },
+    "tapis": {
+        "base": "brent",
+        "spread": 1.50,
+        "source": "estimated_from_brent",
+    },
+    "espo": {
+        "base": "brent",
+        "spread": -5.00,
+        "source": "estimated_from_brent",
+    },
     "opec_basket": {
         "base": "brent",
         "spread": -2.00,

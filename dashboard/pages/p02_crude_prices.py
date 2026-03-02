@@ -1,4 +1,4 @@
-"""Page 2: Crude Prices - Multi-line chart, statistics grid, Brent-WTI spread."""
+"""Page 2: Crude Prices - Multi-benchmark chart with global grades."""
 
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -9,6 +9,15 @@ from dashboard.data_access import cached_crude_prices
 from dashboard.components.price_chart import line_chart
 from dashboard.components.filters import date_range_filter, benchmark_filter
 from dashboard.components.theme import CYAN, TEAL, EMERALD, CORAL, TEXT_PRIMARY, TEXT_SECONDARY, TEXT_MUTED, TEXT_DIM, BG_CARD, PLOTLY_CONFIG
+
+BM_LABELS = {
+    "brent": "Brent", "wti": "WTI", "oman_dubai": "Dubai/Oman",
+    "murban": "Murban", "arab_light": "Arab Light", "basrah_light": "Basrah Light",
+    "tapis": "Tapis", "espo": "ESPO", "opec_basket": "OPEC Basket",
+    "indian_basket": "Indian Basket",
+}
+
+ESTIMATED_BENCHMARKS = {"murban", "arab_light", "basrah_light", "tapis", "espo", "opec_basket"}
 
 
 def render():
@@ -34,41 +43,11 @@ def render():
 
     # --- Price Chart ---
     st.subheader("Price Trends")
-    BM_LABELS = {
-        "brent": "Brent", "oman_dubai": "Dubai/Oman", "wti": "WTI",
-        "murban": "Murban", "opec_basket": "OPEC Basket", "indian_basket": "Indian Basket",
-    }
     pivot = df.pivot_table(index="date", columns="benchmark", values="price").reset_index()
     y_cols = {bm: BM_LABELS.get(bm, bm.upper()) for bm in benchmarks if bm in pivot.columns}
-    fig = line_chart(pivot, "date", y_cols, "Crude Oil Benchmark Prices", height=460,
+    fig = line_chart(pivot, "date", y_cols, "Crude Oil Benchmark Prices", height=500,
                     show_range_selector=True)
     st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
-
-    # --- Brent-Dubai Spread ---
-    if "brent" in benchmarks and "oman_dubai" in benchmarks and "brent" in pivot.columns and "oman_dubai" in pivot.columns:
-        st.subheader("Brent-Dubai Spread")
-        spread_bd = pivot[["date", "brent", "oman_dubai"]].copy()
-        spread_bd = spread_bd.sort_values("date")
-        spread_bd["brent"] = spread_bd["brent"].ffill()
-        spread_bd["oman_dubai"] = spread_bd["oman_dubai"].ffill()
-        spread_bd = spread_bd.dropna(subset=["brent", "oman_dubai"])
-        spread_bd["spread"] = spread_bd["brent"] - spread_bd["oman_dubai"]
-        fig_bd = line_chart(spread_bd, "date", {"spread": "Brent-Dubai Spread"},
-                           "Brent-Dubai Price Differential", "Spread (USD/bbl)")
-        st.plotly_chart(fig_bd, use_container_width=True, config=PLOTLY_CONFIG)
-
-    # --- Brent-WTI Spread ---
-    if "brent" in benchmarks and "wti" in benchmarks and "brent" in pivot.columns and "wti" in pivot.columns:
-        st.subheader("Brent-WTI Spread")
-        spread_df = pivot[["date", "brent", "wti"]].copy()
-        spread_df = spread_df.sort_values("date")
-        spread_df["brent"] = spread_df["brent"].ffill()
-        spread_df["wti"] = spread_df["wti"].ffill()
-        spread_df = spread_df.dropna(subset=["brent", "wti"])
-        spread_df["spread"] = spread_df["brent"] - spread_df["wti"]
-        fig_s = line_chart(spread_df, "date", {"spread": "Brent-WTI Spread"},
-                          "Brent-WTI Price Differential", "Spread (USD/bbl)")
-        st.plotly_chart(fig_s, use_container_width=True, config=PLOTLY_CONFIG)
 
     # --- Statistics Grid ---
     st.subheader("Price Statistics")
@@ -101,7 +80,7 @@ def render():
             </div>
         </div>""", unsafe_allow_html=True)
 
-    if any(bm in benchmarks for bm in ["murban", "opec_basket"]):
-        st.caption("Murban and OPEC Basket are estimates derived from Dubai/Oman and Brent using "
-                   "typical historical differentials. For authoritative prices, consult Platts/Argus.")
-
+    if any(bm in benchmarks for bm in ESTIMATED_BENCHMARKS):
+        st.caption("Estimated grades (Murban, Arab Light, Basrah Light, Tapis, ESPO, OPEC Basket) "
+                   "are derived from Brent/Dubai using typical historical differentials. "
+                   "For authoritative prices, consult Platts/Argus.")

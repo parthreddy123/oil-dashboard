@@ -34,7 +34,8 @@ with st.sidebar:
     NAV_ITEMS = {
         "Morning Brief": "&#9749;",
         "Overview": "&#128202;", "Crude Prices": "&#128738;", "Indian Refineries": "&#127981;",
-        "Products & Cracks": "&#128200;", "Trade Flows": "&#128674;",
+        "Products & Cracks": "&#128200;", "Indian Trade Flows": "&#128674;",
+        "SE Asian Refineries": "&#127981;", "SE Asian Trade Flows": "&#128674;",
         "News & Impact": "&#128240;", "Geopolitical & Global": "&#127758;",
     }
     page = st.radio("NAVIGATION", list(NAV_ITEMS.keys()), index=0,
@@ -102,8 +103,12 @@ elif page == "Indian Refineries":
     from dashboard.pages.p03_indian_refineries import render
 elif page == "Products & Cracks":
     from dashboard.pages.p04_products_cracks import render
-elif page == "Trade Flows":
+elif page == "Indian Trade Flows":
     from dashboard.pages.p05_trade_flows import render
+elif page == "SE Asian Refineries":
+    from dashboard.pages.p08_sea_refineries import render
+elif page == "SE Asian Trade Flows":
+    from dashboard.pages.p09_sea_trade_flows import render
 elif page == "News & Impact":
     from dashboard.pages.p06_news_impact import render
 elif page == "Geopolitical & Global":
