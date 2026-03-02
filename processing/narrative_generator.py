@@ -177,6 +177,13 @@ def generate_narrative():
 
         html = response.content[0].text.strip()
 
+        # Strip markdown code fences if present (```html ... ```)
+        if "```" in html:
+            html = html.split("```")[1]
+            if html.lower().startswith("html"):
+                html = html[4:]
+            html = html.strip()
+
         # Ensure we got valid HTML list
         if "<ul>" not in html.lower():
             logger.warning("LLM response missing <ul> tag, wrapping")
