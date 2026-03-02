@@ -137,5 +137,15 @@ hr { border-color: rgba(255, 255, 255, 0.06) !important; }
 ::-webkit-scrollbar-track { background: #0E1117; }
 ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #4B5563; }
+
+/* Mobile responsive overrides */
+@media (max-width: 768px) {
+    .block-container { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+    [data-testid="stHorizontalBlock"] { flex-wrap: wrap !important; gap: 0.5rem !important; }
+    [data-testid="stColumn"] { min-width: 45% !important; flex: 1 1 45% !important; }
+    [data-testid="stMetric"] { padding: 0.6rem 0.8rem !important; }
+    [data-testid="stMetric"] [data-testid="stMetricValue"] { font-size: 1.1rem !important; }
+    h1 { font-size: 1.3rem !important; }
+}
 </style>
 """

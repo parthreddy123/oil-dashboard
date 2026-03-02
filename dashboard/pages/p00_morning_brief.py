@@ -5,11 +5,14 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 import streamlit as st
 import pandas as pd
-from datetime import datetime
+import logging
+from datetime import datetime, timedelta
 from dashboard.data_access import (
     cached_crude_prices, cached_news_articles, cached_metric_snapshots,
     cached_strategic_narrative,
 )
+
+logger = logging.getLogger(__name__)
 from dashboard.components.kpi_card import kpi_card
 from dashboard.components.news_card import news_card
 from dashboard.components.price_chart import line_chart
@@ -136,20 +139,44 @@ def _render_narrative(snapshots, cracks, grm, articles):
         </div>""", unsafe_allow_html=True)
 
 
+def _maybe_refresh_narrative():
+    """Auto-regenerate narrative if stale (>6 hours old) or missing."""
+    narrative_row = cached_strategic_narrative()
+    if narrative_row and narrative_row.get("narrative_html"):
+        try:
+            created = datetime.fromisoformat(str(narrative_row.get("created_at", "")))
+            if datetime.now() - created < timedelta(hours=6):
+                return narrative_row
+        except Exception:
+            return narrative_row
+
+    # Stale or missing — try to regenerate in the background
+    try:
+        from processing.narrative_generator import generate_narrative
+        html = generate_narrative()
+        if html:
+            st.cache_data.clear()
+            return cached_strategic_narrative()
+    except Exception as e:
+        logger.warning(f"Auto-refresh narrative failed: {e}")
+
+    return narrative_row
+
+
 def _render_llm_narrative(narrative_row):
     """Render the LLM-generated strategic narrative as a styled bullet list."""
     html = narrative_row["narrative_html"]
     gen_date = narrative_row.get("snapshot_date", "")
     model = narrative_row.get("model_used", "")
 
-    # Style the <ul>/<li> bullets with custom CSS for the dark theme
+    # Style the <ul>/<li> bullets with responsive CSS for the dark theme
     styled_html = html.replace(
         "<ul>",
-        '<ul style="list-style:none;padding:0;margin:0;">'
+        '<ul class="sv-list" style="list-style:none;padding:0;margin:0;">'
     ).replace(
         "<li>",
-        f'<li style="font-size:0.85rem;color:{TEXT_SECONDARY};line-height:1.7;'
-        f'padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);">'
+        f'<li class="sv-item" style="color:{TEXT_SECONDARY};line-height:1.7;'
+        f'padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);">'
         f'<span style="color:{TEAL};margin-right:6px;">&#9654;</span>'
     )
 
@@ -164,7 +191,15 @@ def _render_llm_narrative(narrative_row):
         meta_line += '</div>'
 
     st.markdown(f"""
-    <div style="background:rgba(0,212,170,0.05);border:1px solid rgba(0,212,170,0.2);
+    <style>
+    .sv-item {{ font-size: 0.85rem; }}
+    @media (max-width: 768px) {{
+        .sv-item {{ font-size: 0.82rem; line-height: 1.6 !important; padding: 10px 0 !important; }}
+        .sv-item b {{ display: block; margin-bottom: 4px; color: {TEXT_PRIMARY}; }}
+        .sv-box {{ padding: 14px 12px !important; }}
+    }}
+    </style>
+    <div class="sv-box" style="background:rgba(0,212,170,0.05);border:1px solid rgba(0,212,170,0.2);
         border-radius:10px;padding:18px 22px;margin-bottom:0.5rem;">
         <div style="font-size:0.72rem;font-weight:700;color:{TEAL};text-transform:uppercase;
             letter-spacing:0.08em;margin-bottom:10px;">Strategic View</div>
@@ -176,7 +211,7 @@ def _render_llm_narrative(narrative_row):
 def render():
     now = datetime.now()
     st.markdown(f"""
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:0.5rem;gap:4px;">
         <div>
             <h1 style="margin:0;font-size:1.8rem;font-weight:800;color:{TEXT_PRIMARY};
                 letter-spacing:-0.02em;">Morning Brief</h1>
@@ -281,8 +316,8 @@ def render():
     # Fetch news once — reuse for narrative and news section below
     all_articles = cached_news_articles(limit=50)
 
-    # --- Strategic Narrative (LLM-powered, full-width) ---
-    narrative_row = cached_strategic_narrative()
+    # --- Strategic Narrative (LLM-powered, auto-refreshes if stale) ---
+    narrative_row = _maybe_refresh_narrative()
     if narrative_row and narrative_row.get("narrative_html"):
         _render_llm_narrative(narrative_row)
     else:
