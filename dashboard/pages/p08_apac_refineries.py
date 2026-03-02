@@ -1,4 +1,4 @@
-"""Page 8: SE Asian Refineries - Capacity, throughput, and regional refining landscape."""
+"""Page 8: APAC Refineries - Capacity, throughput, and regional refining landscape."""
 
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -13,7 +13,7 @@ from dashboard.components.theme import (
     BG_ELEVATED, PLOTLY_CONFIG, apply_theme,
 )
 
-# Reference data: Major SE Asian & APAC refineries (public sources: company reports, IEA, OPEC)
+# Reference data: Major APAC refineries (public sources: company reports, IEA, OPEC)
 # Capacity in kb/d (thousand barrels per day), utilization estimated from recent public data
 SE_ASIAN_REFINERIES = [
     # Singapore
@@ -82,7 +82,7 @@ SE_ASIAN_REFINERIES = [
 
 
 def render():
-    st.header("SE Asian & APAC Refineries")
+    st.header("APAC Refineries")
     st.caption("Reference data from company reports, IEA, and OPEC. Utilization rates are estimates.")
 
     df = pd.DataFrame(SE_ASIAN_REFINERIES)
@@ -92,7 +92,7 @@ def render():
     with st.sidebar:
         st.subheader("Filters")
         countries = ["All"] + sorted(df["country"].unique().tolist())
-        selected_country = st.selectbox("Country", countries, key="sea_ref_country")
+        selected_country = st.selectbox("Country", countries, key="apac_ref_country")
         if selected_country != "All":
             df = df[df["country"] == selected_country]
 

@@ -1,4 +1,4 @@
-"""Page 9: SE Asian Trade Flows - Regional crude imports, product exports, and trade patterns."""
+"""Page 9: APAC Trade Flows - Regional crude imports, product exports, and trade patterns."""
 
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -14,7 +14,7 @@ from dashboard.components.theme import (
     BG_ELEVATED, PLOTLY_CONFIG, apply_theme,
 )
 
-# Reference data: SE Asian crude oil trade flows (IEA, OPEC MOMR, country customs data)
+# Reference data: APAC crude oil trade flows (IEA, OPEC MOMR, country customs data)
 # Volumes in kb/d (thousand barrels per day), 2024-2025 estimates
 
 CRUDE_IMPORTS = [
@@ -45,7 +45,7 @@ CRUDE_IMPORTS = [
     # Singapore (as hub — imports for re-export + refining)
     {"importer": "Singapore", "supplier": "Middle East", "volume_kbd": 550, "grade": "Mixed AG grades"},
     {"importer": "Singapore", "supplier": "West Africa", "volume_kbd": 180, "grade": "Bonny/Agbami"},
-    {"importer": "Singapore", "supplier": "SE Asia", "volume_kbd": 120, "grade": "Tapis/Minas"},
+    {"importer": "Singapore", "supplier": "APAC", "volume_kbd": 120, "grade": "Tapis/Minas"},
     # Thailand
     {"importer": "Thailand", "supplier": "Saudi Arabia", "volume_kbd": 220, "grade": "Arab Light"},
     {"importer": "Thailand", "supplier": "UAE", "volume_kbd": 180, "grade": "Murban"},
@@ -68,28 +68,28 @@ CRUDE_IMPORTS = [
 
 PRODUCT_EXPORTS = [
     # Singapore — world's largest product export hub
-    {"exporter": "Singapore", "product": "Diesel/Gasoil", "volume_kbd": 450, "destination": "Australia/SE Asia"},
+    {"exporter": "Singapore", "product": "Diesel/Gasoil", "volume_kbd": 450, "destination": "Australia/APAC"},
     {"exporter": "Singapore", "product": "Jet Fuel", "volume_kbd": 280, "destination": "Regional"},
     {"exporter": "Singapore", "product": "Naphtha", "volume_kbd": 200, "destination": "NE Asia petrochems"},
     {"exporter": "Singapore", "product": "Fuel Oil", "volume_kbd": 350, "destination": "Bunker/Power gen"},
     {"exporter": "Singapore", "product": "Gasoline", "volume_kbd": 180, "destination": "Indonesia/Vietnam"},
     # South Korea
-    {"exporter": "South Korea", "product": "Diesel/Gasoil", "volume_kbd": 480, "destination": "SE Asia/Australia"},
-    {"exporter": "South Korea", "product": "Gasoline", "volume_kbd": 220, "destination": "SE Asia/Pacific"},
+    {"exporter": "South Korea", "product": "Diesel/Gasoil", "volume_kbd": 480, "destination": "APAC/Australia"},
+    {"exporter": "South Korea", "product": "Gasoline", "volume_kbd": 220, "destination": "APAC/Pacific"},
     {"exporter": "South Korea", "product": "Jet Fuel", "volume_kbd": 150, "destination": "Japan/Pacific"},
     {"exporter": "South Korea", "product": "Naphtha", "volume_kbd": 120, "destination": "Japan/Taiwan"},
-    {"exporter": "South Korea", "product": "LPG", "volume_kbd": 80, "destination": "SE Asia"},
+    {"exporter": "South Korea", "product": "LPG", "volume_kbd": 80, "destination": "APAC"},
     # China
-    {"exporter": "China", "product": "Diesel/Gasoil", "volume_kbd": 550, "destination": "SE Asia/Australia"},
-    {"exporter": "China", "product": "Gasoline", "volume_kbd": 380, "destination": "SE Asia/Africa"},
+    {"exporter": "China", "product": "Diesel/Gasoil", "volume_kbd": 550, "destination": "APAC/Australia"},
+    {"exporter": "China", "product": "Gasoline", "volume_kbd": 380, "destination": "APAC/Africa"},
     {"exporter": "China", "product": "Jet Fuel", "volume_kbd": 280, "destination": "Regional"},
     {"exporter": "China", "product": "Naphtha", "volume_kbd": 150, "destination": "NE Asia"},
     # Japan
-    {"exporter": "Japan", "product": "Diesel/Gasoil", "volume_kbd": 120, "destination": "SE Asia/Pacific"},
+    {"exporter": "Japan", "product": "Diesel/Gasoil", "volume_kbd": 120, "destination": "APAC/Pacific"},
     {"exporter": "Japan", "product": "Fuel Oil", "volume_kbd": 80, "destination": "Singapore/bunker"},
     # Taiwan
-    {"exporter": "Taiwan", "product": "Gasoline", "volume_kbd": 100, "destination": "SE Asia"},
-    {"exporter": "Taiwan", "product": "Diesel/Gasoil", "volume_kbd": 80, "destination": "SE Asia"},
+    {"exporter": "Taiwan", "product": "Gasoline", "volume_kbd": 100, "destination": "APAC"},
+    {"exporter": "Taiwan", "product": "Diesel/Gasoil", "volume_kbd": 80, "destination": "APAC"},
     # Thailand
     {"exporter": "Thailand", "product": "Diesel/Gasoil", "volume_kbd": 60, "destination": "Mekong countries"},
     {"exporter": "Thailand", "product": "Gasoline", "volume_kbd": 40, "destination": "Cambodia/Laos/Myanmar"},
@@ -97,12 +97,12 @@ PRODUCT_EXPORTS = [
 
 
 def render():
-    st.header("SE Asian Trade Flows")
+    st.header("APAC Trade Flows")
     st.caption("Reference data from IEA, OPEC MOMR, and national customs agencies. Volumes are 2024-2025 estimates.")
 
     with st.sidebar:
         st.subheader("Filters")
-        view = st.radio("View", ["Crude Imports", "Product Exports"], key="sea_tf_view")
+        view = st.radio("View", ["Crude Imports", "Product Exports"], key="apac_tf_view")
 
     if view == "Crude Imports":
         _render_crude_imports()
@@ -116,7 +116,7 @@ def _render_crude_imports():
     # Filter
     with st.sidebar:
         importers = ["All"] + sorted(df["importer"].unique().tolist())
-        selected = st.selectbox("Importer", importers, key="sea_tf_importer")
+        selected = st.selectbox("Importer", importers, key="apac_tf_importer")
         if selected != "All":
             df = df[df["importer"] == selected]
 
@@ -159,7 +159,7 @@ def _render_crude_imports():
     st.divider()
 
     # --- By Supplier (who feeds Asia) ---
-    st.subheader("Crude Suppliers to SE Asia & APAC")
+    st.subheader("Crude Suppliers to APAC")
     supplier_agg = df.groupby("supplier")["volume_kbd"].sum().reset_index()
     supplier_agg = supplier_agg.sort_values("volume_kbd", ascending=False)
 
@@ -175,7 +175,7 @@ def _render_crude_imports():
     # --- Treemap ---
     st.subheader("Import Flow Map")
     df_tree = df.copy()
-    df_tree["root"] = "SE Asia Crude Imports"
+    df_tree["root"] = "APAC Crude Imports"
     fig = treemap_chart(df_tree, ["root", "importer", "supplier"], "volume_kbd",
                         "Crude Import Flows (kb/d)", height=550)
     st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
@@ -186,7 +186,7 @@ def _render_crude_imports():
     display.columns = ["Importer", "Supplier", "Volume (kb/d)", "Crude Grade"]
     display = display.sort_values("Volume (kb/d)", ascending=False)
     csv = display.to_csv(index=False)
-    st.download_button("Download CSV", csv, "sea_crude_imports.csv", "text/csv")
+    st.download_button("Download CSV", csv, "apac_crude_imports.csv", "text/csv")
     st.dataframe(display, use_container_width=True, hide_index=True)
 
 
@@ -196,7 +196,7 @@ def _render_product_exports():
     # Filter
     with st.sidebar:
         exporters = ["All"] + sorted(df["exporter"].unique().tolist())
-        selected = st.selectbox("Exporter", exporters, key="sea_tf_exporter")
+        selected = st.selectbox("Exporter", exporters, key="apac_tf_exporter")
         if selected != "All":
             df = df[df["exporter"] == selected]
 
@@ -255,7 +255,7 @@ def _render_product_exports():
     # --- Treemap ---
     st.subheader("Export Flow Map")
     df_tree = df.copy()
-    df_tree["root"] = "SE Asia Product Exports"
+    df_tree["root"] = "APAC Product Exports"
     fig = treemap_chart(df_tree, ["root", "exporter", "product"], "volume_kbd",
                         "Product Export Flows (kb/d)", height=500)
     st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
@@ -266,5 +266,5 @@ def _render_product_exports():
     display.columns = ["Exporter", "Product", "Volume (kb/d)", "Destination"]
     display = display.sort_values("Volume (kb/d)", ascending=False)
     csv = display.to_csv(index=False)
-    st.download_button("Download CSV", csv, "sea_product_exports.csv", "text/csv")
+    st.download_button("Download CSV", csv, "apac_product_exports.csv", "text/csv")
     st.dataframe(display, use_container_width=True, hide_index=True)
