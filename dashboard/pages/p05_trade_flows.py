@@ -10,7 +10,8 @@ from dashboard.data_access import cached_trade_flows
 from dashboard.components.price_chart import treemap_chart, bar_chart, donut_chart
 from dashboard.components.filters import date_range_filter
 from dashboard.components.theme import (SERIES_COLORS, PLOTLY_CONFIG, apply_theme,
-                                         TEXT_PRIMARY, TEXT_MUTED, BG_ELEVATED)
+                                         TEXT_PRIMARY, TEXT_SECONDARY, TEXT_MUTED, TEXT_DIM,
+                                         BG_ELEVATED, BORDER_SUBTLE)
 
 
 def render():
@@ -37,8 +38,24 @@ def render():
     with c1:
         st.metric("Total Volume", f"{df_latest['volume_tmt'].sum():,.0f} TMT")
     with c2:
-        if "value_musd" in df_latest.columns:
-            st.metric("Total Value", f"${df_latest['value_musd'].sum():,.0f}M")
+        if "value_musd" in df_latest.columns and df_latest["value_musd"].notna().any():
+            total_val = df_latest["value_musd"].sum()
+            st.metric("Total Value", f"${total_val:,.0f}M")
+            st.markdown(f"""
+            <style>.tf-tooltip-wrap:hover .tf-tooltip-text {{visibility:visible !important;opacity:1 !important;}}</style>
+            <div class="tf-tooltip-wrap" style="position:relative;display:inline-block;cursor:help;">
+                <span style="font-size:0.65rem;color:{TEXT_DIM};border:1px solid {TEXT_DIM};
+                    border-radius:50%;width:14px;height:14px;display:inline-flex;align-items:center;
+                    justify-content:center;">i</span>
+                <span class="tf-tooltip-text" style="visibility:hidden;opacity:0;position:absolute;
+                    z-index:999;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+                    width:240px;background:{BG_ELEVATED};color:{TEXT_SECONDARY};font-size:0.7rem;
+                    line-height:1.5;padding:10px 12px;border-radius:8px;border:1px solid {BORDER_SUBTLE};
+                    box-shadow:0 4px 16px rgba(0,0,0,0.4);transition:opacity 0.2s;pointer-events:none;">
+                    <b>Total Value</b> = sum of value_musd across all source countries for the selected
+                    flow type on the latest date. Values are in millions of USD (FOB basis where available).
+                </span>
+            </div>""", unsafe_allow_html=True)
     with c3:
         st.metric("Source Countries", df_latest["country"].nunique())
 

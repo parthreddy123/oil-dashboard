@@ -34,13 +34,16 @@ def render():
         for i, (_, row) in enumerate(df_latest.iterrows()):
             if i < len(cols):
                 with cols[i]:
-                    st.metric(row["product"].title(), f"{row['price']:.2f} {row.get('unit', '')}")
+                    unit = row.get("unit", "")
+                    st.metric(row["product"].title(), f"{row['price']:.2f} {unit}")
 
-        if df["date"].nunique() > 1:
-            pivot = df.pivot_table(index="date", columns="product", values="price").reset_index()
+        # Line chart: only include USD/bbl products (exclude INR/cylinder LPG etc.)
+        df_chart = df[df["unit"] == "USD/bbl"].copy() if "unit" in df.columns else df.copy()
+        if df_chart["date"].nunique() > 1 and not df_chart.empty:
+            pivot = df_chart.pivot_table(index="date", columns="product", values="price").reset_index()
             pivot["date"] = pd.to_datetime(pivot["date"])
             y_cols = {col: col.title() for col in pivot.columns if col != "date"}
-            fig = line_chart(pivot, "date", y_cols, "Product Price Trends", y_title="Price")
+            fig = line_chart(pivot, "date", y_cols, "Product Price Trends (USD/bbl)", y_title="Price (USD/bbl)")
             st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
     else:
         st.info("No product price data available.")
@@ -48,9 +51,28 @@ def render():
     st.divider()
 
     # --- Crack Spreads + GRM ---
-    st.subheader("Crack Spreads vs Brent")
-    cracks = calculate_crack_spreads()
-    grm = estimate_grm(cracks)
+    # Prefer Singapore estimated cracks from DB (anchored to realistic market levels)
+    from database.db_manager import get_connection
+    cracks = {}
+    grm = None
+    with get_connection() as conn:
+        rows = conn.execute(
+            """SELECT product, spread, estimated_grm FROM crack_spreads
+               WHERE date=(SELECT MAX(date) FROM crack_spreads)
+               AND source = 'yfinance_sg_est'"""
+        ).fetchall()
+        if rows:
+            for r in rows:
+                cracks[r["product"]] = float(r["spread"])
+                if grm is None and r["estimated_grm"] is not None:
+                    grm = float(r["estimated_grm"])
+    # Fallback to calculated if no yfinance data
+    if not cracks:
+        cracks = calculate_crack_spreads()
+        grm = estimate_grm(cracks)
+
+    benchmark_label = "Dubai" if any(True for _ in cracks) and grm else "Brent"
+    st.subheader(f"Crack Spreads vs {benchmark_label}")
 
     if cracks:
         col1, col2 = st.columns([2, 1])
@@ -76,10 +98,19 @@ def render():
                         <span style="font-size:0.8rem;color:{TEXT_MUTED};font-weight:400;">/bbl</span></div>
                 </div>""", unsafe_allow_html=True)
 
-                # Waterfall breakdown
-                sorted_cracks = sorted(cracks.items(), key=lambda x: abs(x[1]), reverse=True)
-                categories = [p.title() for p, _ in sorted_cracks] + ["Net GRM"]
-                values = [s for _, s in sorted_cracks] + [grm]
+                # Waterfall breakdown — weighted by refinery yield
+                GRM_WEIGHTS = {
+                    "diesel": 0.42, "petrol": 0.22, "naphtha": 0.12,
+                    "atf": 0.10, "fuel_oil": 0.08, "lpg": 0.06,
+                }
+                weighted_items = []
+                for prod, spread in cracks.items():
+                    w = GRM_WEIGHTS.get(prod, 0)
+                    if w > 0:
+                        weighted_items.append((prod, round(spread * w, 2), w))
+                weighted_items.sort(key=lambda x: abs(x[1]), reverse=True)
+                categories = [f"{p.title()} ({w:.0%})" for p, _, w in weighted_items] + ["Net GRM"]
+                values = [v for _, v, _ in weighted_items] + [grm]
                 fig_wf = waterfall_chart(categories, values, f"GRM Build-up: ${grm:.2f}/bbl", height=350)
                 st.plotly_chart(fig_wf, use_container_width=True, config=PLOTLY_CONFIG)
             else:

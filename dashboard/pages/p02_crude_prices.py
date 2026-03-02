@@ -43,7 +43,11 @@ def render():
     # --- Brent-Dubai Spread ---
     if "brent" in benchmarks and "oman_dubai" in benchmarks and "brent" in pivot.columns and "oman_dubai" in pivot.columns:
         st.subheader("Brent-Dubai Spread")
-        spread_bd = pivot[["date", "brent", "oman_dubai"]].dropna()
+        spread_bd = pivot[["date", "brent", "oman_dubai"]].copy()
+        spread_bd = spread_bd.sort_values("date")
+        spread_bd["brent"] = spread_bd["brent"].ffill()
+        spread_bd["oman_dubai"] = spread_bd["oman_dubai"].ffill()
+        spread_bd = spread_bd.dropna(subset=["brent", "oman_dubai"])
         spread_bd["spread"] = spread_bd["brent"] - spread_bd["oman_dubai"]
         fig_bd = line_chart(spread_bd, "date", {"spread": "Brent-Dubai Spread"},
                            "Brent-Dubai Price Differential", "Spread (USD/bbl)")
@@ -52,7 +56,11 @@ def render():
     # --- Brent-WTI Spread ---
     if "brent" in benchmarks and "wti" in benchmarks and "brent" in pivot.columns and "wti" in pivot.columns:
         st.subheader("Brent-WTI Spread")
-        spread_df = pivot[["date", "brent", "wti"]].dropna()
+        spread_df = pivot[["date", "brent", "wti"]].copy()
+        spread_df = spread_df.sort_values("date")
+        spread_df["brent"] = spread_df["brent"].ffill()
+        spread_df["wti"] = spread_df["wti"].ffill()
+        spread_df = spread_df.dropna(subset=["brent", "wti"])
         spread_df["spread"] = spread_df["brent"] - spread_df["wti"]
         fig_s = line_chart(spread_df, "date", {"spread": "Brent-WTI Spread"},
                           "Brent-WTI Price Differential", "Spread (USD/bbl)")
@@ -88,18 +96,3 @@ def render():
             </div>
         </div>""", unsafe_allow_html=True)
 
-    # --- Recent Changes ---
-    st.subheader("Recent Daily Changes")
-    if benchmarks:
-        recent = df[df["benchmark"] == benchmarks[0]].head(30).copy()
-        if not recent.empty:
-            recent = recent.sort_values("date")
-            recent["change"] = recent["price"].diff()
-            recent["change_pct"] = recent["price"].pct_change() * 100
-            recent = recent.dropna().tail(15).sort_values("date", ascending=False)
-            recent["date"] = recent["date"].dt.strftime("%Y-%m-%d")
-            display_df = recent[["date", "price", "change", "change_pct"]].copy()
-            display_df.columns = ["Date", "Price (USD)", "Change (USD)", "Change (%)"]
-            display_df["Change (USD)"] = display_df["Change (USD)"].round(2)
-            display_df["Change (%)"] = display_df["Change (%)"].round(2)
-            st.dataframe(display_df, use_container_width=True, hide_index=True)

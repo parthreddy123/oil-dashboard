@@ -47,6 +47,18 @@ def render():
 
     st.divider()
 
+    # --- Company Summary Snapshot ---
+    st.subheader("Company Snapshot")
+    if not df_latest.empty and "company" in df_latest.columns:
+        summary = df_latest.groupby("company").agg({
+            "throughput_tmt": "sum", "capacity_mmtpa": "sum", "utilization_pct": "mean",
+        }).round(1).reset_index()
+        summary.columns = ["Company", "Throughput (TMT)", "Capacity (MMTPA)", "Avg Utilization (%)"]
+        summary = summary.sort_values("Throughput (TMT)", ascending=False)
+        st.dataframe(summary, use_container_width=True, hide_index=True)
+
+    st.divider()
+
     # --- Throughput by Refinery ---
     st.subheader("Throughput by Refinery")
     if not df_latest.empty:

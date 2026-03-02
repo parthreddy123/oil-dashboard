@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 import streamlit as st
 import pandas as pd
 from datetime import datetime
-from dashboard.data_access import cached_crude_prices, cached_news_articles, cached_metric_snapshots, cached_refinery_data
+from dashboard.data_access import cached_crude_prices, cached_news_articles, cached_metric_snapshots
 from dashboard.components.kpi_card import kpi_card
 from dashboard.components.price_chart import line_chart
 from dashboard.components.news_card import news_card
@@ -115,18 +115,3 @@ def render():
         if not bullish and not bearish:
             st.info("No tagged news yet. Refresh data to fetch news.")
 
-    # --- Refinery Snapshot ---
-    st.divider()
-    st.subheader("Indian Refinery Snapshot")
-    refinery_data = cached_refinery_data(limit=50)
-    if refinery_data:
-        df_ref = pd.DataFrame(refinery_data)
-        if "company" in df_ref.columns and "throughput_tmt" in df_ref.columns:
-            summary = df_ref.groupby("company").agg({
-                "throughput_tmt": "sum", "capacity_mmtpa": "sum", "utilization_pct": "mean",
-            }).round(1).reset_index()
-            summary.columns = ["Company", "Throughput (TMT)", "Capacity (MMTPA)", "Avg Utilization (%)"]
-            summary = summary.sort_values("Throughput (TMT)", ascending=False)
-            st.dataframe(summary, use_container_width=True, hide_index=True)
-    else:
-        st.info("No refinery data. Run a refresh.")

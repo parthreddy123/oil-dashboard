@@ -86,13 +86,23 @@ def render():
         if row["metric_name"] not in snapshots:
             snapshots[row["metric_name"]] = row
 
-    # Use cached crack spreads and GRM from DB (computed during snapshot build)
+    # Use cached crack spreads and GRM from DB
+    # Prefer Singapore estimated cracks vs Dubai (most relevant for India/APAC)
     cracks = {}
     grm = None
     with get_connection() as conn:
         rows = conn.execute(
-            "SELECT product, spread, estimated_grm FROM crack_spreads WHERE date=(SELECT MAX(date) FROM crack_spreads)"
+            """SELECT product, spread, estimated_grm FROM crack_spreads
+               WHERE date=(SELECT MAX(date) FROM crack_spreads)
+               AND source = 'yfinance_sg_est'"""
         ).fetchall()
+        if not rows:
+            # Fallback to calculated cracks (vs Brent)
+            rows = conn.execute(
+                """SELECT product, spread, estimated_grm FROM crack_spreads
+                   WHERE date=(SELECT MAX(date) FROM crack_spreads)
+                   AND source = 'calculated'"""
+            ).fetchall()
         for r in rows:
             cracks[r["product"]] = float(r["spread"])
             if grm is None and r["estimated_grm"] is not None:

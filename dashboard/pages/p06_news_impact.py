@@ -10,8 +10,8 @@ from dashboard.data_access import cached_news_articles
 from dashboard.components.news_card import news_feed
 from dashboard.components.price_chart import scatter_chart
 from dashboard.components.filters import date_range_filter, impact_filter
-from dashboard.components.theme import (EMERALD, CORAL, TEXT_PRIMARY, TEXT_SECONDARY, TEXT_MUTED,
-                                         BG_ELEVATED, PLOTLY_CONFIG, apply_theme, SERIES_COLORS)
+from dashboard.components.theme import (EMERALD, CORAL, TEXT_PRIMARY, TEXT_SECONDARY, TEXT_MUTED, TEXT_DIM,
+                                         BG_ELEVATED, BORDER_SUBTLE, PLOTLY_CONFIG, apply_theme, SERIES_COLORS)
 
 
 def render():
@@ -44,11 +44,36 @@ def render():
     neutral_count = sum(1 for a in all_articles if a.get("impact_tag") == "neutral")
     total = len(all_articles)
 
+    SENTIMENT_TOOLTIP = (
+        "<b>How are articles tagged?</b><br><br>"
+        "<b>Bullish</b> = news likely to push oil prices UP "
+        "(supply cuts, demand growth, geopolitical risk).<br><br>"
+        "<b>Bearish</b> = news likely to push prices DOWN "
+        "(demand weakness, supply increases, economic slowdown).<br><br>"
+        "<b>Impact Score</b> (-3 to +3) reflects estimated magnitude. "
+        "Scored by keyword analysis of headlines and summaries."
+    )
+
     c1, c2, c3, c4 = st.columns(4)
     with c1: st.metric("Total Articles", total)
     with c2: st.metric("Bullish", bullish_count)
     with c3: st.metric("Bearish", bearish_count)
-    with c4: st.metric("Neutral", neutral_count)
+    with c4:
+        st.metric("Neutral", neutral_count)
+        st.markdown(f"""
+        <style>.news-tooltip-wrap:hover .news-tooltip-text {{visibility:visible !important;opacity:1 !important;}}</style>
+        <div class="news-tooltip-wrap" style="position:relative;display:inline-block;cursor:help;">
+            <span style="font-size:0.65rem;color:{TEXT_DIM};border:1px solid {TEXT_DIM};
+                border-radius:50%;width:14px;height:14px;display:inline-flex;align-items:center;
+                justify-content:center;">i</span>
+            <span class="news-tooltip-text" style="visibility:hidden;opacity:0;position:absolute;
+                z-index:999;bottom:calc(100% + 8px);right:0;
+                width:280px;background:{BG_ELEVATED};color:{TEXT_SECONDARY};font-size:0.7rem;
+                line-height:1.5;padding:10px 12px;border-radius:8px;border:1px solid {BORDER_SUBTLE};
+                box-shadow:0 4px 16px rgba(0,0,0,0.4);transition:opacity 0.2s;pointer-events:none;">
+                {SENTIMENT_TOOLTIP}
+            </span>
+        </div>""", unsafe_allow_html=True)
 
     st.divider()
 
