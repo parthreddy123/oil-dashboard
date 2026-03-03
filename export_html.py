@@ -396,11 +396,28 @@ def generate_html(output_path="scenario_report.html"):
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Scenario Engine Report — {now_str}</title>
-<style>{EXPORT_CSS}</style>
+<style>{EXPORT_CSS}
+.refresh-btn {{
+    background: linear-gradient(135deg, #00D4AA 0%, #00B894 100%);
+    color: #0E1117; border: none; padding: 8px 20px; border-radius: 8px;
+    font-weight: 700; font-size: 0.82rem; cursor: pointer; letter-spacing: 0.02em;
+}}
+.refresh-btn:hover {{ box-shadow: 0 4px 16px rgba(0,212,170,0.3); }}
+.refresh-btn:disabled {{ opacity: 0.5; cursor: not-allowed; }}
+.refresh-status {{ font-size: 0.75rem; color: #9CA3AF; margin-left: 12px; }}
+</style>
 </head>
 <body>
-<h1>&#127919; Scenario Engine</h1>
-<div class="subtitle">Geopolitical scenario analysis for Indian refinery strategy &middot; {now_str}</div>
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+    <div>
+        <h1 style="margin-bottom:0.2rem;">&#127919; Scenario Engine</h1>
+        <div class="subtitle" style="margin-bottom:0;">Geopolitical scenario analysis for Indian refinery strategy &middot; {now_str}</div>
+    </div>
+    <div style="display:flex;align-items:center;">
+        <button class="refresh-btn" id="refreshBtn" onclick="doRefresh()">&#8635; Refresh Data</button>
+        <span class="refresh-status" id="refreshStatus"></span>
+    </div>
+</div>
 {brent_banner}
 
 {horizon_sections}
@@ -409,8 +426,43 @@ def generate_html(output_path="scenario_report.html"):
     <span>Generated: {last_gen_time[:16] if last_gen_time else now_str}</span>
     <span>Articles analyzed: {total_articles}</span>
     <span>Model: {last_model or 'N/A'}</span>
-    <span>All horizons: 3m, 6m, 12m</span>
+    <span>Horizons: {', '.join(HORIZONS)}</span>
 </div>
+
+<script>
+function doRefresh() {{
+    var btn = document.getElementById('refreshBtn');
+    var status = document.getElementById('refreshStatus');
+    btn.disabled = true;
+    btn.textContent = 'Refreshing...';
+    status.textContent = 'Scraping + scoring + generating...';
+
+    fetch('/refresh', {{method: 'POST'}})
+        .then(r => r.json())
+        .then(d => {{
+            if (d.error) {{ status.textContent = d.error; btn.disabled = false; btn.textContent = '\\u21BB Refresh Data'; return; }}
+            pollStatus();
+        }})
+        .catch(e => {{
+            status.textContent = 'Server not running. Start with: python serve_report.py';
+            btn.disabled = false; btn.textContent = '\\u21BB Refresh Data';
+        }});
+}}
+
+function pollStatus() {{
+    var status = document.getElementById('refreshStatus');
+    var btn = document.getElementById('refreshBtn');
+    fetch('/status').then(r => r.json()).then(d => {{
+        if (d.running) {{
+            status.textContent = 'Processing...';
+            setTimeout(pollStatus, 2000);
+        }} else {{
+            status.textContent = 'Done! Reloading...';
+            setTimeout(() => location.reload(), 500);
+        }}
+    }}).catch(() => {{ setTimeout(pollStatus, 3000); }});
+}}
+</script>
 </body>
 </html>"""
 
