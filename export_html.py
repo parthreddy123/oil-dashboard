@@ -177,8 +177,8 @@ def _color_rgba(hex_color, alpha):
     return f"rgba({r},{g},{b},{alpha})"
 
 
-def render_horizon(horizon, narrative_data, momentum, recent_articles, top_articles, current_brent=None):
-    """Render a single horizon section as HTML string."""
+def render_horizon(horizon, narrative_data, momentum, recent_articles, top_articles, current_brent=None, compact=False):
+    """Render a single horizon section. compact=True shows only narrative + KPIs."""
     weights = narrative_data.get("weight_snapshot", {}) if narrative_data else {}
     if not weights:
         weights = {sid: 1.0 / len(SCENARIOS) for sid in SCENARIOS}
@@ -226,6 +226,9 @@ def render_horizon(horizon, narrative_data, momentum, recent_articles, top_artic
             {f'<div class="kpi-explanation">{stock_expl}</div>' if stock_expl else ''}
         </div>
     </div>""")
+
+    if compact:
+        return "\n".join(parts)
 
     # Momentum row
     if momentum:
@@ -373,7 +376,8 @@ def generate_html(output_path="scenario_report.html"):
             if narrative_data.get("model_used", ""):
                 last_model = narrative_data["model_used"]
 
-        body = render_horizon(h, narrative_data, momentum, recent_articles, top_articles, current_brent)
+        is_compact = (h != HORIZONS[0])  # Only first horizon gets full detail
+        body = render_horizon(h, narrative_data, momentum, recent_articles, top_articles, current_brent, compact=is_compact)
         horizon_sections += f"""
         <div class="horizon-section">
             <h2 style="font-size:1.3rem;margin-top:2.5rem;">{horizon_labels.get(h, h)} Horizon</h2>
