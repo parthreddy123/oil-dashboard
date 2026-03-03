@@ -177,7 +177,7 @@ def _color_rgba(hex_color, alpha):
     return f"rgba({r},{g},{b},{alpha})"
 
 
-def render_horizon(horizon, narrative_data, momentum, recent_articles, top_articles):
+def render_horizon(horizon, narrative_data, momentum, recent_articles, top_articles, current_brent=None):
     """Render a single horizon section as HTML string."""
     weights = narrative_data.get("weight_snapshot", {}) if narrative_data else {}
     if not weights:
@@ -202,12 +202,15 @@ def render_horizon(horizon, narrative_data, momentum, recent_articles, top_artic
     grm_expl = narrative_data.get("grm_explanation", "") if narrative_data else ""
     stock_expl = narrative_data.get("stock_explanation", "") if narrative_data else ""
 
+    brent_now_html = f'<div style="font-size:0.72rem;color:#F59E0B;margin-top:4px;">Current Brent: ${current_brent:.2f}/bbl</div>' if current_brent else ''
+
     parts.append(f"""
     <div class="kpi-row">
         <div class="kpi-card" style="border-left:3px solid #F59E0B;">
-            <div class="label">Oil Price (EV)</div>
+            <div class="label">Brent Price (EV)</div>
             <div class="value">${ev['oil']:.0f}/bbl</div>
             <div class="range">range: ${ranges['oil'][0]}-{ranges['oil'][1]}</div>
+            {brent_now_html}
             {f'<div class="kpi-explanation">{oil_expl}</div>' if oil_expl else ''}
         </div>
         <div class="kpi-card" style="border-left:3px solid #00D4AA;">
@@ -325,7 +328,7 @@ def render_horizon(horizon, narrative_data, momentum, recent_articles, top_artic
                 <div class="scenario-articles">{articles_html}</div>
                 <div class="scenario-kpis">
                     <div class="row">
-                        <div class="item"><div class="lbl">Oil</div><div class="val">${kpis['oil']}</div></div>
+                        <div class="item"><div class="lbl">Brent</div><div class="val">${kpis['oil']}</div></div>
                         <div class="item"><div class="lbl">GRM</div><div class="val">${kpis['grm']}</div></div>
                         <div class="item"><div class="lbl">Stock</div><div class="val">{kpis['stock']:+.0f}%</div></div>
                     </div>
@@ -338,21 +341,50 @@ def render_horizon(horizon, narrative_data, momentum, recent_articles, top_artic
 
 
 def generate_html(output_path="scenario_report.html"):
-    """Generate the full standalone HTML report."""
+    """Generate the full standalone HTML report with all horizons."""
+    from database.db_manager import get_latest_price
     init_db()
 
-    horizon = DEFAULT_HORIZON
-    narrative_data = get_latest_scenario_narrative(horizon)
-    momentum = compute_momentum(horizon)
+    # Get current Brent price
+    brent_row = get_latest_price("brent")
+    current_brent = float(brent_row["price"]) if brent_row else None
+
+    # Shared data
+    momentum = compute_momentum(DEFAULT_HORIZON)
     recent_articles = get_recent_articles_with_signals(hours=12, limit=20)
     top_articles = get_top_articles_across_scenarios(limit=30)
 
-    body = render_horizon(horizon, narrative_data, momentum, recent_articles, top_articles)
-
-    gen_time = narrative_data.get("generated_at", "") if narrative_data else ""
-    article_count = narrative_data.get("article_count", 0) if narrative_data else 0
-    model_used = narrative_data.get("model_used", "") if narrative_data else ""
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+    horizon_labels = {"3m": "3-Month", "6m": "6-Month", "12m": "12-Month"}
+
+    # Render each horizon
+    horizon_sections = ""
+    total_articles = 0
+    last_gen_time = ""
+    last_model = ""
+
+    for h in HORIZONS:
+        narrative_data = get_latest_scenario_narrative(h)
+        if narrative_data:
+            if narrative_data.get("article_count", 0) > total_articles:
+                total_articles = narrative_data["article_count"]
+            if narrative_data.get("generated_at", ""):
+                last_gen_time = narrative_data["generated_at"]
+            if narrative_data.get("model_used", ""):
+                last_model = narrative_data["model_used"]
+
+        body = render_horizon(h, narrative_data, momentum, recent_articles, top_articles, current_brent)
+        horizon_sections += f"""
+        <div class="horizon-section">
+            <h2 style="font-size:1.3rem;margin-top:2.5rem;">{horizon_labels.get(h, h)} Horizon</h2>
+            {body}
+        </div>
+        <hr style="border-color:rgba(255,255,255,0.08);margin:2rem 0;">
+        """
+
+    brent_banner = ""
+    if current_brent:
+        brent_banner = f'<div style="font-size:0.85rem;color:#F59E0B;margin-bottom:1rem;">Current Brent: <strong>${current_brent:.2f}/bbl</strong></div>'
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -365,14 +397,15 @@ def generate_html(output_path="scenario_report.html"):
 <body>
 <h1>&#127919; Scenario Engine</h1>
 <div class="subtitle">Geopolitical scenario analysis for Indian refinery strategy &middot; {now_str}</div>
+{brent_banner}
 
-{body}
+{horizon_sections}
 
 <div class="footer">
-    <span>Generated: {gen_time[:16] if gen_time else now_str}</span>
-    <span>Articles analyzed: {article_count}</span>
-    <span>Model: {model_used or 'N/A'}</span>
-    <span>Horizon: {horizon}</span>
+    <span>Generated: {last_gen_time[:16] if last_gen_time else now_str}</span>
+    <span>Articles analyzed: {total_articles}</span>
+    <span>Model: {last_model or 'N/A'}</span>
+    <span>All horizons: 3m, 6m, 12m</span>
 </div>
 </body>
 </html>"""

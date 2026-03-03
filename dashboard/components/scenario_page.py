@@ -69,8 +69,9 @@ def _render_narrative_box(narrative_data):
     </div>""", unsafe_allow_html=True)
 
 
-def _render_kpi_with_explanation(label, value_str, range_str, explanation, accent_color=TEAL):
+def _render_kpi_with_explanation(label, value_str, range_str, explanation, accent_color=TEAL, subtitle=None):
     """Render a KPI box with explanation text below."""
+    sub_html = f'<div style="font-size:0.72rem;color:{accent_color};margin-top:4px;">{subtitle}</div>' if subtitle else ''
     st.markdown(f"""
     <div class="kpi-box" style="position:relative;background:linear-gradient(135deg,{BG_CARD},{BG_ELEVATED});
         border:1px solid {BORDER_SUBTLE};border-left:3px solid {accent_color};
@@ -80,6 +81,7 @@ def _render_kpi_with_explanation(label, value_str, range_str, explanation, accen
         <div class="kpi-value" style="color:{TEXT_PRIMARY};font-size:1.5rem;font-weight:700;
             letter-spacing:-0.02em;line-height:1.1;font-variant-numeric:tabular-nums;">{value_str}</div>
         <div style="font-size:0.68rem;color:{TEXT_DIM};margin-top:4px;">range: {range_str}</div>
+        {sub_html}
         {f'<div class="kpi-explanation">{explanation}</div>' if explanation else ''}
     </div>""", unsafe_allow_html=True)
 
@@ -227,7 +229,7 @@ def _render_scenario_card(sid, scenario, weight, kpis, articles, assessment=None
             <div style="width:280px;flex-shrink:0;padding:14px 18px;">
                 <div style="display:flex;gap:12px;margin-bottom:8px;">
                     <div style="text-align:center;">
-                        <div style="font-size:0.6rem;color:{TEXT_DIM};text-transform:uppercase;">Oil</div>
+                        <div style="font-size:0.6rem;color:{TEXT_DIM};text-transform:uppercase;">Brent</div>
                         <div style="font-size:0.95rem;font-weight:700;color:{TEXT_PRIMARY};">${kpis['oil']}</div>
                     </div>
                     <div style="text-align:center;">
@@ -297,10 +299,17 @@ def render():
     stock_expl = narrative_data.get("stock_explanation", "") if narrative_data else ""
 
     kpi_cols = st.columns(3)
+    # Get current Brent price
+    from database.db_manager import get_latest_price
+    brent_row = get_latest_price("brent")
+    current_brent = float(brent_row["price"]) if brent_row else None
+    brent_sub = f" (now ${current_brent:.2f})" if current_brent else ""
+
     with kpi_cols[0]:
         _render_kpi_with_explanation(
-            "Oil Price (EV)", f"${ev['oil']:.0f}/bbl",
-            f"${ranges['oil'][0]}-{ranges['oil'][1]}", oil_expl, accent_color=AMBER)
+            "Brent Price (EV)", f"${ev['oil']:.0f}/bbl",
+            f"${ranges['oil'][0]}-{ranges['oil'][1]}", oil_expl, accent_color=AMBER,
+            subtitle=f"Current: ${current_brent:.2f}/bbl" if current_brent else None)
     with kpi_cols[1]:
         _render_kpi_with_explanation(
             "GRM (EV)", f"${ev['grm']:.1f}/bbl",

@@ -170,8 +170,12 @@ def analyze_articles(horizon=DEFAULT_HORIZON, batch_size=10):
                 signals = r.get("signals", {})
                 for sid, data in signals.items():
                     if sid in SCENARIOS:
-                        sig = max(-1.0, min(1.0, float(data.get("signal", 0))))
-                        reasoning = data.get("reasoning", "")
+                        if isinstance(data, (int, float)):
+                            sig = max(-1.0, min(1.0, float(data)))
+                            reasoning = ""
+                        else:
+                            sig = max(-1.0, min(1.0, float(data.get("signal", 0))))
+                            reasoning = data.get("reasoning", "")
                         rows.append((art_id, sid, sig, reasoning, horizon))
 
             if rows:

@@ -74,6 +74,18 @@ def run_post_processing():
         results["narrative"] = {"status": "failed", "error": str(e)}
         logger.warning(f"Narrative generation failed (non-fatal): {e}")
 
+    # Scenario Engine — score articles and generate scenario narratives
+    try:
+        from processing.scenario_analyzer import analyze_articles, compute_weights, HORIZONS
+        scored = analyze_articles("3m")
+        results["scenario_signals"] = {"status": "success", "count": scored}
+        for h in HORIZONS:
+            compute_weights(h, generate_narratives=True)
+        results["scenario_narratives"] = {"status": "success", "count": len(HORIZONS)}
+    except Exception as e:
+        results["scenario_engine"] = {"status": "failed", "error": str(e)}
+        logger.warning(f"Scenario engine failed (non-fatal): {e}")
+
     return results
 
 
