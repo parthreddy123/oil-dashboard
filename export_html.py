@@ -430,23 +430,49 @@ def generate_html(output_path="scenario_report.html"):
 </div>
 
 <script>
+var ACTIONS_URL = 'https://github.com/parthreddy123/oil-dashboard/actions/workflows/refresh.yml';
+
 function doRefresh() {{
     var btn = document.getElementById('refreshBtn');
     var status = document.getElementById('refreshStatus');
     btn.disabled = true;
     btn.textContent = 'Refreshing...';
-    status.textContent = 'Scraping + scoring + generating...';
+    status.textContent = 'Trying local server...';
 
     fetch('/refresh', {{method: 'POST'}})
         .then(r => r.json())
         .then(d => {{
             if (d.error) {{ status.textContent = d.error; btn.disabled = false; btn.textContent = '\\u21BB Refresh Data'; return; }}
+            status.textContent = 'Processing...';
             pollStatus();
         }})
         .catch(e => {{
-            status.textContent = 'Server not running. Start with: python serve_report.py';
-            btn.disabled = false; btn.textContent = '\\u21BB Refresh Data';
+            status.innerHTML = 'Triggering GitHub Actions... <a href="' + ACTIONS_URL + '" target="_blank" style="color:#00D4FF;">View progress \\u2197</a>';
+            btn.textContent = '\\u21BB Triggered';
+            triggerGitHub();
         }});
+}}
+
+function triggerGitHub() {{
+    fetch('https://api.github.com/repos/parthreddy123/oil-dashboard/dispatches', {{
+        method: 'POST',
+        headers: {{'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json'}},
+        body: JSON.stringify({{event_type: 'refresh'}})
+    }}).then(r => {{
+        var status = document.getElementById('refreshStatus');
+        var btn = document.getElementById('refreshBtn');
+        if (r.status === 204) {{
+            status.innerHTML = 'Refresh triggered! Page will update in ~3 min. <a href="' + ACTIONS_URL + '" target="_blank" style="color:#00D4FF;">View \\u2197</a>';
+        }} else {{
+            status.innerHTML = '<a href="' + ACTIONS_URL + '" target="_blank" style="color:#00D4FF;">Click here to run refresh manually \\u2197</a>';
+        }}
+        btn.disabled = false; btn.textContent = '\\u21BB Refresh Data';
+    }}).catch(() => {{
+        var status = document.getElementById('refreshStatus');
+        var btn = document.getElementById('refreshBtn');
+        status.innerHTML = '<a href="' + ACTIONS_URL + '" target="_blank" style="color:#00D4FF;">Click here to run refresh manually \\u2197</a>';
+        btn.disabled = false; btn.textContent = '\\u21BB Refresh Data';
+    }});
 }}
 
 function pollStatus() {{

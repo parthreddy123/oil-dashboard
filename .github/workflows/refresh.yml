@@ -1,0 +1,56 @@
+name: Refresh Scenario Engine
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [refresh]
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run full pipeline
+        env:
+          EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python -c "from database.db_manager import init_db; init_db()"
+          python -m processing.data_processor || true
+          python -m processing.scenario_analyzer
+          python export_html.py
+          echo "Report generated"
+
+      - name: Commit updated DB to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/oil_dashboard.db scenario_report.html
+          git diff --staged --quiet || git commit -m "Auto-refresh: update data and report [skip ci]"
+          git push origin main
+
+      - name: Deploy to gh-pages
+        run: |
+          git checkout gh-pages || git checkout --orphan gh-pages
+          git rm -rf --cached . > /dev/null 2>&1 || true
+          git checkout main -- scenario_report.html
+          cp scenario_report.html index.html
+          git add index.html scenario_report.html
+          git diff --staged --quiet || git commit -m "Auto-deploy scenario report"
+          git push origin gh-pages --force

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scenario Engine Report — 2026-03-04 07:47</title>
+<title>Scenario Engine Report — 2026-03-04 07:53</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -147,14 +147,14 @@ a:hover { text-decoration: underline; }
 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
     <div>
         <h1 style="margin-bottom:0.2rem;">&#127919; Scenario Engine</h1>
-        <div class="subtitle" style="margin-bottom:0;">Geopolitical scenario analysis for Indian refinery strategy &middot; 2026-03-04 07:47</div>
+        <div class="subtitle" style="margin-bottom:0;">Geopolitical scenario analysis for Indian refinery strategy &middot; 2026-03-04 07:53</div>
     </div>
     <div style="display:flex;align-items:center;">
         <button class="refresh-btn" id="refreshBtn" onclick="doRefresh()">&#8635; Refresh Data</button>
         <span class="refresh-status" id="refreshStatus"></span>
     </div>
 </div>
-<div style="font-size:0.85rem;color:#F59E0B;margin-bottom:1rem;">Current Brent: <strong>$71.90/bbl</strong></div>
+<div style="font-size:0.85rem;color:#F59E0B;margin-bottom:1rem;">Current Brent: <strong>$50.00/bbl</strong></div>
 
 
         <div class="horizon-section">
@@ -170,7 +170,7 @@ a:hover { text-decoration: underline; }
             <div class="label">Brent Price (EV)</div>
             <div class="value">$93/bbl</div>
             <div class="range">range: $55-160</div>
-            <div style="font-size:0.72rem;color:#F59E0B;margin-top:4px;">Current Brent: $71.90/bbl</div>
+            <div style="font-size:0.72rem;color:#F59E0B;margin-top:4px;">Current Brent: $50.00/bbl</div>
             <div class="kpi-explanation">$93/bbl reflects an unresolved geopolitical premium where prolonged standoff (24%) and regime change (20%) scenarios dominate trading, offset partially by quick resolution (19%) optimism tied to extended nuclear discussions. The $55-160 range pricing demonstrates extreme uncertainty with tail-risk skew upward.</div>
         </div>
         <div class="kpi-card" style="border-left:3px solid #00D4AA;">
@@ -334,7 +334,7 @@ a:hover { text-decoration: underline; }
             <div class="label">Brent Price (EV)</div>
             <div class="value">$88/bbl</div>
             <div class="range">range: $58-140</div>
-            <div style="font-size:0.72rem;color:#F59E0B;margin-top:4px;">Current Brent: $71.90/bbl</div>
+            <div style="font-size:0.72rem;color:#F59E0B;margin-top:4px;">Current Brent: $50.00/bbl</div>
             <div class="kpi-explanation">$88/bbl reflects the equilibrium of prolonged standoff economics: steady risk premium (+$8-12 above fundamentals) supported by demonstrated willingness of Gulf producers to offset supply disruptions, balanced against dampening effects of OPEC+ spare capacity and weakening demand signals. Downside protection exists at $80s; upside capped near $110 unless kinetic escalation occurs.</div>
         </div>
         <div class="kpi-card" style="border-left:3px solid #00D4AA;">
@@ -362,23 +362,49 @@ a:hover { text-decoration: underline; }
 </div>
 
 <script>
+var ACTIONS_URL = 'https://github.com/parthreddy123/oil-dashboard/actions/workflows/refresh.yml';
+
 function doRefresh() {
     var btn = document.getElementById('refreshBtn');
     var status = document.getElementById('refreshStatus');
     btn.disabled = true;
     btn.textContent = 'Refreshing...';
-    status.textContent = 'Scraping + scoring + generating...';
+    status.textContent = 'Trying local server...';
 
     fetch('/refresh', {method: 'POST'})
         .then(r => r.json())
         .then(d => {
             if (d.error) { status.textContent = d.error; btn.disabled = false; btn.textContent = '\u21BB Refresh Data'; return; }
+            status.textContent = 'Processing...';
             pollStatus();
         })
         .catch(e => {
-            status.textContent = 'Server not running. Start with: python serve_report.py';
-            btn.disabled = false; btn.textContent = '\u21BB Refresh Data';
+            status.innerHTML = 'Triggering GitHub Actions... <a href="' + ACTIONS_URL + '" target="_blank" style="color:#00D4FF;">View progress \u2197</a>';
+            btn.textContent = '\u21BB Triggered';
+            triggerGitHub();
         });
+}
+
+function triggerGitHub() {
+    fetch('https://api.github.com/repos/parthreddy123/oil-dashboard/dispatches', {
+        method: 'POST',
+        headers: {'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json'},
+        body: JSON.stringify({event_type: 'refresh'})
+    }).then(r => {
+        var status = document.getElementById('refreshStatus');
+        var btn = document.getElementById('refreshBtn');
+        if (r.status === 204) {
+            status.innerHTML = 'Refresh triggered! Page will update in ~3 min. <a href="' + ACTIONS_URL + '" target="_blank" style="color:#00D4FF;">View \u2197</a>';
+        } else {
+            status.innerHTML = '<a href="' + ACTIONS_URL + '" target="_blank" style="color:#00D4FF;">Click here to run refresh manually \u2197</a>';
+        }
+        btn.disabled = false; btn.textContent = '\u21BB Refresh Data';
+    }).catch(() => {
+        var status = document.getElementById('refreshStatus');
+        var btn = document.getElementById('refreshBtn');
+        status.innerHTML = '<a href="' + ACTIONS_URL + '" target="_blank" style="color:#00D4FF;">Click here to run refresh manually \u2197</a>';
+        btn.disabled = false; btn.textContent = '\u21BB Refresh Data';
+    });
 }
 
 function pollStatus() {
