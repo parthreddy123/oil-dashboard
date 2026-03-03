@@ -33,6 +33,7 @@ with st.sidebar:
 
     NAV_ITEMS = {
         "Morning Brief": "&#9749;",
+        "Scenario Engine": "&#127919;",
         "Overview": "&#128202;", "Crude Prices": "&#128738;", "Indian Refineries": "&#127981;",
         "Products & Cracks": "&#128200;", "Indian Trade Flows": "&#128674;",
         "APAC Refineries": "&#127981;", "APAC Trade Flows": "&#128674;",
@@ -95,6 +96,8 @@ with st.sidebar:
 # --- Page Router ---
 if page == "Morning Brief":
     from dashboard.pages.p00_morning_brief import render
+elif page == "Scenario Engine":
+    from dashboard.components.scenario_page import render
 elif page == "Overview":
     from dashboard.pages.p01_overview import render
 elif page == "Crude Prices":

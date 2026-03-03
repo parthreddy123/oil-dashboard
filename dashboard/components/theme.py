@@ -222,6 +222,126 @@ hr { border-color: rgba(255, 255, 255, 0.06) !important; }
     .stDownloadButton > button { font-size: 0.72rem !important; padding: 0.3rem 0.8rem !important; }
 }
 
+/* ===== Scenario Engine components ===== */
+.narrative-box {
+    background: linear-gradient(135deg, #0D2818 0%, #1A1F2E 100%);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-left: 4px solid #10B981;
+    border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1.2rem;
+    line-height: 1.7;
+    color: #E5E7EB;
+    font-size: 0.88rem;
+}
+.narrative-box strong, .narrative-box b {
+    color: #F9FAFB;
+}
+
+.kpi-explanation {
+    font-size: 0.72rem;
+    color: #9CA3AF;
+    line-height: 1.5;
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    font-style: italic;
+}
+
+.art-reasoning {
+    font-size: 0.7rem;
+    color: #6B7280;
+    line-height: 1.4;
+    margin-top: 3px;
+    padding-left: 8px;
+    border-left: 2px solid rgba(255,255,255,0.06);
+    font-style: italic;
+}
+
+.scenario-assessment {
+    background: rgba(0, 212, 170, 0.06);
+    border: 1px solid rgba(0, 212, 170, 0.2);
+    border-left: 3px solid #00D4AA;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-top: 10px;
+    font-size: 0.78rem;
+    color: #D1D5DB;
+    line-height: 1.5;
+}
+.scenario-assessment .label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #00D4AA;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+}
+
+.momentum-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+.momentum-box {
+    background: linear-gradient(135deg, #1A1F2E, #151A28);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 8px 14px;
+    min-width: 120px;
+    flex: 1;
+    text-align: center;
+}
+.momentum-box .scenario-name {
+    font-size: 0.65rem;
+    color: #9CA3AF;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+}
+.momentum-box .delta {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-top: 2px;
+    font-variant-numeric: tabular-nums;
+}
+
+.breaking-article {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.82rem;
+}
+.breaking-article:hover {
+    background: rgba(255,255,255,0.02);
+}
+.breaking-article .timestamp {
+    font-size: 0.7rem;
+    color: #6B7280;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    min-width: 42px;
+}
+.breaking-article .signal-tag {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+.breaking-article .title a {
+    color: #F9FAFB;
+    text-decoration: none;
+}
+.breaking-article .title a:hover {
+    color: #00D4FF;
+    text-decoration: underline;
+}
+
 /* Smaller phones */
 @media (max-width: 480px) {
     .block-container { padding-left: 0.3rem !important; padding-right: 0.3rem !important; }

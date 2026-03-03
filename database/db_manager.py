@@ -2,7 +2,8 @@
 
 import sqlite3
 import os
-from datetime import datetime, date
+import json
+from datetime import datetime, date, timedelta
 from contextlib import contextmanager
 
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "oil_dashboard.db")
@@ -181,6 +182,36 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_fx_rates_pair_date ON fx_rates(pair, date);
         CREATE INDEX IF NOT EXISTS idx_crack_spreads_date ON crack_spreads(date, source);
         CREATE INDEX IF NOT EXISTS idx_snapshots_date ON key_metrics_snapshot(snapshot_date DESC);
+
+        CREATE TABLE IF NOT EXISTS article_signals (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            article_id INTEGER NOT NULL,
+            scenario_id TEXT NOT NULL,
+            signal REAL NOT NULL,
+            reasoning TEXT,
+            horizon TEXT DEFAULT '3m',
+            created_at TEXT DEFAULT (datetime('now')),
+            UNIQUE(article_id, scenario_id, horizon),
+            FOREIGN KEY (article_id) REFERENCES news_articles(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS scenario_narratives (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            horizon TEXT NOT NULL,
+            generated_at TEXT DEFAULT (datetime('now')),
+            narrative TEXT,
+            oil_explanation TEXT,
+            grm_explanation TEXT,
+            stock_explanation TEXT,
+            scenario_assessments TEXT,
+            weight_snapshot TEXT,
+            article_count INTEGER,
+            model_used TEXT DEFAULT 'claude-haiku-4-5-20251001'
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_article_signals_article ON article_signals(article_id);
+        CREATE INDEX IF NOT EXISTS idx_article_signals_scenario ON article_signals(scenario_id, created_at);
+        CREATE INDEX IF NOT EXISTS idx_scenario_narratives_horizon ON scenario_narratives(horizon, generated_at DESC);
         """)
 
 
@@ -511,6 +542,155 @@ def get_all_benchmarks():
     with get_connection(readonly=True) as conn:
         rows = conn.execute("SELECT DISTINCT benchmark FROM crude_prices").fetchall()
         return [r["benchmark"] for r in rows]
+
+
+# --- Article Signal Methods ---
+
+def insert_article_signal(article_id, scenario_id, signal, reasoning=None, horizon="3m"):
+    with get_connection() as conn:
+        conn.execute(
+            """INSERT INTO article_signals (article_id, scenario_id, signal, reasoning, horizon)
+               VALUES (?, ?, ?, ?, ?)
+               ON CONFLICT(article_id, scenario_id, horizon) DO UPDATE SET
+                 signal=excluded.signal, reasoning=excluded.reasoning,
+                 created_at=datetime('now')""",
+            (article_id, scenario_id, signal, reasoning, horizon),
+        )
+
+
+def insert_article_signals_bulk(rows):
+    """rows: list of (article_id, scenario_id, signal, reasoning, horizon)"""
+    with get_connection() as conn:
+        conn.executemany(
+            """INSERT INTO article_signals (article_id, scenario_id, signal, reasoning, horizon)
+               VALUES (?, ?, ?, ?, ?)
+               ON CONFLICT(article_id, scenario_id, horizon) DO UPDATE SET
+                 signal=excluded.signal, reasoning=excluded.reasoning,
+                 created_at=datetime('now')""",
+            rows,
+        )
+
+
+# --- Scenario Narrative Methods ---
+
+def insert_scenario_narrative(horizon, narrative, oil_expl, grm_expl, stock_expl,
+                              assessments, weights, count, model="claude-haiku-4-5-20251001"):
+    with get_connection() as conn:
+        conn.execute(
+            """INSERT INTO scenario_narratives
+               (horizon, narrative, oil_explanation, grm_explanation, stock_explanation,
+                scenario_assessments, weight_snapshot, article_count, model_used)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (horizon, narrative, oil_expl, grm_expl, stock_expl,
+             json.dumps(assessments) if isinstance(assessments, dict) else assessments,
+             json.dumps(weights) if isinstance(weights, dict) else weights,
+             count, model),
+        )
+
+
+def get_latest_scenario_narrative(horizon):
+    """Get the most recent scenario narrative for a horizon, with JSON fields parsed."""
+    with get_connection(readonly=True) as conn:
+        row = conn.execute(
+            """SELECT * FROM scenario_narratives
+               WHERE horizon = ? ORDER BY generated_at DESC LIMIT 1""",
+            (horizon,),
+        ).fetchone()
+        if not row:
+            return None
+        d = dict(row)
+        for field in ("scenario_assessments", "weight_snapshot"):
+            if d.get(field):
+                try:
+                    d[field] = json.loads(d[field])
+                except (json.JSONDecodeError, TypeError):
+                    pass
+        return d
+
+
+def get_recent_articles_with_signals(hours=12, limit=20):
+    """Get recent articles with their nested signal scores."""
+    cutoff = (datetime.utcnow() - timedelta(hours=hours)).isoformat()
+    with get_connection(readonly=True) as conn:
+        articles = conn.execute(
+            """SELECT id, published_date, title, summary, url, source,
+                      impact_tag, impact_score
+               FROM news_articles
+               WHERE published_date >= ? OR created_at >= ?
+               ORDER BY COALESCE(published_date, created_at) DESC
+               LIMIT ?""",
+            (cutoff, cutoff, limit),
+        ).fetchall()
+        result = []
+        for a in articles:
+            art = dict(a)
+            signals = conn.execute(
+                """SELECT scenario_id, signal, reasoning
+                   FROM article_signals WHERE article_id = ?
+                   ORDER BY ABS(signal) DESC""",
+                (a["id"],),
+            ).fetchall()
+            art["signals"] = [dict(s) for s in signals]
+            result.append(art)
+        return result
+
+
+def get_top_articles_across_scenarios(limit=20):
+    """Get articles with strongest absolute signals for narrative prompt."""
+    with get_connection(readonly=True) as conn:
+        rows = conn.execute(
+            """SELECT DISTINCT n.id, n.title, n.summary, n.url, n.source,
+                      n.published_date, n.impact_tag,
+                      MAX(ABS(s.signal)) as max_signal
+               FROM news_articles n
+               JOIN article_signals s ON s.article_id = n.id
+               GROUP BY n.id
+               ORDER BY max_signal DESC
+               LIMIT ?""",
+            (limit,),
+        ).fetchall()
+        result = []
+        for r in rows:
+            art = dict(r)
+            signals = conn.execute(
+                """SELECT scenario_id, signal, reasoning
+                   FROM article_signals WHERE article_id = ?""",
+                (r["id"],),
+            ).fetchall()
+            art["signals"] = [dict(s) for s in signals]
+            result.append(art)
+        return result
+
+
+def get_signals_for_window(hours):
+    """Get raw article signals within a time window for momentum calculation."""
+    cutoff = (datetime.utcnow() - timedelta(hours=hours)).isoformat()
+    with get_connection(readonly=True) as conn:
+        return [dict(r) for r in conn.execute(
+            """SELECT s.scenario_id, s.signal, s.created_at,
+                      n.title, n.published_date
+               FROM article_signals s
+               JOIN news_articles n ON n.id = s.article_id
+               WHERE s.created_at >= ? OR n.published_date >= ?
+               ORDER BY s.created_at DESC""",
+            (cutoff, cutoff),
+        ).fetchall()]
+
+
+def get_unscored_articles(horizon="3m", limit=50):
+    """Get articles that don't have signals yet for a given horizon."""
+    with get_connection(readonly=True) as conn:
+        return [dict(r) for r in conn.execute(
+            """SELECT n.id, n.title, n.summary, n.url, n.source,
+                      n.published_date, n.impact_tag, n.impact_score
+               FROM news_articles n
+               WHERE n.id NOT IN (
+                   SELECT DISTINCT article_id FROM article_signals WHERE horizon = ?
+               )
+               ORDER BY n.published_date DESC
+               LIMIT ?""",
+            (horizon, limit),
+        ).fetchall()]
 
 
 if __name__ == "__main__":
