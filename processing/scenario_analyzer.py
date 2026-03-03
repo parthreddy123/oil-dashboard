@@ -82,7 +82,7 @@ SCENARIOS = {
     },
 }
 
-HORIZONS = ["3m", "6m", "12m"]
+HORIZONS = ["3m", "6m"]
 SCENARIO_IDS = list(SCENARIOS.keys())
 DEFAULT_HORIZON = "3m"
 
