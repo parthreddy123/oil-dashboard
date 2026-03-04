@@ -315,7 +315,7 @@ def render_horizon(horizon, narrative_data, momentum, recent_articles, top_artic
             <div class="scenario-header">
                 <div>
                     <span class="name">{scenario['name']}</span>
-                    <span class="desc">{scenario['description'][:80]}</span>
+                    <span class="desc">{scenario['description']}</span>
                 </div>
                 <span class="pct" style="color:{color};">{pct:.0f}%</span>
             </div>
@@ -452,12 +452,12 @@ function doRefresh() {{
         }} else {{
             btn.disabled = false;
             btn.textContent = '\\u21BB Refresh Data';
-            st.innerHTML = 'Failed (' + data.code + '). <a href="https://github.com/parthreddy123/oil-dashboard/actions/workflows/refresh.yml" target="_blank" style="color:#00D4FF;">Run manually</a>';
+            st.textContent = 'Refresh failed. Please try again in a moment.';
         }}
     }}).catch(function() {{
         btn.disabled = false;
         btn.textContent = '\\u21BB Refresh Data';
-        st.innerHTML = '<a href="https://github.com/parthreddy123/oil-dashboard/actions/workflows/refresh.yml" target="_blank" style="color:#00D4FF;">Run manually</a>';
+        st.textContent = 'Network error. Please try again.';
     }});
 }}
 
