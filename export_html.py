@@ -429,6 +429,23 @@ def generate_html(output_path="scenario_report.html"):
     <span>Horizons: {', '.join(HORIZONS)}</span>
 </div>
 
+<script>
+// Auto-reload when page content changes (after GitHub Actions deploys)
+(function() {{
+    var checkInterval = 30000; // check every 30s
+    var initialEtag = null;
+    function checkForUpdate() {{
+        fetch(window.location.href, {{method: 'HEAD', cache: 'no-cache'}})
+            .then(function(r) {{
+                var etag = r.headers.get('etag') || r.headers.get('last-modified') || '';
+                if (initialEtag === null) {{ initialEtag = etag; return; }}
+                if (etag && etag !== initialEtag) {{ location.reload(); }}
+            }}).catch(function() {{}});
+    }}
+    setInterval(checkForUpdate, checkInterval);
+    checkForUpdate();
+}})();
+</script>
 </body>
 </html>"""
 
