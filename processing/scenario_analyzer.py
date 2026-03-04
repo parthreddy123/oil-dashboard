@@ -289,23 +289,22 @@ def _compute_ranges(scenarios, horizon):
 # Strategic narrative generation — LLM synthesizes across articles
 # ---------------------------------------------------------------------------
 
-_NARRATIVE_SYSTEM = """You are a senior geopolitical risk analyst advising Indian refinery executives.
-Write concise, actionable strategic assessments about Middle East crisis impact on oil markets."""
+_NARRATIVE_SYSTEM = """You are a senior geopolitical risk analyst. Write concise, actionable strategic
+assessments about Middle East crisis impact on crude oil prices and Indian refinery margins."""
 
 _NARRATIVE_USER = """Given these scenario weights and top articles, produce a JSON response with:
-1. "narrative": 3-5 sentence strategic assessment. What's happening? What does it mean for Reliance/Indian refiners? What to watch?
-2. "oil_explanation": 1-2 sentences explaining the expected oil price (${oil_ev:.0f}/bbl)
-3. "grm_explanation": 1-2 sentences explaining expected GRM (${grm_ev:.1f}/bbl)
-4. "stock_explanation": 1-2 sentences explaining expected stock impact ({stock_ev:+.0f}%)
+1. "narrative": 3-5 sentence strategic assessment. What's happening? What does it mean for Indian refiners? What to watch?
+2. "oil_explanation": 1-2 sentences explaining the expected Brent crude oil price (${oil_ev:.0f}/bbl)
+3. "grm_explanation": 1-2 sentences explaining expected typical Indian refinery GRM (${grm_ev:.1f}/bbl)
 
 Scenario probabilities: {weights}
 
-Expected values: Oil ${oil_ev:.0f}/bbl (range {oil_range}), GRM ${grm_ev:.1f}/bbl (range {grm_range}), Stock {stock_ev:+.0f}% (range {stock_range})
+Expected values: Brent Oil ${oil_ev:.0f}/bbl (range {oil_range}), GRM ${grm_ev:.1f}/bbl (range {grm_range})
 
 Top articles driving these assessments:
 {articles}
 
-Return ONLY valid JSON with keys: narrative, oil_explanation, grm_explanation, stock_explanation."""
+Return ONLY valid JSON with keys: narrative, oil_explanation, grm_explanation."""
 
 
 def generate_strategic_narrative(horizon, weights, ev, ranges, scenarios):

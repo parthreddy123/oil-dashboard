@@ -197,33 +197,26 @@ def render_horizon(horizon, narrative_data, momentum, recent_articles, top_artic
             <div>{narrative_data['narrative']}</div>
         </div>""")
 
-    # KPIs
+    # KPIs (no stock — public page)
     oil_expl = narrative_data.get("oil_explanation", "") if narrative_data else ""
     grm_expl = narrative_data.get("grm_explanation", "") if narrative_data else ""
-    stock_expl = narrative_data.get("stock_explanation", "") if narrative_data else ""
 
     brent_now_html = f'<div style="font-size:0.72rem;color:#F59E0B;margin-top:4px;">Current Brent: ${current_brent:.2f}/bbl</div>' if current_brent else ''
 
     parts.append(f"""
     <div class="kpi-row">
         <div class="kpi-card" style="border-left:3px solid #F59E0B;">
-            <div class="label">Brent Price (EV)</div>
+            <div class="label">Brent Price (Expected Value)</div>
             <div class="value">${ev['oil']:.0f}/bbl</div>
             <div class="range">range: ${ranges['oil'][0]}-{ranges['oil'][1]}</div>
             {brent_now_html}
             {f'<div class="kpi-explanation">{oil_expl}</div>' if oil_expl else ''}
         </div>
         <div class="kpi-card" style="border-left:3px solid #00D4AA;">
-            <div class="label">GRM (EV)</div>
+            <div class="label">Typical Indian Refinery GRM (EV)</div>
             <div class="value">${ev['grm']:.1f}/bbl</div>
             <div class="range">range: ${ranges['grm'][0]}-{ranges['grm'][1]}</div>
             {f'<div class="kpi-explanation">{grm_expl}</div>' if grm_expl else ''}
-        </div>
-        <div class="kpi-card" style="border-left:3px solid #00D4FF;">
-            <div class="label">Stock Impact (EV)</div>
-            <div class="value">{ev['stock']:+.0f}%</div>
-            <div class="range">range: {ranges['stock'][0]:+.0f}% to {ranges['stock'][1]:+.0f}%</div>
-            {f'<div class="kpi-explanation">{stock_expl}</div>' if stock_expl else ''}
         </div>
     </div>""")
 
@@ -333,7 +326,6 @@ def render_horizon(horizon, narrative_data, momentum, recent_articles, top_artic
                     <div class="row">
                         <div class="item"><div class="lbl">Brent</div><div class="val">${kpis['oil']}</div></div>
                         <div class="item"><div class="lbl">GRM</div><div class="val">${kpis['grm']}</div></div>
-                        <div class="item"><div class="lbl">Stock</div><div class="val">{kpis['stock']:+.0f}%</div></div>
                     </div>
                     {assessment_html}
                 </div>
@@ -413,12 +405,24 @@ def generate_html(output_path="scenario_report.html"):
         <h1 style="margin-bottom:0.2rem;">&#127919; Scenario Engine</h1>
         <div class="subtitle" style="margin-bottom:0;">Geopolitical scenario analysis for Indian refinery strategy &middot; {now_str}</div>
     </div>
-    <div style="display:flex;align-items:center;">
-        <a href="https://github.com/parthreddy123/oil-dashboard/actions/workflows/refresh.yml" target="_blank"
-           class="refresh-btn" style="text-decoration:none;display:inline-block;">&#8635; Refresh Data</a>
+    <div style="display:flex;align-items:center;gap:10px;">
+        <button class="refresh-btn" id="refreshBtn" onclick="doRefresh()">&#8635; Refresh Data</button>
+        <span id="refreshStatus" style="font-size:0.75rem;color:#9CA3AF;"></span>
     </div>
 </div>
 {brent_banner}
+
+<div style="background:linear-gradient(135deg,#151A28,#1A1F2E);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px 18px;margin-bottom:1.5rem;font-size:0.82rem;color:#9CA3AF;line-height:1.6;">
+    <strong style="color:#F9FAFB;">What is this?</strong> This page uses AI to analyze recent geopolitical news and estimate how different Middle East crisis scenarios could affect crude oil prices and refinery margins. Articles are scored by an LLM against 5 scenarios; probabilities are computed via softmax over average signal strengths. The <strong style="color:#F9FAFB;">Expected Value (EV)</strong> for each metric is the probability-weighted average across all scenarios &mdash; not a price forecast, but a risk-weighted expectation given current signals.
+</div>
+
+<div style="background:linear-gradient(135deg,#151A28,#1A1F2E);border:1px solid rgba(0,212,170,0.15);border-left:3px solid #00D4AA;border-radius:10px;padding:14px 18px;margin-bottom:1rem;font-size:0.8rem;color:#9CA3AF;line-height:1.6;">
+    <strong style="color:#00D4AA;">How is GRM calculated?</strong> Gross Refining Margin (GRM) measures the difference between the value of refined products (petrol, diesel, ATF, naphtha, fuel oil, LPG) and the cost of crude oil. We use a typical Indian refinery product slate: diesel 42%, petrol 22%, naphtha 12%, ATF 10%, fuel oil 8%, LPG 6%. Each scenario estimates how supply disruptions, crude cost changes, and demand shifts would affect this margin.
+</div>
+
+<div style="background:linear-gradient(135deg,#151A28,#1A1F2E);border:1px solid rgba(245,158,11,0.15);border-left:3px solid #F59E0B;border-radius:10px;padding:14px 18px;margin-bottom:1.5rem;font-size:0.8rem;color:#9CA3AF;line-height:1.6;">
+    <strong style="color:#F59E0B;">How are Brent prices per scenario estimated?</strong> Each scenario&rsquo;s assumed Brent price is based on historical crisis parallels and analyst consensus: <em>Ceasefire</em> ($55-58) reflects pre-crisis normalization, similar to post-JCPOA 2015 levels. <em>Quick Resolution</em> ($65-68) mirrors the 2019 drone-attack recovery. <em>Regime Change</em> ($80-85) is benchmarked to the 2011 Arab Spring range. <em>Prolonged Standoff</em> ($95-100) reflects 2022-style sustained supply risk premium. <em>Conflagration</em> ($140-160) is based on the 1990 Gulf War spike and 2008 oil shock. These are not forecasts &mdash; they are scenario-conditional estimates grounded in historical precedent.
+</div>
 
 {horizon_sections}
 
@@ -430,21 +434,49 @@ def generate_html(output_path="scenario_report.html"):
 </div>
 
 <script>
-// Auto-reload when page content changes (after GitHub Actions deploys)
-(function() {{
-    var checkInterval = 30000; // check every 30s
-    var initialEtag = null;
-    function checkForUpdate() {{
-        fetch(window.location.href, {{method: 'HEAD', cache: 'no-cache'}})
-            .then(function(r) {{
-                var etag = r.headers.get('etag') || r.headers.get('last-modified') || '';
-                if (initialEtag === null) {{ initialEtag = etag; return; }}
-                if (etag && etag !== initialEtag) {{ location.reload(); }}
-            }}).catch(function() {{}});
-    }}
-    setInterval(checkForUpdate, checkInterval);
-    checkForUpdate();
-}})();
+function doRefresh() {{
+    var btn = document.getElementById('refreshBtn');
+    var st = document.getElementById('refreshStatus');
+    btn.disabled = true;
+    btn.textContent = 'Triggering...';
+    st.textContent = '';
+
+    fetch('https://oil-dashboard-refresh.parthreddy.workers.dev', {{
+        method: 'POST',
+        headers: {{'Content-Type': 'application/json'}}
+    }}).then(function(r) {{ return r.json(); }}).then(function(data) {{
+        if (data.status === 'triggered') {{
+            btn.textContent = 'Triggered!';
+            st.textContent = 'Pipeline running (~3 min). Page will auto-reload.';
+            startPolling();
+        }} else {{
+            btn.disabled = false;
+            btn.textContent = '\\u21BB Refresh Data';
+            st.innerHTML = 'Failed (' + data.code + '). <a href="https://github.com/parthreddy123/oil-dashboard/actions/workflows/refresh.yml" target="_blank" style="color:#00D4FF;">Run manually</a>';
+        }}
+    }}).catch(function() {{
+        btn.disabled = false;
+        btn.textContent = '\\u21BB Refresh Data';
+        st.innerHTML = '<a href="https://github.com/parthreddy123/oil-dashboard/actions/workflows/refresh.yml" target="_blank" style="color:#00D4FF;">Run manually</a>';
+    }});
+}}
+
+// Auto-reload when GitHub Actions deploys new content
+var _initialEtag = null;
+function checkForUpdate() {{
+    fetch(window.location.href, {{method: 'HEAD', cache: 'no-cache'}})
+        .then(function(r) {{
+            var etag = r.headers.get('etag') || r.headers.get('last-modified') || '';
+            if (_initialEtag === null) {{ _initialEtag = etag; return; }}
+            if (etag && etag !== _initialEtag) {{ location.reload(); }}
+        }}).catch(function() {{}});
+}}
+
+function startPolling() {{
+    setInterval(checkForUpdate, 15000);
+}}
+checkForUpdate();
+setInterval(checkForUpdate, 60000);
 </script>
 </body>
 </html>"""
