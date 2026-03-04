@@ -15,6 +15,8 @@ from database.db_manager import (
 from processing.scenario_analyzer import (
     SCENARIOS, SCENARIO_IDS, HORIZONS, DEFAULT_HORIZON,
     compute_momentum, _compute_ev, _compute_ranges,
+    compute_scenario_products, compute_ev_products,
+    get_current_product_prices, PRODUCT_NAMES, GRM_WEIGHTS,
 )
 
 logger = logging.getLogger(__name__)
@@ -144,12 +146,22 @@ a:hover { text-decoration: underline; }
     justify-content: space-between; flex-wrap: wrap; gap: 8px;
 }
 
+table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); }
+table td { padding: 5px 10px; }
+.narrative-box ul { margin: 0; padding-left: 1.2em; }
+.narrative-box li { margin-bottom: 4px; }
+
 @media (max-width: 768px) {
-    body { padding: 1rem; }
+    body { padding: 0.8rem; font-size: 0.85rem; }
+    h1 { font-size: 1.2rem; }
     .kpi-row { flex-direction: column; }
     .scenario-body { flex-direction: column; }
     .scenario-kpis { width: 100%; border-right: none; border-top: 1px solid rgba(255,255,255,0.06); }
     .momentum-row { flex-direction: column; }
+    .narrative-box { padding: 10px 12px; font-size: 0.82rem; }
+    .scenario-header .desc { display: none; }
+    .art-reasoning { display: none; }
+    .breaking-article { font-size: 0.75rem; }
 }
 """
 
@@ -218,6 +230,38 @@ def render_horizon(horizon, narrative_data, momentum, recent_articles, top_artic
             <div class="range">range: ${ranges['grm'][0]}-{ranges['grm'][1]}</div>
             {f'<div class="kpi-explanation">{grm_expl}</div>' if grm_expl else ''}
         </div>
+    </div>""")
+
+    # Product price table — current vs scenario EV
+    current_products = get_current_product_prices()
+    ev_products = compute_ev_products(weights, horizon)
+    prod_order = ["diesel", "petrol", "atf", "naphtha", "fuel_oil", "lpg"]
+    prod_rows = ""
+    for p in prod_order:
+        cur = current_products.get(p)
+        ev_p = ev_products.get(p)
+        cur_str = f"${cur:.0f}" if cur else "—"
+        ev_str = f"${ev_p:.0f}" if ev_p else "—"
+        chg = ""
+        if cur and ev_p:
+            delta = ((ev_p - cur) / cur) * 100
+            chg_color = "#EF4444" if delta > 0 else "#10B981" if delta < 0 else "#4B5563"
+            chg = f'<span style="color:{chg_color};font-weight:600;">{delta:+.0f}%</span>'
+        wt = GRM_WEIGHTS.get(p, 0)
+        prod_rows += f'<tr><td>{PRODUCT_NAMES.get(p, p)}</td><td>{cur_str}</td><td>{ev_str}</td><td>{chg}</td><td style="color:#4B5563;">{wt:.0%}</td></tr>'
+
+    parts.append(f"""
+    <div style="overflow-x:auto;margin-bottom:1.5rem;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.78rem;">
+            <thead><tr style="border-bottom:2px solid rgba(255,255,255,0.1);text-align:left;">
+                <th style="padding:6px 10px;color:#9CA3AF;font-weight:600;font-size:0.68rem;text-transform:uppercase;">Product</th>
+                <th style="padding:6px 10px;color:#9CA3AF;font-weight:600;font-size:0.68rem;text-transform:uppercase;">Current</th>
+                <th style="padding:6px 10px;color:#9CA3AF;font-weight:600;font-size:0.68rem;text-transform:uppercase;">EV ({horizon})</th>
+                <th style="padding:6px 10px;color:#9CA3AF;font-weight:600;font-size:0.68rem;text-transform:uppercase;">Chg</th>
+                <th style="padding:6px 10px;color:#9CA3AF;font-weight:600;font-size:0.68rem;text-transform:uppercase;">GRM Wt</th>
+            </tr></thead>
+            <tbody style="color:#E5E7EB;">{prod_rows}</tbody>
+        </table>
     </div>""")
 
     if compact:
@@ -310,6 +354,13 @@ def render_horizon(horizon, narrative_data, momentum, recent_articles, top_artic
         if assessment:
             assessment_html = f'<div class="scenario-assessment"><div class="lbl">LLM Assessment</div><div>{assessment}</div></div>'
 
+        # Per-scenario product prices
+        sc_products = compute_scenario_products(sid, horizon)
+        prod_mini = " | ".join(
+            f'<span style="white-space:nowrap;">{PRODUCT_NAMES.get(p,p)[:3]} ${sc_products[p]:.0f}</span>'
+            for p in ["diesel", "petrol", "atf"]
+        )
+
         parts.append(f"""
         <div class="scenario-card">
             <div class="scenario-header">
@@ -327,6 +378,7 @@ def render_horizon(horizon, narrative_data, momentum, recent_articles, top_artic
                         <div class="item"><div class="lbl">Brent</div><div class="val">${kpis['oil']}</div></div>
                         <div class="item"><div class="lbl">GRM</div><div class="val">${kpis['grm']}</div></div>
                     </div>
+                    <div style="font-size:0.65rem;color:#6B7280;margin-top:6px;line-height:1.6;">{prod_mini}</div>
                     {assessment_html}
                 </div>
             </div>

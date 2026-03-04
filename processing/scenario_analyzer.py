@@ -82,6 +82,94 @@ SCENARIOS = {
     },
 }
 
+# ---------------------------------------------------------------------------
+# Product price derivation — crack spread adjustment factors per scenario
+# Base ratios from EIA spot data: diesel/brent ≈ 1.31, petrol ≈ 0.90,
+# atf ≈ 1.27, lpg ≈ 0.31, naphtha = petrol*0.90, fuel_oil = brent*0.65
+# ---------------------------------------------------------------------------
+
+_BASE_PRODUCT_RATIOS = {
+    "diesel": 1.31,   # EIA spot diesel / Brent
+    "petrol": 0.90,   # EIA spot petrol / Brent
+    "atf":    1.27,   # EIA spot ATF / Brent
+    "lpg":    0.31,   # EIA spot LPG / Brent
+    "naphtha": 0.81,  # petrol * 0.90
+    "fuel_oil": 0.65, # brent * 0.65
+}
+
+# Scenario-specific crack spread multipliers (how each scenario shifts
+# the base ratio — e.g., 1.15 means crack widens 15%)
+_SCENARIO_CRACK_ADJ = {
+    "quick_resolution":   {"diesel": 1.00, "petrol": 1.02, "atf": 1.00, "lpg": 1.05, "naphtha": 1.02, "fuel_oil": 1.00},
+    "prolonged_standoff":  {"diesel": 1.12, "petrol": 0.95, "atf": 1.10, "lpg": 0.90, "naphtha": 0.88, "fuel_oil": 1.10},
+    "conflagration":       {"diesel": 1.25, "petrol": 0.85, "atf": 1.30, "lpg": 0.75, "naphtha": 0.70, "fuel_oil": 1.25},
+    "ceasefire":           {"diesel": 0.98, "petrol": 1.05, "atf": 0.98, "lpg": 1.10, "naphtha": 1.05, "fuel_oil": 0.95},
+    "regime_change":       {"diesel": 1.05, "petrol": 0.98, "atf": 1.05, "lpg": 0.95, "naphtha": 0.95, "fuel_oil": 1.05},
+}
+
+PRODUCT_NAMES = {
+    "diesel": "Diesel", "petrol": "Petrol", "atf": "ATF",
+    "lpg": "LPG", "naphtha": "Naphtha", "fuel_oil": "Fuel Oil",
+}
+
+GRM_WEIGHTS = {
+    "diesel": 0.42, "petrol": 0.22, "naphtha": 0.12,
+    "atf": 0.10, "fuel_oil": 0.08, "lpg": 0.06,
+}
+
+
+def get_current_product_prices():
+    """Fetch latest product prices from DB. Returns dict {product: price_usd_bbl}.
+
+    Naphtha and fuel_oil are always derived (no reliable market source):
+    naphtha = petrol * 0.90, fuel_oil = Brent * 0.65.
+    """
+    with get_connection(readonly=True) as conn:
+        rows = conn.execute(
+            """SELECT product, price FROM product_prices
+               WHERE unit='USD/bbl' AND product IN ('petrol','diesel','atf','lpg')
+               GROUP BY product HAVING date = MAX(date)"""
+        ).fetchall()
+        brent_row = conn.execute(
+            "SELECT price FROM crude_prices WHERE benchmark='brent' ORDER BY date DESC LIMIT 1"
+        ).fetchone()
+    prices = {r["product"]: r["price"] for r in rows}
+    brent = float(brent_row["price"]) if brent_row else 80.0
+    # Always derive estimated products from current Brent
+    if "petrol" in prices:
+        prices["naphtha"] = round(prices["petrol"] * 0.90, 2)
+    else:
+        prices["naphtha"] = round(brent * 0.81, 2)
+    prices["fuel_oil"] = round(brent * 0.65, 2)
+    return prices
+
+
+def compute_scenario_products(scenario_id, horizon):
+    """Derive per-product prices for a scenario from its Brent + adjusted cracks.
+
+    Returns dict {product: price_usd_bbl}.
+    """
+    scenario_brent = SCENARIOS[scenario_id]["horizons"].get(
+        horizon, SCENARIOS[scenario_id]["horizons"]["3m"]
+    )["oil"]
+    adj = _SCENARIO_CRACK_ADJ.get(scenario_id, {})
+
+    products = {}
+    for prod, base_ratio in _BASE_PRODUCT_RATIOS.items():
+        multiplier = adj.get(prod, 1.0)
+        products[prod] = round(scenario_brent * base_ratio * multiplier, 1)
+    return products
+
+
+def compute_ev_products(weights, horizon):
+    """Compute probability-weighted expected product prices across scenarios."""
+    ev = {p: 0.0 for p in _BASE_PRODUCT_RATIOS}
+    for sid, w in weights.items():
+        prods = compute_scenario_products(sid, horizon)
+        for p in ev:
+            ev[p] += w * prods[p]
+    return {p: round(v, 1) for p, v in ev.items()}
+
 HORIZONS = ["3m", "6m"]
 SCENARIO_IDS = list(SCENARIOS.keys())
 DEFAULT_HORIZON = "3m"
@@ -289,22 +377,26 @@ def _compute_ranges(scenarios, horizon):
 # Strategic narrative generation — LLM synthesizes across articles
 # ---------------------------------------------------------------------------
 
-_NARRATIVE_SYSTEM = """You are a senior geopolitical risk analyst. Write concise, actionable strategic
-assessments about Middle East crisis impact on crude oil prices and Indian refinery margins."""
+_NARRATIVE_SYSTEM = """You are a McKinsey senior partner briefing a refinery CEO. Write like a top-tier strategy consultant:
+- Every word earns its place. No filler, no hedging, no "it is worth noting".
+- Use HTML bullet points (<ul><li>). Max 4 bullets for narrative, 1 bullet each for KPI explanations.
+- Lead each bullet with the insight, not the setup. Start with "what" not "given that".
+- Be specific: name countries, percentages, mechanisms. Never say "various factors".
+- Narrative bullets: (1) Situation now (2) Key driver (3) Implication for Indian refiners (4) Watch item
+- KPI explanations: one sharp sentence with the causal mechanism."""
 
-_NARRATIVE_USER = """Given these scenario weights and top articles, produce a JSON response with:
-1. "narrative": 3-5 sentence strategic assessment. What's happening? What does it mean for Indian refiners? What to watch?
-2. "oil_explanation": 1-2 sentences explaining the expected Brent crude oil price (${oil_ev:.0f}/bbl)
-3. "grm_explanation": 1-2 sentences explaining expected typical Indian refinery GRM (${grm_ev:.1f}/bbl)
+_NARRATIVE_USER = """Scenario probabilities: {weights}
+Expected values: Brent ${oil_ev:.0f}/bbl (range {oil_range}), GRM ${grm_ev:.1f}/bbl (range {grm_range})
 
-Scenario probabilities: {weights}
-
-Expected values: Brent Oil ${oil_ev:.0f}/bbl (range {oil_range}), GRM ${grm_ev:.1f}/bbl (range {grm_range})
-
-Top articles driving these assessments:
+Top signals:
 {articles}
 
-Return ONLY valid JSON with keys: narrative, oil_explanation, grm_explanation."""
+Return ONLY valid JSON with exactly these keys:
+- "narrative": HTML string with <ul><li> bullets. Max 4 bullets, each 1 sentence. MBB partner voice.
+- "oil_explanation": 1 sentence. Why this price, what's the mechanism.
+- "grm_explanation": 1 sentence. What's compressing or expanding margins and why.
+
+No markdown fences. No preamble."""
 
 
 def generate_strategic_narrative(horizon, weights, ev, ranges, scenarios):
@@ -333,10 +425,9 @@ def generate_strategic_narrative(horizon, weights, ev, ranges, scenarios):
         system=_NARRATIVE_SYSTEM,
         messages=[{"role": "user", "content": _NARRATIVE_USER.format(
             weights=weights_text,
-            oil_ev=ev["oil"], grm_ev=ev["grm"], stock_ev=ev["stock"],
+            oil_ev=ev["oil"], grm_ev=ev["grm"],
             oil_range=f"${ranges['oil'][0]}-{ranges['oil'][1]}",
             grm_range=f"${ranges['grm'][0]}-{ranges['grm'][1]}",
-            stock_range=f"{ranges['stock'][0]:+.0f}% to {ranges['stock'][1]:+.0f}%",
             articles=articles_text or "No articles scored yet.",
         )}],
     )
@@ -360,15 +451,14 @@ def generate_strategic_narrative(horizon, weights, ev, ranges, scenarios):
 # Per-scenario LLM assessments
 # ---------------------------------------------------------------------------
 
-_ASSESSMENT_SYSTEM = """You are a geopolitical risk analyst. For each scenario, explain in 2-3 sentences
-why its probability is what it is, citing specific evidence from recent articles."""
+_ASSESSMENT_SYSTEM = """You are a McKinsey senior partner. For each scenario, write exactly 1 sentence explaining
+the probability — cite the specific signal or event driving it. No filler. Every word earns its place."""
 
-_ASSESSMENT_USER = """Given these 5 scenarios and their computed probabilities, write a brief assessment
-for each explaining the probability level.
-
+_ASSESSMENT_USER = """Scenarios with probabilities and evidence:
 {scenario_details}
 
-Return ONLY valid JSON: {{"scenario_id": "assessment text", ...}}"""
+Return ONLY valid JSON: {{"scenario_id": "one sharp sentence", ...}}
+No markdown fences."""
 
 
 def generate_scenario_assessments(weights, scenarios, horizon=DEFAULT_HORIZON):
