@@ -20,6 +20,22 @@ def run_all_scrapers():
     init_db()
     results = {}
 
+    # Fetch live Brent from yfinance (more current than EIA)
+    try:
+        import yfinance as yf
+        from database.db_manager import upsert_crude_price
+        bz = yf.Ticker('BZ=F')
+        hist = bz.history(period='5d')
+        count = 0
+        for date, row in hist.iterrows():
+            upsert_crude_price(date.strftime('%Y-%m-%d'), 'brent', round(float(row['Close']), 2), source='yfinance_live')
+            count += 1
+        results["brent_live"] = {"status": "success", "count": count}
+        logger.info(f"Live Brent: {count} prices from yfinance")
+    except Exception as e:
+        results["brent_live"] = {"status": "failed", "error": str(e)}
+        logger.warning(f"Live Brent fetch failed: {e}")
+
     scrapers = [
         ("eia", "scrapers.eia_scraper"),
         ("oilprice", "scrapers.oilprice_scraper"),
