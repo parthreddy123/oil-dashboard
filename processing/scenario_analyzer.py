@@ -24,63 +24,97 @@ MODEL = "claude-haiku-4-5-20251001"
 # Scenario definitions — 5 geopolitical scenarios for Middle East / Hormuz
 # ---------------------------------------------------------------------------
 
-SCENARIOS = {
+# ---------------------------------------------------------------------------
+# Scenario definitions — oil multipliers are relative to current Brent
+# Based on historical crisis parallels:
+#   Ceasefire: post-JCPOA 2015 (-30%), Quick: 2019 drone recovery (-15%),
+#   Regime: 2011 Arab Spring (+5%), Standoff: 2022 premium (+23%),
+#   Conflagration: 1990 Gulf War / 2008 shock (+97%)
+# GRM shifts reflect crack spread behavior under each scenario.
+# ---------------------------------------------------------------------------
+
+_SCENARIO_DEFS = {
     "quick_resolution": {
         "name": "Quick Resolution",
         "short": "Quick",
         "description": "Diplomatic breakthrough leads to rapid de-escalation within weeks. "
                        "Strait of Hormuz fully reopens, insurance premiums drop.",
-        "horizons": {
-            "3m":  {"oil": 68,  "grm": 11.5, "stock": 8},
-            "6m":  {"oil": 65,  "grm": 12.0, "stock": 12},
-            "12m": {"oil": 62,  "grm": 12.5, "stock": 15},
-        },
+        "oil_mult":  {"3m": 0.84, "6m": 0.80, "12m": 0.77},
+        "grm":       {"3m": 11.5,  "6m": 12.0,  "12m": 12.5},
+        "stock":     {"3m": 8,     "6m": 12,     "12m": 15},
     },
     "prolonged_standoff": {
         "name": "Prolonged Standoff",
         "short": "Prolong",
         "description": "Neither escalation nor resolution. Partial Hormuz disruption persists "
                        "with naval escort corridors. Elevated premiums, rerouted tankers.",
-        "horizons": {
-            "3m":  {"oil": 100, "grm": 7.0,  "stock": -12},
-            "6m":  {"oil": 95,  "grm": 7.5,  "stock": -8},
-            "12m": {"oil": 88,  "grm": 8.5,  "stock": -3},
-        },
+        "oil_mult":  {"3m": 1.23, "6m": 1.17, "12m": 1.09},
+        "grm":       {"3m": 7.0,   "6m": 7.5,   "12m": 8.5},
+        "stock":     {"3m": -12,   "6m": -8,     "12m": -3},
     },
     "conflagration": {
         "name": "Conflagration",
         "short": "Conflag",
         "description": "Full regional war with complete Hormuz closure, refinery attacks, "
                        "and global supply chain disruption.",
-        "horizons": {
-            "3m":  {"oil": 160, "grm": -2.0, "stock": -35},
-            "6m":  {"oil": 140, "grm": 0.0,  "stock": -28},
-            "12m": {"oil": 120, "grm": 3.0,  "stock": -18},
-        },
+        "oil_mult":  {"3m": 1.97, "6m": 1.73, "12m": 1.48},
+        "grm":       {"3m": -2.0,  "6m": 0.0,   "12m": 3.0},
+        "stock":     {"3m": -35,   "6m": -28,    "12m": -18},
     },
     "ceasefire": {
         "name": "Ceasefire & Talks",
         "short": "Ceasefire",
         "description": "Formal ceasefire with ongoing negotiations. Markets normalize "
                        "rapidly, crude flows resume, risk premiums evaporate.",
-        "horizons": {
-            "3m":  {"oil": 55,  "grm": 13.0, "stock": 18},
-            "6m":  {"oil": 58,  "grm": 12.5, "stock": 15},
-            "12m": {"oil": 60,  "grm": 12.0, "stock": 12},
-        },
+        "oil_mult":  {"3m": 0.68, "6m": 0.72, "12m": 0.74},
+        "grm":       {"3m": 13.0,  "6m": 12.5,  "12m": 12.0},
+        "stock":     {"3m": 18,    "6m": 15,     "12m": 12},
     },
     "regime_change": {
         "name": "Regime Change",
         "short": "Regime",
         "description": "Internal power shift in key state creates unpredictable transition. "
                        "Temporary disruption followed by uncertain new equilibrium.",
-        "horizons": {
-            "3m":  {"oil": 85,  "grm": 9.0,  "stock": -5},
-            "6m":  {"oil": 80,  "grm": 9.5,  "stock": 0},
-            "12m": {"oil": 75,  "grm": 10.0, "stock": 5},
-        },
+        "oil_mult":  {"3m": 1.05, "6m": 0.99, "12m": 0.93},
+        "grm":       {"3m": 9.0,   "6m": 9.5,   "12m": 10.0},
+        "stock":     {"3m": -5,    "6m": 0,      "12m": 5},
     },
 }
+
+
+def _get_current_brent():
+    """Get latest Brent price from DB for dynamic scenario pricing."""
+    with get_connection(readonly=True) as conn:
+        row = conn.execute(
+            "SELECT price FROM crude_prices WHERE benchmark='brent' ORDER BY date DESC LIMIT 1"
+        ).fetchone()
+    return float(row["price"]) if row else 80.0
+
+
+def _build_scenarios(brent=None):
+    """Build SCENARIOS dict with dynamic oil prices from current Brent."""
+    if brent is None:
+        brent = _get_current_brent()
+    scenarios = {}
+    for sid, d in _SCENARIO_DEFS.items():
+        horizons = {}
+        for h in ("3m", "6m", "12m"):
+            horizons[h] = {
+                "oil": round(brent * d["oil_mult"][h]),
+                "grm": d["grm"][h],
+                "stock": d["stock"][h],
+            }
+        scenarios[sid] = {
+            "name": d["name"],
+            "short": d["short"],
+            "description": d["description"],
+            "horizons": horizons,
+        }
+    return scenarios
+
+
+# Build on import with current Brent (re-built at each pipeline run)
+SCENARIOS = _build_scenarios()
 
 # ---------------------------------------------------------------------------
 # Product price derivation — crack spread adjustment factors per scenario
@@ -173,6 +207,13 @@ def compute_ev_products(weights, horizon):
 HORIZONS = ["3m", "6m"]
 SCENARIO_IDS = list(SCENARIOS.keys())
 DEFAULT_HORIZON = "3m"
+
+
+def refresh_scenarios():
+    """Rebuild SCENARIOS with current Brent price. Call before computing weights."""
+    global SCENARIOS, SCENARIO_IDS
+    SCENARIOS = _build_scenarios()
+    SCENARIO_IDS = list(SCENARIOS.keys())
 
 # Prior probabilities (uniform)
 PRIOR_WEIGHTS = {sid: 1.0 / len(SCENARIOS) for sid in SCENARIOS}
