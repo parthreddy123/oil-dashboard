@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scenario Engine &mdash; 2026-03-05 16:25</title>
+<title>Scenario Engine &mdash; 2026-03-05 16:34</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -255,7 +255,7 @@ table td { padding: 5px 10px; }
 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
     <div>
         <h1 style="margin-bottom:0.2rem;">&#127919; Scenario Engine</h1>
-        <div class="subtitle" style="margin-bottom:0;">Geopolitical scenario analysis for Indian refinery strategy &middot; 2026-03-05 16:25</div>
+        <div class="subtitle" style="margin-bottom:0;">Geopolitical scenario analysis for Indian refinery strategy &middot; 2026-03-05 16:34</div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;">
         <button class="refresh-btn" id="refreshBtn" onclick="doRefresh()">&#8635; Refresh Data</button>
@@ -535,8 +535,19 @@ table td { padding: 5px 10px; }
 <div class="t-line t-section">&#9608; PHASE 2: "THIS WILL GO PUBLIC"</div>
 <div class="t-line t-user">remove stock impact please. this is going public, keep it focused on crude and refining economics only</div>
 <div class="t-line t-ai">Removing all stock references from KPI cards, scenario cards, and narratives...</div>
+<div class="t-line t-user">how do I refresh the data? I don't want to run python every time</div>
+<div class="t-line t-ai">Adding a refresh button. It'll trigger GitHub Actions via repository_dispatch.</div>
+<div class="t-line t-prompt">fetch('https://api.github.com/repos/.../dispatches', { headers: { Authorization: 'token ghp_...' }})</div>
+<div class="t-line t-user">wait... you're putting my GitHub token in the HTML?? this is a public page!</div>
+<div class="t-line t-ai">Right. The token would be visible in page source. Can't do client-side GitHub API calls on a public page.</div>
+<div class="t-line t-dim">// first attempt: direct GitHub API from the browser. exposes PAT token to anyone who views source. obviously terrible.</div>
+<div class="t-line t-user">what if we just link to the GitHub Actions page so I can trigger it manually?</div>
+<div class="t-line t-ai">That works but then anyone visiting needs GitHub access. And they'd see the repo.</div>
 <div class="t-line t-user">the refresh button shouldn't expose any tokens or open GitHub. people will use this.</div>
-<div class="t-line t-ai">Need a proxy layer. Cloudflare Workers &mdash; free tier, sits between button and GitHub.</div>
+<div class="t-line t-dim">// the requirements keep tightening: no tokens in HTML, no GitHub redirect, works for anonymous users.</div>
+<div class="t-line t-dim">// need a server-side proxy. but we don't have a server. this is a static GitHub Pages site.</div>
+<div class="t-line t-ai">Need a proxy layer. Cloudflare Workers &mdash; free tier, serverless, sits between button and GitHub.</div>
+<div class="t-line t-dim">// the token lives in Cloudflare's environment variables. browser just POSTs to the worker URL. clean.</div>
 <div class="t-line t-prompt">npm create cloudflare@latest</div>
 <div class="t-line t-err">wrangler: command not found</div>
 <div class="t-line t-prompt">npm install -g wrangler</div>
