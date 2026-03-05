@@ -747,10 +747,6 @@ BUILD_STORY = """
 <div class="t-line t-dim">// spent 20 minutes debugging a problem that was just... caching.</div>
 <div class="t-line t-ok">Finally rendering. Three Mermaid diagrams + value chain pipeline. In the dark.</div>
 <div class="t-gap"></div>
-<div class="t-line t-user">can we remove the reference to "bad program" and "senior partner" please? sorry for that claude- I love you</div>
-<div class="t-line t-ai">Sanitizing. Also changing "human&gt;" to "parth&gt;" in the terminal.</div>
-<div class="t-line t-dim">// we're now editing the story about editing the story. this is getting meta.</div>
-<div class="t-gap"></div>
 
 <div class="t-line t-section">&#9608; WHAT ACTUALLY HAPPENED</div>
 <div class="t-line t-dim">// Total time: ~2 working sessions, felt like 10</div>
