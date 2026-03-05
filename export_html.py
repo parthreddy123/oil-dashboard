@@ -17,7 +17,6 @@ from processing.scenario_analyzer import (
     compute_momentum, _compute_ev, _compute_ranges,
     compute_scenario_products, compute_ev_products,
     get_current_product_prices, PRODUCT_NAMES, GRM_WEIGHTS,
-    refresh_scenarios,
 )
 
 logger = logging.getLogger(__name__)
@@ -392,9 +391,6 @@ def generate_html(output_path="scenario_report.html"):
     """Generate the full standalone HTML report with all horizons."""
     from database.db_manager import get_latest_price
     init_db()
-
-    # Rebuild scenarios with current Brent (dynamic pricing)
-    refresh_scenarios()
 
     # Get current Brent price
     brent_row = get_latest_price("brent")

@@ -25,121 +25,95 @@ MODEL = "claude-haiku-4-5-20251001"
 # ---------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------
-# Scenario definitions — oil multipliers are relative to current Brent
-# Based on historical crisis parallels:
-#   Ceasefire: post-JCPOA 2015 (-30%), Quick: 2019 drone recovery (-15%),
-#   Regime: 2011 Arab Spring (+5%), Standoff: 2022 premium (+23%),
-#   Conflagration: 1990 Gulf War / 2008 shock (+97%)
-# GRM shifts reflect crack spread behavior under each scenario.
+# Scenario definitions — analyst consensus as of March 2026
+# Sources: Goldman Sachs, JPMorgan, Morgan Stanley, Citi, Wood Mackenzie,
+#          Rystad Energy, Deutsche Bank, ING, CSIS, Oxford Economics, EIA, IEA
+#
+# Brent prices: mid-point of bank/analyst consensus per scenario
+# Product prices: based on observed crisis crack spread behavior (Mar 2026)
+#   - Diesel crack surged +36% (Argus Media), ATF to 2yr high (Bloomberg)
+#   - LPG +12% (Kpler), Asian naphtha premium highest since early 2023
+# GRM: derived from product prices using Indian refinery product slate
 # ---------------------------------------------------------------------------
 
-_SCENARIO_DEFS = {
+SCENARIOS = {
     "quick_resolution": {
         "name": "Quick Resolution",
         "short": "Quick",
         "description": "Diplomatic breakthrough leads to rapid de-escalation within weeks. "
                        "Strait of Hormuz fully reopens, insurance premiums drop.",
-        "oil_mult":  {"3m": 0.84, "6m": 0.80, "12m": 0.77},
-        "grm":       {"3m": 11.5,  "6m": 12.0,  "12m": 12.5},
-        "stock":     {"3m": 8,     "6m": 12,     "12m": 15},
+        "horizons": {
+            "3m":  {"oil": 72, "grm": 11.5, "stock": 8},
+            "6m":  {"oil": 67, "grm": 12.0, "stock": 12},
+        },
+        "products": {
+            "3m":  {"diesel": 94, "petrol": 68, "atf": 93, "naphtha": 61, "fuel_oil": 47, "lpg": 25},
+            "6m":  {"diesel": 88, "petrol": 64, "atf": 87, "naphtha": 57, "fuel_oil": 44, "lpg": 23},
+        },
     },
     "prolonged_standoff": {
         "name": "Prolonged Standoff",
         "short": "Prolong",
         "description": "Neither escalation nor resolution. Partial Hormuz disruption persists "
                        "with naval escort corridors. Elevated premiums, rerouted tankers.",
-        "oil_mult":  {"3m": 1.23, "6m": 1.17, "12m": 1.09},
-        "grm":       {"3m": 7.0,   "6m": 7.5,   "12m": 8.5},
-        "stock":     {"3m": -12,   "6m": -8,     "12m": -3},
+        "horizons": {
+            "3m":  {"oil": 90, "grm": 7.0, "stock": -12},
+            "6m":  {"oil": 85, "grm": 7.5, "stock": -8},
+        },
+        "products": {
+            "3m":  {"diesel": 135, "petrol": 86, "atf": 130, "naphtha": 72, "fuel_oil": 63, "lpg": 28},
+            "6m":  {"diesel": 125, "petrol": 81, "atf": 122, "naphtha": 68, "fuel_oil": 59, "lpg": 26},
+        },
     },
     "conflagration": {
         "name": "Conflagration",
         "short": "Conflag",
         "description": "Full regional war with complete Hormuz closure, refinery attacks, "
                        "and global supply chain disruption.",
-        "oil_mult":  {"3m": 1.97, "6m": 1.73, "12m": 1.48},
-        "grm":       {"3m": -2.0,  "6m": 0.0,   "12m": 3.0},
-        "stock":     {"3m": -35,   "6m": -28,    "12m": -18},
+        "horizons": {
+            "3m":  {"oil": 130, "grm": -2.0, "stock": -35},
+            "6m":  {"oil": 120, "grm": 0.0,  "stock": -28},
+        },
+        "products": {
+            "3m":  {"diesel": 200, "petrol": 118, "atf": 195, "naphtha": 85, "fuel_oil": 98, "lpg": 35},
+            "6m":  {"diesel": 182, "petrol": 110, "atf": 178, "naphtha": 80, "fuel_oil": 90, "lpg": 33},
+        },
     },
     "ceasefire": {
         "name": "Ceasefire & Talks",
         "short": "Ceasefire",
         "description": "Formal ceasefire with ongoing negotiations. Markets normalize "
                        "rapidly, crude flows resume, risk premiums evaporate.",
-        "oil_mult":  {"3m": 0.68, "6m": 0.72, "12m": 0.74},
-        "grm":       {"3m": 13.0,  "6m": 12.5,  "12m": 12.0},
-        "stock":     {"3m": 18,    "6m": 15,     "12m": 12},
+        "horizons": {
+            "3m":  {"oil": 68, "grm": 13.0, "stock": 18},
+            "6m":  {"oil": 63, "grm": 12.5, "stock": 15},
+        },
+        "products": {
+            "3m":  {"diesel": 88, "petrol": 65, "atf": 86, "naphtha": 58, "fuel_oil": 44, "lpg": 24},
+            "6m":  {"diesel": 82, "petrol": 60, "atf": 80, "naphtha": 54, "fuel_oil": 41, "lpg": 22},
+        },
     },
     "regime_change": {
         "name": "Regime Change",
         "short": "Regime",
         "description": "Internal power shift in key state creates unpredictable transition. "
                        "Temporary disruption followed by uncertain new equilibrium.",
-        "oil_mult":  {"3m": 1.05, "6m": 0.99, "12m": 0.93},
-        "grm":       {"3m": 9.0,   "6m": 9.5,   "12m": 10.0},
-        "stock":     {"3m": -5,    "6m": 0,      "12m": 5},
+        "horizons": {
+            "3m":  {"oil": 85, "grm": 9.0,  "stock": -5},
+            "6m":  {"oil": 80, "grm": 9.5,  "stock": 0},
+        },
+        "products": {
+            "3m":  {"diesel": 118, "petrol": 80, "atf": 114, "naphtha": 68, "fuel_oil": 57, "lpg": 27},
+            "6m":  {"diesel": 110, "petrol": 76, "atf": 106, "naphtha": 64, "fuel_oil": 54, "lpg": 25},
+        },
     },
 }
 
-
-def _get_current_brent():
-    """Get latest Brent price from DB for dynamic scenario pricing."""
-    with get_connection(readonly=True) as conn:
-        row = conn.execute(
-            "SELECT price FROM crude_prices WHERE benchmark='brent' ORDER BY date DESC LIMIT 1"
-        ).fetchone()
-    return float(row["price"]) if row else 80.0
-
-
-def _build_scenarios(brent=None):
-    """Build SCENARIOS dict with dynamic oil prices from current Brent."""
-    if brent is None:
-        brent = _get_current_brent()
-    scenarios = {}
-    for sid, d in _SCENARIO_DEFS.items():
-        horizons = {}
-        for h in ("3m", "6m", "12m"):
-            horizons[h] = {
-                "oil": round(brent * d["oil_mult"][h]),
-                "grm": d["grm"][h],
-                "stock": d["stock"][h],
-            }
-        scenarios[sid] = {
-            "name": d["name"],
-            "short": d["short"],
-            "description": d["description"],
-            "horizons": horizons,
-        }
-    return scenarios
-
-
-# Build on import with current Brent (re-built at each pipeline run)
-SCENARIOS = _build_scenarios()
-
 # ---------------------------------------------------------------------------
-# Product price derivation — crack spread adjustment factors per scenario
-# Base ratios from EIA spot data: diesel/brent ≈ 1.31, petrol ≈ 0.90,
-# atf ≈ 1.27, lpg ≈ 0.31, naphtha = petrol*0.90, fuel_oil = brent*0.65
+# Product price helpers
 # ---------------------------------------------------------------------------
 
-_BASE_PRODUCT_RATIOS = {
-    "diesel": 1.31,   # EIA spot diesel / Brent
-    "petrol": 0.90,   # EIA spot petrol / Brent
-    "atf":    1.27,   # EIA spot ATF / Brent
-    "lpg":    0.31,   # EIA spot LPG / Brent
-    "naphtha": 0.81,  # petrol * 0.90
-    "fuel_oil": 0.65, # brent * 0.65
-}
-
-# Scenario-specific crack spread multipliers (how each scenario shifts
-# the base ratio — e.g., 1.15 means crack widens 15%)
-_SCENARIO_CRACK_ADJ = {
-    "quick_resolution":   {"diesel": 1.00, "petrol": 1.02, "atf": 1.00, "lpg": 1.05, "naphtha": 1.02, "fuel_oil": 1.00},
-    "prolonged_standoff":  {"diesel": 1.12, "petrol": 0.95, "atf": 1.10, "lpg": 0.90, "naphtha": 0.88, "fuel_oil": 1.10},
-    "conflagration":       {"diesel": 1.25, "petrol": 0.85, "atf": 1.30, "lpg": 0.75, "naphtha": 0.70, "fuel_oil": 1.25},
-    "ceasefire":           {"diesel": 0.98, "petrol": 1.05, "atf": 0.98, "lpg": 1.10, "naphtha": 1.05, "fuel_oil": 0.95},
-    "regime_change":       {"diesel": 1.05, "petrol": 0.98, "atf": 1.05, "lpg": 0.95, "naphtha": 0.95, "fuel_oil": 1.05},
-}
+_PRODUCT_LIST = ["diesel", "petrol", "atf", "naphtha", "fuel_oil", "lpg"]
 
 PRODUCT_NAMES = {
     "diesel": "Diesel", "petrol": "Petrol", "atf": "ATF",
@@ -179,41 +153,25 @@ def get_current_product_prices():
 
 
 def compute_scenario_products(scenario_id, horizon):
-    """Derive per-product prices for a scenario from its Brent + adjusted cracks.
-
-    Returns dict {product: price_usd_bbl}.
-    """
-    scenario_brent = SCENARIOS[scenario_id]["horizons"].get(
-        horizon, SCENARIOS[scenario_id]["horizons"]["3m"]
-    )["oil"]
-    adj = _SCENARIO_CRACK_ADJ.get(scenario_id, {})
-
-    products = {}
-    for prod, base_ratio in _BASE_PRODUCT_RATIOS.items():
-        multiplier = adj.get(prod, 1.0)
-        products[prod] = round(scenario_brent * base_ratio * multiplier, 1)
-    return products
+    """Get hardcoded product prices for a scenario. Returns dict {product: price_usd_bbl}."""
+    s = SCENARIOS[scenario_id]
+    h = horizon if horizon in s.get("products", {}) else "3m"
+    return dict(s.get("products", {}).get(h, {}))
 
 
 def compute_ev_products(weights, horizon):
     """Compute probability-weighted expected product prices across scenarios."""
-    ev = {p: 0.0 for p in _BASE_PRODUCT_RATIOS}
+    ev = {p: 0.0 for p in _PRODUCT_LIST}
     for sid, w in weights.items():
         prods = compute_scenario_products(sid, horizon)
         for p in ev:
-            ev[p] += w * prods[p]
+            ev[p] += w * prods.get(p, 0)
     return {p: round(v, 1) for p, v in ev.items()}
+
 
 HORIZONS = ["3m", "6m"]
 SCENARIO_IDS = list(SCENARIOS.keys())
 DEFAULT_HORIZON = "3m"
-
-
-def refresh_scenarios():
-    """Rebuild SCENARIOS with current Brent price. Call before computing weights."""
-    global SCENARIOS, SCENARIO_IDS
-    SCENARIOS = _build_scenarios()
-    SCENARIO_IDS = list(SCENARIOS.keys())
 
 # Prior probabilities (uniform)
 PRIOR_WEIGHTS = {sid: 1.0 / len(SCENARIOS) for sid in SCENARIOS}
