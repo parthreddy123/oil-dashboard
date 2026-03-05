@@ -510,33 +510,28 @@ BUILD_STORY = """
 
 <div class="t-line t-section">&#9608; PHASE 1: THE BRIEF &amp; ARCHITECTURE</div>
 <div class="t-line t-user">build a scenario engine. 5 geopolitical scenarios for middle east crisis. score news articles against them with AI. show probabilities, expected brent price, GRM impact.</div>
-<div class="t-line t-user">use Claude Haiku for the scoring- it's cheap and fast enough. batch articles through the API.</div>
-<div class="t-line t-user">I want softmax probabilities, not just raw scores. and expected values weighted by probability.</div>
+<div class="t-line t-user">use an LLM to score the articles. keep costs low. and I want probabilities not just scores- weight the outcomes.</div>
 <div class="t-gap"></div>
-<div class="t-line t-ai">Good call on Haiku &mdash; ~$0.005 per full run. Designing the scoring pipeline...</div>
-<div class="t-line t-dim">// Parth made the key architecture calls early:</div>
-<div class="t-line t-dim">// - LLM choice: Claude Haiku 4.5 (cost-effective, fast enough for batch scoring)</div>
-<div class="t-line t-dim">// - Scoring approach: per-article signals [-1, +1] across all 5 scenarios</div>
-<div class="t-line t-dim">// - Probability model: softmax with temperature (not simple averaging)</div>
-<div class="t-line t-dim">// - Output: expected values, not point estimates. probability-weighted.</div>
-<div class="t-line t-dim">// - Deployment: static HTML on GitHub Pages (no server costs, CDN-fast)</div>
-<div class="t-line t-dim">// - Data: SQLite WAL mode (single file, concurrent reads, zero config)</div>
+<div class="t-line t-ai">Going with Claude Haiku 4.5 &mdash; cheapest model that can handle nuanced geopolitical scoring. ~$0.005 per full run.</div>
+<div class="t-line t-ai">Scoring each article [-1, +1] per scenario. Softmax over averages &rarr; probabilities. Expected values = probability &times; scenario price.</div>
+<div class="t-line t-dim">// Parth set the direction: LLM-scored articles, probabilistic output, cost-conscious.</div>
+<div class="t-line t-dim">// I filled in the specifics: Haiku model, softmax with temperature, SQLite WAL for storage,</div>
+<div class="t-line t-dim">// static HTML on GitHub Pages for zero hosting cost.</div>
 <div class="t-gap"></div>
-<div class="t-line t-user">make the LLM generate a strategic narrative too- like what a consulting partner would write</div>
-<div class="t-line t-user">and each scenario should have its own LLM assessment explaining why the probability is what it is</div>
-<div class="t-line t-ai">So that's: 1 call for article scoring (batched), 1 call for strategic narrative, 1 call for scenario assessments. Three LLM agent roles per refresh.</div>
-<div class="t-line t-user">exactly. and the narrative should be sharp- MBB partner voice, not academic.</div>
+<div class="t-line t-user">make the LLM generate a strategic narrative too. and per-scenario assessments. like a consulting partner would brief.</div>
+<div class="t-line t-ai">Three LLM roles per refresh: article scorer, strategic narrator, scenario assessor.</div>
+<div class="t-line t-dim">// the "consulting partner" framing shaped everything. it wasn't a data dump &mdash; it was a brief.</div>
 <div class="t-gap"></div>
 <div class="t-line t-prompt">creating database/schema.py &mdash; new tables: article_signals, scenario_weights, strategic_narratives</div>
 <div class="t-line t-prompt">creating processing/scenario_analyzer.py &mdash; LLM scoring + narrative pipeline</div>
-<div class="t-line t-ai">Each article scored [-1, +1] against all 5 scenarios. Softmax over avg signals &rarr; probabilities. EV = probability-weighted price across scenarios.</div>
 <div class="t-line t-prompt">python -m processing.scenario_analyzer</div>
 <div class="t-line t-ok">Scored 47 articles. Prolonged Standoff: 34%, Conflagration: 22%, Quick Resolution: 18%...</div>
 <div class="t-line t-prompt">python export_html.py &amp;&amp; git push origin gh-pages</div>
-<div class="t-line t-ok">Report live at github.io. LLM narratives, scenario cards, momentum tracking. v1 working.</div>
-<div class="t-line t-user">can we also add a "last 12 hours" breaking signal section? show momentum direction per scenario.</div>
-<div class="t-line t-ai">Adding momentum computation: 12h avg signal vs 7-day baseline per scenario. Rising/falling/stable.</div>
-<div class="t-line t-ok">Breaking signal window + momentum indicators live.</div>
+<div class="t-line t-ok">Report live at github.io. v1 working.</div>
+<div class="t-gap"></div>
+<div class="t-line t-user">add a breaking news section- last 12 hours. show which way momentum is moving per scenario.</div>
+<div class="t-line t-ai">Adding momentum: 12h avg signal vs 7-day baseline per scenario. Rising/falling/stable indicators.</div>
+<div class="t-line t-ok">Breaking signal window + momentum live.</div>
 <div class="t-gap"></div>
 
 <div class="t-line t-section">&#9608; PHASE 2: "THIS WILL GO PUBLIC"</div>
