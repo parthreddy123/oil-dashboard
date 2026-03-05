@@ -901,7 +901,7 @@ def generate_html(output_path="scenario_report.html"):
 
 <script>
 mermaid.initialize({{
-    startOnLoad: true,
+    startOnLoad: false,
     theme: 'dark',
     themeVariables: {{
         primaryColor: '#1a2332',
@@ -914,6 +914,7 @@ mermaid.initialize({{
         fontSize: '14px'
     }}
 }});
+var _mermaidRendered = false;
 function switchTab(id) {{
     document.querySelectorAll('.tab-panel').forEach(function(p) {{ p.classList.remove('active'); }});
     document.querySelectorAll('.tab-btn').forEach(function(b) {{ b.classList.remove('active'); }});
@@ -921,7 +922,8 @@ function switchTab(id) {{
     var btns = document.querySelectorAll('.tab-btn');
     var map = {{'analysis': 0, 'build': 1, 'arch': 2}};
     if (map[id] !== undefined) btns[map[id]].classList.add('active');
-    if (id === 'arch') {{
+    if (id === 'arch' && !_mermaidRendered) {{
+        _mermaidRendered = true;
         mermaid.run({{ querySelector: '#tab-arch .mermaid' }});
     }}
 }}
