@@ -17,6 +17,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: main
+          fetch-depth: 0   # Full history for branch operations
 
       - uses: actions/setup-python@v5
         with:
@@ -31,9 +32,13 @@ jobs:
           EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          python -c "from database.db_manager import init_db; init_db()"
-          python -m processing.data_processor || true
-          python -m processing.scenario_analyzer
+          python -c "
+          from database.db_manager import init_db; init_db()
+          from processing.data_processor import full_refresh
+          results = full_refresh()
+          for k, v in results.items():
+              print(f'  {k}: {v}')
+          "
           python export_html.py
           echo "Report generated"
 
@@ -42,15 +47,18 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/oil_dashboard.db scenario_report.html
-          git diff --staged --quiet || git commit -m "Auto-refresh: update data and report [skip ci]"
-          git push origin main
+          git diff --staged --quiet && echo "No changes" && exit 0
+          git commit -m "Auto-refresh: update data and report [skip ci]"
+          git pull --rebase origin main || true
+          git push origin main || echo "Push to main failed (non-fatal)"
 
       - name: Deploy to gh-pages
         run: |
-          git checkout gh-pages || git checkout --orphan gh-pages
+          cp scenario_report.html /tmp/index.html
+          git checkout --orphan gh-pages-tmp
           git rm -rf --cached . > /dev/null 2>&1 || true
-          git checkout main -- scenario_report.html
-          cp scenario_report.html index.html
-          git add index.html scenario_report.html
-          git diff --staged --quiet || git commit -m "Auto-deploy scenario report"
-          git push origin gh-pages --force
+          rm -rf * .github .gitignore 2>/dev/null || true
+          cp /tmp/index.html index.html
+          git add index.html
+          git commit -m "Auto-deploy scenario report"
+          git push origin HEAD:gh-pages --force
