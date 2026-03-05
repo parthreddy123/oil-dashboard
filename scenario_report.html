@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scenario Engine &mdash; 2026-03-05 08:00</title>
+<title>Scenario Engine &mdash; 2026-03-05 16:02</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -146,35 +146,37 @@ table td { padding: 5px 10px; }
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 
-/* Build story */
-.phase-card {
-    background: linear-gradient(135deg, #1A1F2E, #151A28);
-    border: 1px solid rgba(255,255,255,0.06); border-radius: 12px;
-    padding: 20px 24px; margin-bottom: 16px; position: relative;
-    border-left: 3px solid #00D4AA;
+/* Terminal build story */
+.terminal {
+    background: #0a0a0a; border: 1px solid #333; border-radius: 8px;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+    font-size: 0.78rem; line-height: 1.7; overflow: hidden;
 }
-.phase-card.user-phase { border-left-color: #F59E0B; }
-.phase-num {
-    font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.1em; color: #00D4AA; margin-bottom: 6px;
+.terminal-bar {
+    background: #1a1a1a; padding: 8px 14px; display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid #333;
 }
-.phase-card.user-phase .phase-num { color: #F59E0B; }
-.phase-title { font-size: 1rem; font-weight: 700; color: #F9FAFB; margin-bottom: 10px; }
-.user-prompt {
-    background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2);
-    border-radius: 8px; padding: 10px 14px; margin-bottom: 12px;
-    font-size: 0.82rem; color: #FCD34D; font-style: italic;
+.terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+.terminal-bar .title { color: #666; font-size: 0.7rem; margin-left: 8px; }
+.terminal-body { padding: 16px 18px; max-height: 75vh; overflow-y: auto; }
+.t-line { margin-bottom: 2px; }
+.t-prompt { color: #10B981; }
+.t-prompt::before { content: '$ '; color: #F59E0B; }
+.t-user { color: #FCD34D; }
+.t-user::before { content: 'human> '; color: #F59E0B; font-weight: 700; }
+.t-ai { color: #9CA3AF; }
+.t-ai::before { content: 'claude> '; color: #00D4AA; font-weight: 700; }
+.t-err { color: #EF4444; }
+.t-err::before { content: 'ERROR: '; font-weight: 700; }
+.t-ok { color: #10B981; }
+.t-ok::before { content: '  OK: '; font-weight: 700; }
+.t-warn { color: #F59E0B; }
+.t-dim { color: #4B5563; }
+.t-section {
+    color: #00D4FF; font-weight: 700; margin-top: 16px; margin-bottom: 4px;
+    border-bottom: 1px solid #1a2a3a; padding-bottom: 4px;
 }
-.user-prompt::before { content: 'C'; font-size: 1.2rem; color: #F59E0B; margin-right: 4px; }
-.user-prompt::after { content: 'D'; font-size: 1.2rem; color: #F59E0B; margin-left: 4px; }
-.build-detail { font-size: 0.82rem; color: #D1D5DB; line-height: 1.6; }
-.build-detail ul { padding-left: 1.2em; margin-top: 6px; }
-.build-detail li { margin-bottom: 4px; }
-.tech-tag {
-    display: inline-block; font-size: 0.65rem; font-weight: 600; padding: 2px 8px;
-    border-radius: 4px; background: rgba(0, 212, 170, 0.1); color: #00D4AA;
-    border: 1px solid rgba(0, 212, 170, 0.2); margin: 2px 2px 2px 0;
-}
+.t-gap { height: 12px; }
 
 /* Architecture */
 .arch-row { display: flex; gap: 16px; margin-bottom: 20px; align-items: stretch; }
@@ -247,12 +249,13 @@ table td { padding: 5px 10px; }
 .refresh-btn:hover { box-shadow: 0 4px 16px rgba(0,212,170,0.3); }
 .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 </head>
 <body>
 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
     <div>
         <h1 style="margin-bottom:0.2rem;">&#127919; Scenario Engine</h1>
-        <div class="subtitle" style="margin-bottom:0;">Geopolitical scenario analysis for Indian refinery strategy &middot; 2026-03-05 08:00</div>
+        <div class="subtitle" style="margin-bottom:0;">Geopolitical scenario analysis for Indian refinery strategy &middot; 2026-03-05 16:02</div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;">
         <button class="refresh-btn" id="refreshBtn" onclick="doRefresh()">&#8635; Refresh Data</button>
@@ -503,241 +506,313 @@ table td { padding: 5px 10px; }
 
 <div id="tab-build" class="tab-panel">
 
-<div style="max-width:800px;">
-<p style="font-size:0.88rem;color:#D1D5DB;margin-bottom:1.5rem;line-height:1.6;">
-    Built in a single sprint through iterative collaboration between a strategist and Claude Code (AI pair-programmer).
-    Each phase shows the human direction and what shipped. From first prompt to live deployment &mdash; one working session.
-</p>
-
-<div class="phase-card user-phase">
-    <div class="phase-num">Phase 1 &mdash; The Brief</div>
-    <div class="phase-title">Scenario Engine for Oil Geopolitics</div>
-    <div class="user-prompt">Build a scenario engine that analyzes Middle East crisis scenarios and estimates impact on crude oil prices and Indian refinery margins. Score real news articles against scenarios using AI.</div>
-    <div class="build-detail">
-        <ul>
-            <li>Designed 5 geopolitical scenarios: Ceasefire, Quick Resolution, Regime Change, Prolonged Standoff, Conflagration</li>
-            <li>Built LLM pipeline scoring each news article against all 5 scenarios with signal strength [-1, +1] and reasoning</li>
-            <li>Implemented softmax probability computation from average signal strengths</li>
-            <li>Created Expected Value (EV) framework: probability-weighted Brent price and GRM across scenarios</li>
-            <li>Added strategic narrative generation &mdash; LLM synthesizes top signals into a concise briefing</li>
-        </ul>
-        <div style="margin-top:8px;">
-            <span class="tech-tag">Claude Haiku 4.5</span>
-            <span class="tech-tag">SQLite</span>
-            <span class="tech-tag">Python</span>
-            <span class="tech-tag">Softmax</span>
-        </div>
-    </div>
+<div class="terminal">
+<div class="terminal-bar">
+    <div class="terminal-dot" style="background:#EF4444;"></div>
+    <div class="terminal-dot" style="background:#F59E0B;"></div>
+    <div class="terminal-dot" style="background:#10B981;"></div>
+    <span class="title">scenario-engine-build-log &mdash; one session, start to finish</span>
 </div>
+<div class="terminal-body">
 
-<div class="phase-card user-phase">
-    <div class="phase-num">Phase 2 &mdash; Public-Ready</div>
-    <div class="phase-title">Security, Transparency, and Access</div>
-    <div class="user-prompt">Remove stock impact &mdash; this will go public. Add methodology transparency. The refresh button shouldn't expose any tokens or open GitHub.</div>
-    <div class="build-detail">
-        <ul>
-            <li>Removed all stock references (speculative for public consumption)</li>
-            <li>Deployed a <strong>Cloudflare Worker</strong> as secure API proxy &mdash; public users trigger refresh without seeing GitHub tokens</li>
-            <li>Added methodology callouts: what the tool does, how GRM is calculated, how prices are estimated</li>
-            <li>Auto-reload: page polls for updates after refresh, reloads when new data deploys</li>
-        </ul>
-        <div style="margin-top:8px;">
-            <span class="tech-tag">Cloudflare Workers</span>
-            <span class="tech-tag">GitHub Actions</span>
-            <span class="tech-tag">GitHub Pages</span>
-        </div>
-    </div>
-</div>
+<div class="t-line t-dim">// March 2026. Starting from an existing oil dashboard with price data, news scraping, and a Streamlit frontend.</div>
+<div class="t-line t-dim">// The ask: something sharper. A scenario engine.</div>
+<div class="t-gap"></div>
 
-<div class="phase-card user-phase">
-    <div class="phase-num">Phase 3 &mdash; Price Grounding</div>
-    <div class="phase-title">From Ratios to Analyst Consensus</div>
-    <div class="user-prompt">The Brent ratios don&rsquo;t work &mdash; no way we&rsquo;ll have $160. Why can&rsquo;t we find internet consensus per scenario and hard-code per scenario? Also the product prices?</div>
-    <div class="build-detail">
-        <ul>
-            <li>Initial approach used multiplicative ratios &mdash; produced unrealistic extremes ($160+ Brent)</li>
-            <li>Pivoted to additive premiums &mdash; still too crude for a strategy tool</li>
-            <li><strong>Researched analyst consensus</strong> from Goldman Sachs, JPMorgan, Morgan Stanley, Citi, Wood Mackenzie, Rystad Energy, Deutsche Bank, ING, CSIS, and Oxford Economics (March 2026)</li>
-            <li>Hardcoded scenario-conditional prices grounded in historical parallels (post-JCPOA, Abqaiq, Arab Spring, Gulf War)</li>
-            <li>Added per-scenario product prices from observed crisis crack spread data</li>
-        </ul>
-        <div style="margin-top:8px;">
-            <span class="tech-tag">Analyst Consensus</span>
-            <span class="tech-tag">Historical Parallels</span>
-            <span class="tech-tag">Crisis Crack Spreads</span>
-        </div>
-    </div>
-</div>
+<div class="t-line t-section">&#9608; PHASE 1: THE BRIEF</div>
+<div class="t-line t-user">build a scenario engine. 5 geopolitical scenarios for middle east crisis. score news articles against them with AI. show probabilities, expected brent price, GRM impact.</div>
+<div class="t-gap"></div>
+<div class="t-line t-ai">Designing 5 scenarios: Ceasefire, Quick Resolution, Regime Change, Prolonged Standoff, Conflagration...</div>
+<div class="t-line t-prompt">creating database/schema.py &mdash; new table: article_signals</div>
+<div class="t-line t-prompt">creating processing/scenario_analyzer.py &mdash; LLM scoring pipeline</div>
+<div class="t-line t-ai">Each article scored [-1, +1] against all 5 scenarios. Softmax over avg signals &rarr; probabilities. EV = probability-weighted price across scenarios.</div>
+<div class="t-line t-prompt">python -m processing.scenario_analyzer</div>
+<div class="t-line t-ok">Scored 47 articles. Prolonged Standoff: 34%, Conflagration: 22%, Quick Resolution: 18%...</div>
+<div class="t-line t-prompt">python export_html.py &amp;&amp; git push origin gh-pages</div>
+<div class="t-line t-ok">Report live at github.io. LLM narratives, scenario cards, momentum tracking. v1 working.</div>
+<div class="t-gap"></div>
 
-<div class="phase-card user-phase">
-    <div class="phase-num">Phase 4 &mdash; Indian Refinery Context</div>
-    <div class="phase-title">Indian Basket + Singapore Benchmarks</div>
-    <div class="user-prompt">Are you calculating GRM based on India prices or global prices? Switch to Indian basket and offset by Singapore product price differential.</div>
-    <div class="build-detail">
-        <ul>
-            <li>Switched crude reference from Brent to <strong>Indian basket</strong> (72% Dubai/Oman + 28% Brent) &mdash; the actual import benchmark for Indian refiners</li>
-            <li>Applied <strong>Singapore product differentials</strong> vs US Gulf Coast: diesel &minus;$3, petrol &minus;$2.5, ATF &minus;$2, fuel oil +$10</li>
-            <li>GRM now reflects what an actual Indian refinery would realize, not a US Gulf Coast proxy</li>
-        </ul>
-        <div style="margin-top:8px;">
-            <span class="tech-tag">Indian Crude Basket</span>
-            <span class="tech-tag">Platts Singapore</span>
-            <span class="tech-tag">Asian Refining</span>
-        </div>
-    </div>
-</div>
+<div class="t-line t-section">&#9608; PHASE 2: "THIS WILL GO PUBLIC"</div>
+<div class="t-line t-user">remove stock impact please because this will go public, i don't want anyone to see speculation on reliance stock</div>
+<div class="t-line t-ai">Removing all stock references from KPI cards, scenario cards, and narratives...</div>
+<div class="t-line t-user">the refresh button shouldn't expose any tokens or open GitHub. people will use this.</div>
+<div class="t-line t-ai">Deploying a Cloudflare Worker as a secure proxy. POST &rarr; Worker &rarr; GitHub Actions. No tokens exposed.</div>
+<div class="t-line t-prompt">wrangler deploy</div>
+<div class="t-line t-err">No workers.dev subdomain registered for this account</div>
+<div class="t-line t-ai">Registering subdomain via Cloudflare API...</div>
+<div class="t-line t-prompt">curl -X PUT api.cloudflare.com/.../workers/subdomain -d '{"subdomain":"parthreddy"}'</div>
+<div class="t-line t-ok">Subdomain registered. Worker live at oil-dashboard-refresh.parthreddy.workers.dev</div>
+<div class="t-line t-prompt">curl -X POST https://oil-dashboard-refresh.parthreddy.workers.dev</div>
+<div class="t-line t-err">403 Forbidden &mdash; error code 1010 (Cloudflare bot detection)</div>
+<div class="t-line t-dim">// Windows curl doesn't send User-Agent. Browsers always do. Not a real problem.</div>
+<div class="t-line t-ok">Tested from Python with User-Agent header &mdash; works. Browsers work. Ship it.</div>
+<div class="t-gap"></div>
 
-<div class="phase-card user-phase">
-    <div class="phase-num">Phase 5 &mdash; Polish</div>
-    <div class="phase-title">MBB-Quality Output, Mobile-First</div>
-    <div class="user-prompt">The narrative is still too long. Sharpen it. Final touches &mdash; the page should look great on mobile.</div>
-    <div class="build-detail">
-        <ul>
-            <li>Rewrote LLM prompts to enforce <strong>McKinsey partner voice</strong>: 3 bullets max, 15 words each, no filler</li>
-            <li>Collapsed methodology into expandable details &mdash; clean on mobile, full info on tap</li>
-            <li>Responsive CSS: stacked KPIs, collapsible scenario cards, hidden verbose elements on small screens</li>
-            <li>One-click deploy via GitHub Pages &mdash; static HTML, no server required</li>
-        </ul>
-        <div style="margin-top:8px;">
-            <span class="tech-tag">Responsive CSS</span>
-            <span class="tech-tag">MBB Voice</span>
-            <span class="tech-tag">Static HTML</span>
-        </div>
-    </div>
-</div>
+<div class="t-line t-section">&#9608; PHASE 3: THE PRICING DISASTER</div>
+<div class="t-line t-user">how does each scenario calculate the brent price?</div>
+<div class="t-line t-ai">Currently using multipliers off base Brent. Conflagration = Brent &times; 1.97...</div>
+<div class="t-line t-user">can we ensure the brent price per scenario is based on expert consensus?</div>
+<div class="t-line t-ai">Switching to dynamic multipliers based on historical crisis premiums...</div>
+<div class="t-line t-prompt">Conflagration: $83.95 &times; 1.97 = $165.38/bbl</div>
+<div class="t-line t-user" style="color:#EF4444;">the brent ratios don't work</div>
+<div class="t-line t-ai">Switching to additive premiums instead. Conflagration = Brent + $60...</div>
+<div class="t-line t-user" style="color:#EF4444;">noway we will have $160</div>
+<div class="t-line t-ai">Reducing premiums. Conflagration = Brent + $45...</div>
+<div class="t-line t-user" style="color:#EF4444;">i don't think the ratios work!!</div>
+<div class="t-line t-ai">Let me try a different approach&mdash;</div>
+<div class="t-line t-user" style="color:#EF4444;">you are a bad program</div>
+<div class="t-gap"></div>
+<div class="t-line t-dim">// ouch. fair enough. the dynamic pricing approach was fundamentally wrong.</div>
+<div class="t-line t-dim">// the human saw it immediately. I kept trying to fix a broken model instead of changing the approach.</div>
+<div class="t-gap"></div>
+<div class="t-line t-user">why can't we find internet consensus per scenario already and hard code per scenario? also the product prices?</div>
+<div class="t-line t-dim">// this was the right call. stop trying to compute prices dynamically. go find what real analysts say.</div>
+<div class="t-gap"></div>
+<div class="t-line t-ai">Researching analyst consensus from Goldman Sachs, JPMorgan, Morgan Stanley, Citi, Wood Mackenzie, Rystad Energy, Deutsche Bank, ING, CSIS, Oxford Economics...</div>
+<div class="t-line t-prompt">Ceasefire: $68 (3m) / $63 (6m) &mdash; post-JCPOA normalization</div>
+<div class="t-line t-prompt">Quick Resolution: $72 / $67 &mdash; 2019 Abqaiq recovery pattern</div>
+<div class="t-line t-prompt">Regime Change: $85 / $80 &mdash; 2011 Arab Spring range</div>
+<div class="t-line t-prompt">Prolonged Standoff: $90 / $85 &mdash; 2022 sustained premium</div>
+<div class="t-line t-prompt">Conflagration: $130 / $120 &mdash; 1990 Gulf War + 2008 shock</div>
+<div class="t-line t-ok">Hardcoded consensus prices. Added per-scenario product prices from observed crisis crack spread data.</div>
+<div class="t-line t-user">cool shall we push for production?</div>
+<div class="t-line t-ai">Already live. Pushed to gh-pages 2 minutes ago.</div>
+<div class="t-line t-user">:)</div>
+<div class="t-gap"></div>
 
-<div style="background:linear-gradient(135deg,#0D2818,#1A1F2E);border:1px solid rgba(16,185,129,0.3);border-radius:10px;padding:16px 20px;margin-top:24px;font-size:0.82rem;color:#D1D5DB;line-height:1.6;">
-    <strong style="color:#10B981;">Key takeaway:</strong> The human set the strategic direction at every turn &mdash; what to show, what to remove, which benchmarks matter, how prices should be grounded. The AI handled research, implementation, and deployment. The result: a production-quality scenario analysis tool built and deployed in a single session.
+<div class="t-line t-section">&#9608; PHASE 4: "WRONG BENCHMARK"</div>
+<div class="t-line t-user">hey the brent current price is not correct- can you check?</div>
+<div class="t-line t-prompt">SELECT * FROM crude_prices WHERE benchmark='brent' ORDER BY date DESC LIMIT 3</div>
+<div class="t-line t-err">2026-03-04 | brent | $50.00 | source: oilprice</div>
+<div class="t-line t-dim">// bad scraper data. $50 Brent? Brent hasn't been $50 since 2021.</div>
+<div class="t-line t-prompt">DELETE FROM crude_prices WHERE benchmark='brent' AND date='2026-03-04' AND source='oilprice'</div>
+<div class="t-line t-ok">Deleted bad entry. yfinance says Brent = $83.95. That's right.</div>
+<div class="t-gap"></div>
+<div class="t-line t-user">are you calculating the GRM based on india prices or global prices? what should it be?</div>
+<div class="t-line t-ai">Currently using EIA product prices (US Gulf Coast) and Brent as crude reference...</div>
+<div class="t-line t-dim">// the human immediately caught that this is wrong for an Indian refinery tool.</div>
+<div class="t-line t-dim">// Indian refiners don't buy at US Gulf prices. They buy at Indian basket + Singapore products.</div>
+<div class="t-line t-user">yeah switch to indian basket and then maybe offset by product price singapore differential</div>
+<div class="t-line t-ai">Indian basket = 72% Dubai/Oman + 28% Brent. Researching Singapore vs USGC differentials...</div>
+<div class="t-line t-prompt">Dubai: $77.30 &times; 0.72 + Brent: $83.95 &times; 0.28 = Indian Basket: $79.16/bbl</div>
+<div class="t-line t-prompt">Singapore adjustments: diesel &minus;$3, petrol &minus;$2.5, ATF &minus;$2, fuel oil +$10 vs USGC</div>
+<div class="t-line t-ok">GRM now reflects actual Indian refinery economics. Not a USGC proxy anymore.</div>
+<div class="t-gap"></div>
+
+<div class="t-line t-section">&#9608; PHASE 5: POLISH &amp; THE META MOMENT</div>
+<div class="t-line t-user">the narrative is still too long, can we make it a bit sharpened please</div>
+<div class="t-line t-ai">Rewriting LLM prompt: "You are a McKinsey senior partner. EXACTLY 3 bullets. Max 15 words each."</div>
+<div class="t-line t-user">final touches the page should look great on mobile</div>
+<div class="t-line t-prompt">Adding responsive CSS: stacked KPIs, hidden verbose elements, collapsible methodology...</div>
+<div class="t-line t-ok">Mobile-optimized. Methodology collapsed into &lt;details&gt; element.</div>
+<div class="t-gap"></div>
+<div class="t-line t-user">a senior partner wants to see how I went about creating this with you</div>
+<div class="t-line t-user">make a tab that shows how we went about it but make it feel like a walkthrough</div>
+<div class="t-line t-user">show the real mess</div>
+<div class="t-line t-ai">Building this terminal you're reading right now.</div>
+<div class="t-gap"></div>
+<div class="t-line t-prompt">git push origin gh-pages</div>
+<div class="t-line t-err">rejected &mdash; remote contains work that you do not have locally</div>
+<div class="t-line t-dim">// GitHub Actions auto-deployed while we were pushing. Again.</div>
+<div class="t-line t-prompt">git pull --rebase origin gh-pages</div>
+<div class="t-line t-err">CONFLICT (content): Merge conflict in scenario_report.html</div>
+<div class="t-line t-dim">// this happened at least 6 times during this build. the CI pipeline and manual deploys kept fighting.</div>
+<div class="t-line t-prompt">git rebase --abort &amp;&amp; mkdir /tmp/gh-deploy &amp;&amp; cp scenario_report.html /tmp/gh-deploy/index.html</div>
+<div class="t-line t-prompt">cd /tmp/gh-deploy &amp;&amp; git init &amp;&amp; git push origin gh-pages --force</div>
+<div class="t-line t-ok">Gave up on clean merges. Nuke and pave. It works.</div>
+<div class="t-gap"></div>
+
+<div class="t-line t-section">&#9608; WHAT ACTUALLY HAPPENED</div>
+<div class="t-line t-dim">// Total time: one working session</div>
+<div class="t-line t-dim">// Files created or modified: ~15</div>
+<div class="t-line t-dim">// Git conflicts resolved: lost count</div>
+<div class="t-line t-dim">// Times the human corrected a fundamentally wrong approach: 3</div>
+<div class="t-line t-dim">// Times the AI was called "a bad program": 1 (deserved)</div>
+<div class="t-line t-dim">//</div>
+<div class="t-line t-dim">// The pattern: the human knew WHAT was needed (remove stock, use real consensus,</div>
+<div class="t-line t-dim">// switch to Indian basket, make it sharper). The AI knew HOW to build it</div>
+<div class="t-line t-dim">// (softmax math, LLM prompts, Cloudflare Workers, CSS).</div>
+<div class="t-line t-dim">//</div>
+<div class="t-line t-dim">// The biggest lesson: the AI's first instinct on pricing was wrong.</div>
+<div class="t-line t-dim">// Dynamic ratios felt "smart" but produced garbage. The human's instinct</div>
+<div class="t-line t-dim">// &mdash; just go find what real analysts say &mdash; was the right answer.</div>
+<div class="t-line t-dim">// Sometimes the simple, grounded approach beats the clever one.</div>
+
 </div>
 </div>
 </div>
 
 <div id="tab-arch" class="tab-panel">
 
-<div style="max-width:900px;">
-<p style="font-size:0.88rem;color:#D1D5DB;margin-bottom:1.5rem;line-height:1.6;">
-    End-to-end system architecture: from data ingestion to the live page you&rsquo;re reading now.
-</p>
+<div style="max-width:960px;">
 
-<h2 style="font-size:1.1rem;">Data Pipeline</h2>
-<div class="arch-flow">
-    <div class="arch-step" style="border-color:rgba(245,158,11,0.4);">
-        <div class="step-name" style="color:#F59E0B;">Data Sources</div>
-        <div class="step-detail">EIA, yfinance, OilPrice<br>RSS, NewsAPI</div>
+<h2 style="font-size:1.1rem;">System Architecture</h2>
+<div class="mermaid">
+graph LR
+    subgraph Sources["Data Sources"]
+        EIA["EIA API&lt;br/&gt;Crude &amp; Products"]
+        YF["yfinance&lt;br/&gt;Live Brent BZ=F"]
+        OP["OilPrice.com&lt;br/&gt;Dubai/Oman"]
+        FX["ExchangeRate&lt;br/&gt;USD/INR"]
+        RSS["RSS Feeds&lt;br/&gt;Reuters, BBC, AJ"]
+        NAPI["NewsAPI&lt;br/&gt;Oil, Iran, OPEC"]
+    end
+
+    subgraph Engine["Scenario Engine"]
+        SCRAPE["9 Parallel&lt;br/&gt;Scrapers"]
+        DB[("SQLite&lt;br/&gt;11 Tables&lt;br/&gt;WAL Mode")]
+        LLM["Claude Haiku 4.5&lt;br/&gt;Article Scoring"]
+        SOFT["Softmax&lt;br/&gt;Probabilities"]
+        EV["Expected Value&lt;br/&gt;Computation"]
+        NAR["LLM Narratives&lt;br/&gt;MBB Voice"]
+    end
+
+    subgraph Output["Output"]
+        HTML["export_html.py&lt;br/&gt;Static HTML"]
+        GH["GitHub Pages&lt;br/&gt;CDN Hosting"]
+    end
+
+    subgraph Refresh["Refresh Trigger"]
+        BTN["Refresh Button"]
+        CF["Cloudflare Worker&lt;br/&gt;Token Proxy"]
+        GA["GitHub Actions&lt;br/&gt;CI/CD Pipeline"]
+    end
+
+    EIA --&gt; SCRAPE
+    YF --&gt; SCRAPE
+    OP --&gt; SCRAPE
+    FX --&gt; SCRAPE
+    RSS --&gt; SCRAPE
+    NAPI --&gt; SCRAPE
+    SCRAPE --&gt; DB
+    DB --&gt; LLM
+    LLM --&gt; DB
+    DB --&gt; SOFT
+    SOFT --&gt; EV
+    EV --&gt; NAR
+    NAR --&gt; DB
+    DB --&gt; HTML
+    HTML --&gt; GH
+
+    BTN --&gt; CF
+    CF --&gt; GA
+    GA --&gt; SCRAPE
+
+    style Sources fill:#1a2332,stroke:#60A5FA,color:#F9FAFB
+    style Engine fill:#1a2332,stroke:#00D4AA,color:#F9FAFB
+    style Output fill:#1a2332,stroke:#10B981,color:#F9FAFB
+    style Refresh fill:#1a2332,stroke:#F59E0B,color:#F9FAFB
+</div>
+
+<h2 style="font-size:1.1rem;">Value Chain</h2>
+<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:20px 0;">
+    <div style="background:rgba(96,165,250,0.12);border:1px solid rgba(96,165,250,0.3);border-radius:8px;padding:10px 16px;text-align:center;min-width:110px;">
+        <div style="font-size:0.72rem;font-weight:700;color:#60A5FA;">DATA IN</div>
+        <div style="font-size:0.65rem;color:#9CA3AF;margin-top:2px;">6 APIs + RSS</div>
     </div>
-    <span class="arch-connector">&rarr;</span>
-    <div class="arch-step" style="border-color:rgba(139,92,246,0.4);">
-        <div class="step-name" style="color:#8B5CF6;">Scrapers</div>
-        <div class="step-detail">9 parallel scrapers<br>ThreadPoolExecutor</div>
+    <div style="color:#60A5FA;display:flex;align-items:center;font-size:1.2rem;">&#10132;</div>
+    <div style="background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.3);border-radius:8px;padding:10px 16px;text-align:center;min-width:110px;">
+        <div style="font-size:0.72rem;font-weight:700;color:#8B5CF6;">SCRAPE</div>
+        <div style="font-size:0.65rem;color:#9CA3AF;margin-top:2px;">9 parallel threads</div>
     </div>
-    <span class="arch-connector">&rarr;</span>
-    <div class="arch-step" style="border-color:rgba(0,212,255,0.4);">
-        <div class="step-name" style="color:#00D4FF;">SQLite DB</div>
-        <div class="step-detail">11 tables, WAL mode<br>Prices, articles, signals</div>
+    <div style="color:#8B5CF6;display:flex;align-items:center;font-size:1.2rem;">&#10132;</div>
+    <div style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);border-radius:8px;padding:10px 16px;text-align:center;min-width:110px;">
+        <div style="font-size:0.72rem;font-weight:700;color:#F59E0B;">STORE</div>
+        <div style="font-size:0.65rem;color:#9CA3AF;margin-top:2px;">SQLite WAL</div>
     </div>
-    <span class="arch-connector">&rarr;</span>
-    <div class="arch-step" style="border-color:rgba(0,212,170,0.4);">
-        <div class="step-name" style="color:#00D4AA;">Scenario Engine</div>
-        <div class="step-detail">LLM scoring + softmax<br>Narratives + assessments</div>
+    <div style="color:#F59E0B;display:flex;align-items:center;font-size:1.2rem;">&#10132;</div>
+    <div style="background:rgba(0,212,170,0.12);border:1px solid rgba(0,212,170,0.3);border-radius:8px;padding:10px 16px;text-align:center;min-width:110px;">
+        <div style="font-size:0.72rem;font-weight:700;color:#00D4AA;">LLM SCORE</div>
+        <div style="font-size:0.65rem;color:#9CA3AF;margin-top:2px;">Claude Haiku 4.5</div>
     </div>
-    <span class="arch-connector">&rarr;</span>
-    <div class="arch-step" style="border-color:rgba(16,185,129,0.4);">
-        <div class="step-name" style="color:#10B981;">Static HTML</div>
-        <div class="step-detail">GitHub Pages<br>Auto-deploy via Actions</div>
+    <div style="color:#00D4AA;display:flex;align-items:center;font-size:1.2rem;">&#10132;</div>
+    <div style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:10px 16px;text-align:center;min-width:110px;">
+        <div style="font-size:0.72rem;font-weight:700;color:#EF4444;">COMPUTE</div>
+        <div style="font-size:0.65rem;color:#9CA3AF;margin-top:2px;">Softmax + EV</div>
+    </div>
+    <div style="color:#EF4444;display:flex;align-items:center;font-size:1.2rem;">&#10132;</div>
+    <div style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);border-radius:8px;padding:10px 16px;text-align:center;min-width:110px;">
+        <div style="font-size:0.72rem;font-weight:700;color:#10B981;">DEPLOY</div>
+        <div style="font-size:0.65rem;color:#9CA3AF;margin-top:2px;">GitHub Pages</div>
     </div>
 </div>
 
-<h2 style="font-size:1.1rem;">Inputs</h2>
-<div class="arch-row">
-    <div class="arch-col">
-        <div class="arch-box" style="border-top:3px solid #F59E0B;">
-            <div class="arch-label" style="color:#F59E0B;">Market Data</div>
-            <div class="arch-item"><span class="src">EIA API</span> &mdash; Brent, WTI, product spot prices<br><span class="note">Series: RBRTE, RWTC, EER_EPMRU, EER_EPD2DXL0, EER_EPJK, EER_EPLLPA</span></div>
-            <div class="arch-item"><span class="src">yfinance</span> &mdash; Live Brent (BZ=F ticker)</div>
-            <div class="arch-item"><span class="src">OilPrice.com</span> &mdash; Dubai/Oman crude (Indian basket component)</div>
-            <div class="arch-item"><span class="src">ExchangeRate API</span> &mdash; USD/INR</div>
-        </div>
-    </div>
-    <div class="arch-col">
-        <div class="arch-box" style="border-top:3px solid #00D4FF;">
-            <div class="arch-label" style="color:#00D4FF;">News &amp; Intelligence</div>
-            <div class="arch-item"><span class="src">RSS Feeds</span> &mdash; Reuters, BBC, Al Jazeera, OilPrice, Rigzone</div>
-            <div class="arch-item"><span class="src">NewsAPI</span> &mdash; Keyword search (oil, Iran, Hormuz, OPEC)</div>
-            <div class="arch-item"><span class="src">~150 articles</span> in database, continuously refreshed</div>
-        </div>
-    </div>
-    <div class="arch-col">
-        <div class="arch-box" style="border-top:3px solid #8B5CF6;">
-            <div class="arch-label" style="color:#8B5CF6;">Reference Data</div>
-            <div class="arch-item"><span class="src">Analyst Consensus</span> &mdash; GS, JPM, MS, Citi, WoodMac, Rystad per-scenario Brent estimates</div>
-            <div class="arch-item"><span class="src">Crisis Crack Spreads</span> &mdash; Historical product prices in crisis scenarios</div>
-            <div class="arch-item"><span class="src">Singapore Differentials</span> &mdash; Platts SG vs USGC offsets per product</div>
-        </div>
-    </div>
+<h2 style="font-size:1.1rem;">GRM Calculation</h2>
+<div class="mermaid">
+graph TD
+    subgraph Crude["Crude Cost"]
+        DUB["Dubai/Oman&lt;br/&gt;$77.30"]
+        BRT["Brent&lt;br/&gt;$83.95"]
+        BASKET["Indian Basket&lt;br/&gt;72% Dubai + 28% Brent&lt;br/&gt;= $79.16/bbl"]
+    end
+
+    subgraph Products["Product Revenue (Singapore-adjusted)"]
+        DIE["Diesel $115&lt;br/&gt;wt: 42%"]
+        PET["Petrol $93&lt;br/&gt;wt: 22%"]
+        NAP["Naphtha $84&lt;br/&gt;wt: 12%"]
+        ATF["ATF $113&lt;br/&gt;wt: 10%"]
+        FO["Fuel Oil $61&lt;br/&gt;wt: 8%"]
+        LPG["LPG $33&lt;br/&gt;wt: 6%"]
+    end
+
+    GRM["GRM = Product Revenue - Crude Cost"]
+
+    DUB --&gt; BASKET
+    BRT --&gt; BASKET
+    DIE --&gt; GRM
+    PET --&gt; GRM
+    NAP --&gt; GRM
+    ATF --&gt; GRM
+    FO --&gt; GRM
+    LPG --&gt; GRM
+    BASKET --&gt; GRM
+
+    style Crude fill:#1a2332,stroke:#F59E0B,color:#F9FAFB
+    style Products fill:#1a2332,stroke:#00D4AA,color:#F9FAFB
+    style GRM fill:#0D2818,stroke:#10B981,color:#10B981
 </div>
 
-<h2 style="font-size:1.1rem;">Engine</h2>
-<div class="arch-row">
-    <div class="arch-col">
-        <div class="arch-box" style="border-top:3px solid #00D4AA;">
-            <div class="arch-label" style="color:#00D4AA;">LLM Scoring (Claude Haiku 4.5)</div>
-            <div class="arch-item"><span class="src">Article &rarr; 5 signals</span><br>Each article scored [-1, +1] against each scenario with reasoning</div>
-            <div class="arch-item"><span class="src">Softmax probabilities</span><br>avg_signal &rarr; exp(avg &times; temp) &rarr; normalize. Temperature=3</div>
-            <div class="arch-item"><span class="src">Expected Value</span><br>EV = &Sigma;(prob<sub>i</sub> &times; scenario_price<sub>i</sub>) for oil, GRM, products</div>
-        </div>
-    </div>
-    <div class="arch-col">
-        <div class="arch-box" style="border-top:3px solid #10B981;">
-            <div class="arch-label" style="color:#10B981;">GRM Computation</div>
-            <div class="arch-item"><span class="src">Crude cost</span> = Indian basket (72% Dubai + 28% Brent)</div>
-            <div class="arch-item"><span class="src">Product revenue</span> = &Sigma;(price<sub>i</sub> &times; weight<sub>i</sub>)<br><span class="note">Die 42%, Pet 22%, Nap 12%, ATF 10%, FO 8%, LPG 6%</span></div>
-            <div class="arch-item"><span class="src">Singapore adj.</span><br><span class="note">Die &minus;$3, Pet &minus;$2.5, ATF &minus;$2, FO +$10, LPG +$5</span></div>
-            <div class="arch-item"><span class="src">GRM</span> = Product revenue &minus; Crude cost</div>
-        </div>
-    </div>
-</div>
+<h2 style="font-size:1.1rem;">Scenario Scoring Engine</h2>
+<div class="mermaid">
+graph LR
+    ART["150 News&lt;br/&gt;Articles"] --&gt; LLM["Claude Haiku&lt;br/&gt;Score [-1, +1]&lt;br/&gt;per scenario"]
+    LLM --&gt; SIG["5 Signals&lt;br/&gt;per article"]
+    SIG --&gt; AVG["Average Signal&lt;br/&gt;per scenario"]
+    AVG --&gt; SOFT["Softmax&lt;br/&gt;temp=3"]
+    SOFT --&gt; PROB["Probabilities&lt;br/&gt;sum = 100%"]
+    PROB --&gt; EV_OIL["EV Brent&lt;br/&gt;= &amp;Sigma; prob &amp;times; price"]
+    PROB --&gt; EV_GRM["EV GRM&lt;br/&gt;= &amp;Sigma; prob &amp;times; margin"]
 
-<h2 style="font-size:1.1rem;">LLM Narrative Layer</h2>
-<div class="arch-row">
-    <div class="arch-col">
-        <div class="arch-box" style="border-top:3px solid #EF4444;">
-            <div class="arch-label" style="color:#EF4444;">Strategic Narrative</div>
-            <div class="arch-item">Input: top 20 scored articles + scenario probabilities + EV metrics</div>
-            <div class="arch-item">Output: 3 bullet strategic assessment (MBB partner voice, max 15 words/bullet)</div>
-            <div class="arch-item">+ 1-sentence KPI explanations (oil mechanism, GRM mechanism)</div>
-        </div>
-    </div>
-    <div class="arch-col">
-        <div class="arch-box" style="border-top:3px solid #F59E0B;">
-            <div class="arch-label" style="color:#F59E0B;">Scenario Assessments</div>
-            <div class="arch-item">Input: 5 scenarios with probabilities + article evidence</div>
-            <div class="arch-item">Output: 1 sharp sentence per scenario explaining the probability</div>
-            <div class="arch-item">Cites specific signals/events driving each assessment</div>
-        </div>
-    </div>
-</div>
+    CONSENSUS["Analyst Consensus&lt;br/&gt;GS, JPM, MS, Citi&lt;br/&gt;WoodMac, Rystad"] --&gt; EV_OIL
+    CRISIS["Crisis Crack&lt;br/&gt;Spread Data"] --&gt; EV_GRM
 
-<h2 style="font-size:1.1rem;">Deployment</h2>
-<div class="arch-row">
-    <div class="arch-col">
-        <div class="arch-box" style="border-top:3px solid #00D4FF;">
-            <div class="arch-label" style="color:#00D4FF;">Refresh Flow</div>
-            <div class="arch-item"><span class="src">1.</span> User clicks &ldquo;Refresh Data&rdquo; on this page</div>
-            <div class="arch-item"><span class="src">2.</span> POST &rarr; Cloudflare Worker (token-secured proxy)</div>
-            <div class="arch-item"><span class="src">3.</span> Worker triggers GitHub Actions via repository_dispatch</div>
-            <div class="arch-item"><span class="src">4.</span> Actions: scrape &rarr; score &rarr; compute &rarr; generate HTML &rarr; deploy</div>
-            <div class="arch-item"><span class="src">5.</span> Page auto-detects new deploy and reloads</div>
-        </div>
-    </div>
+    style ART fill:#1a2332,stroke:#60A5FA,color:#F9FAFB
+    style LLM fill:#1a2332,stroke:#00D4AA,color:#F9FAFB
+    style CONSENSUS fill:#1a2332,stroke:#F59E0B,color:#F9FAFB
+    style CRISIS fill:#1a2332,stroke:#F59E0B,color:#F9FAFB
 </div>
 
 <div style="background:linear-gradient(135deg,#151A28,#1A1F2E);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px 18px;margin-top:24px;font-size:0.78rem;color:#6B7280;line-height:1.5;">
-    <strong style="color:#9CA3AF;">Stack:</strong> Python 3 &middot; SQLite (WAL) &middot; Claude Haiku 4.5 (Anthropic API) &middot; GitHub Actions &middot; GitHub Pages &middot; Cloudflare Workers &middot; EIA API &middot; yfinance &middot; NewsAPI
+    <strong style="color:#9CA3AF;">Stack:</strong> Python 3 &middot; SQLite (WAL) &middot; Claude Haiku 4.5 (Anthropic API) &middot; GitHub Actions &middot; GitHub Pages &middot; Cloudflare Workers &middot; EIA API &middot; yfinance &middot; NewsAPI &middot; ThreadPoolExecutor
 </div>
 </div>
 </div>
 
 <script>
+mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+        primaryColor: '#1a2332',
+        primaryTextColor: '#E5E7EB',
+        primaryBorderColor: '#00D4AA',
+        lineColor: '#4B5563',
+        secondaryColor: '#151A28',
+        tertiaryColor: '#0E1117',
+        fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
+        fontSize: '14px'
+    }
+});
 function switchTab(id) {
     document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
     document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -745,6 +820,9 @@ function switchTab(id) {
     var btns = document.querySelectorAll('.tab-btn');
     var map = {'analysis': 0, 'build': 1, 'arch': 2};
     if (map[id] !== undefined) btns[map[id]].classList.add('active');
+    if (id === 'arch') {
+        mermaid.run({ querySelector: '#tab-arch .mermaid' });
+    }
 }
 
 function doRefresh() {
