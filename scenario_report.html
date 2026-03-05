@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scenario Engine &mdash; 2026-03-05 16:02</title>
+<title>Scenario Engine &mdash; 2026-03-05 16:09</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -163,7 +163,7 @@ table td { padding: 5px 10px; }
 .t-prompt { color: #10B981; }
 .t-prompt::before { content: '$ '; color: #F59E0B; }
 .t-user { color: #FCD34D; }
-.t-user::before { content: 'human> '; color: #F59E0B; font-weight: 700; }
+.t-user::before { content: 'parth> '; color: #F59E0B; font-weight: 700; }
 .t-ai { color: #9CA3AF; }
 .t-ai::before { content: 'claude> '; color: #00D4AA; font-weight: 700; }
 .t-err { color: #EF4444; }
@@ -255,7 +255,7 @@ table td { padding: 5px 10px; }
 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
     <div>
         <h1 style="margin-bottom:0.2rem;">&#127919; Scenario Engine</h1>
-        <div class="subtitle" style="margin-bottom:0;">Geopolitical scenario analysis for Indian refinery strategy &middot; 2026-03-05 16:02</div>
+        <div class="subtitle" style="margin-bottom:0;">Geopolitical scenario analysis for Indian refinery strategy &middot; 2026-03-05 16:09</div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;">
         <button class="refresh-btn" id="refreshBtn" onclick="doRefresh()">&#8635; Refresh Data</button>
@@ -533,7 +533,7 @@ table td { padding: 5px 10px; }
 <div class="t-gap"></div>
 
 <div class="t-line t-section">&#9608; PHASE 2: "THIS WILL GO PUBLIC"</div>
-<div class="t-line t-user">remove stock impact please because this will go public, i don't want anyone to see speculation on reliance stock</div>
+<div class="t-line t-user">remove stock impact please. this is going public, keep it focused on crude and refining economics only</div>
 <div class="t-line t-ai">Removing all stock references from KPI cards, scenario cards, and narratives...</div>
 <div class="t-line t-user">the refresh button shouldn't expose any tokens or open GitHub. people will use this.</div>
 <div class="t-line t-ai">Deploying a Cloudflare Worker as a secure proxy. POST &rarr; Worker &rarr; GitHub Actions. No tokens exposed.</div>
@@ -560,10 +560,9 @@ table td { padding: 5px 10px; }
 <div class="t-line t-ai">Reducing premiums. Conflagration = Brent + $45...</div>
 <div class="t-line t-user" style="color:#EF4444;">i don't think the ratios work!!</div>
 <div class="t-line t-ai">Let me try a different approach&mdash;</div>
-<div class="t-line t-user" style="color:#EF4444;">you are a bad program</div>
 <div class="t-gap"></div>
-<div class="t-line t-dim">// ouch. fair enough. the dynamic pricing approach was fundamentally wrong.</div>
-<div class="t-line t-dim">// the human saw it immediately. I kept trying to fix a broken model instead of changing the approach.</div>
+<div class="t-line t-dim">// the dynamic pricing approach was fundamentally wrong.</div>
+<div class="t-line t-dim">// Parth saw it immediately. I kept trying to fix a broken model instead of changing the approach.</div>
 <div class="t-gap"></div>
 <div class="t-line t-user">why can't we find internet consensus per scenario already and hard code per scenario? also the product prices?</div>
 <div class="t-line t-dim">// this was the right call. stop trying to compute prices dynamically. go find what real analysts say.</div>
@@ -590,7 +589,7 @@ table td { padding: 5px 10px; }
 <div class="t-gap"></div>
 <div class="t-line t-user">are you calculating the GRM based on india prices or global prices? what should it be?</div>
 <div class="t-line t-ai">Currently using EIA product prices (US Gulf Coast) and Brent as crude reference...</div>
-<div class="t-line t-dim">// the human immediately caught that this is wrong for an Indian refinery tool.</div>
+<div class="t-line t-dim">// Parth immediately caught that this is wrong for an Indian refinery tool.</div>
 <div class="t-line t-dim">// Indian refiners don't buy at US Gulf prices. They buy at Indian basket + Singapore products.</div>
 <div class="t-line t-user">yeah switch to indian basket and then maybe offset by product price singapore differential</div>
 <div class="t-line t-ai">Indian basket = 72% Dubai/Oman + 28% Brent. Researching Singapore vs USGC differentials...</div>
@@ -601,12 +600,12 @@ table td { padding: 5px 10px; }
 
 <div class="t-line t-section">&#9608; PHASE 5: POLISH &amp; THE META MOMENT</div>
 <div class="t-line t-user">the narrative is still too long, can we make it a bit sharpened please</div>
-<div class="t-line t-ai">Rewriting LLM prompt: "You are a McKinsey senior partner. EXACTLY 3 bullets. Max 15 words each."</div>
+<div class="t-line t-ai">Rewriting LLM prompt: "MBB partner voice. EXACTLY 3 bullets. Max 15 words each."</div>
 <div class="t-line t-user">final touches the page should look great on mobile</div>
 <div class="t-line t-prompt">Adding responsive CSS: stacked KPIs, hidden verbose elements, collapsible methodology...</div>
 <div class="t-line t-ok">Mobile-optimized. Methodology collapsed into &lt;details&gt; element.</div>
 <div class="t-gap"></div>
-<div class="t-line t-user">a senior partner wants to see how I went about creating this with you</div>
+<div class="t-line t-user">I want to document how we went about creating this together</div>
 <div class="t-line t-user">make a tab that shows how we went about it but make it feel like a walkthrough</div>
 <div class="t-line t-user">show the real mess</div>
 <div class="t-line t-ai">Building this terminal you're reading right now.</div>
@@ -626,10 +625,10 @@ table td { padding: 5px 10px; }
 <div class="t-line t-dim">// Total time: one working session</div>
 <div class="t-line t-dim">// Files created or modified: ~15</div>
 <div class="t-line t-dim">// Git conflicts resolved: lost count</div>
-<div class="t-line t-dim">// Times the human corrected a fundamentally wrong approach: 3</div>
-<div class="t-line t-dim">// Times the AI was called "a bad program": 1 (deserved)</div>
+<div class="t-line t-dim">// Times Parth corrected a fundamentally wrong approach: 3</div>
+<div class="t-line t-dim">// Times the AI needed a hard course-correction: 3</div>
 <div class="t-line t-dim">//</div>
-<div class="t-line t-dim">// The pattern: the human knew WHAT was needed (remove stock, use real consensus,</div>
+<div class="t-line t-dim">// The pattern: Parth knew WHAT was needed (remove stock, use real consensus,</div>
 <div class="t-line t-dim">// switch to Indian basket, make it sharper). The AI knew HOW to build it</div>
 <div class="t-line t-dim">// (softmax math, LLM prompts, Cloudflare Workers, CSS).</div>
 <div class="t-line t-dim">//</div>
