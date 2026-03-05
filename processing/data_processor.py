@@ -3,7 +3,9 @@
 import os
 import sys
 import logging
+import importlib
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
@@ -15,8 +17,20 @@ from processing.narrative_generator import generate_narrative
 logger = logging.getLogger(__name__)
 
 
+def _run_single_scraper(name, module_path):
+    """Run one scraper, return (name, result_dict)."""
+    try:
+        module = importlib.import_module(module_path)
+        count = module.run()
+        logger.info(f"{name}: {count} records")
+        return name, {"status": "success", "count": count}
+    except Exception as e:
+        logger.error(f"{name} failed: {e}")
+        return name, {"status": "failed", "error": str(e)}
+
+
 def run_all_scrapers():
-    """Run all scrapers and return results summary."""
+    """Run all scrapers IN PARALLEL and return results summary."""
     init_db()
     results = {}
 
@@ -48,17 +62,15 @@ def run_all_scrapers():
         ("company", "scrapers.company_scraper"),
     ]
 
-    for name, module_path in scrapers:
-        try:
-            logger.info(f"Running {name} scraper...")
-            import importlib
-            module = importlib.import_module(module_path)
-            count = module.run()
-            results[name] = {"status": "success", "count": count}
-            logger.info(f"{name}: {count} records")
-        except Exception as e:
-            results[name] = {"status": "failed", "error": str(e)}
-            logger.error(f"{name} failed: {e}")
+    # Run all scrapers in parallel (I/O-bound — threads are ideal)
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        futures = {
+            pool.submit(_run_single_scraper, name, mod): name
+            for name, mod in scrapers
+        }
+        for future in as_completed(futures):
+            name, result = future.result()
+            results[name] = result
 
     return results
 

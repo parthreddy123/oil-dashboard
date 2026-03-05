@@ -126,29 +126,47 @@ GRM_WEIGHTS = {
 }
 
 
-def get_current_product_prices():
-    """Fetch latest product prices from DB. Returns dict {product: price_usd_bbl}.
+# Singapore vs US Gulf Coast product price differentials (USD/bbl)
+_SINGAPORE_DIFF = {
+    "diesel": -3.0, "petrol": -2.5, "atf": -2.0,
+    "naphtha": 0.0, "fuel_oil": +10.0, "lpg": +5.0,
+}
 
-    Naphtha and fuel_oil are always derived (no reliable market source):
-    naphtha = petrol * 0.90, fuel_oil = Brent * 0.65.
-    """
+
+def get_indian_basket_price():
+    """Compute Indian crude basket = 72% Dubai/Oman + 28% Brent."""
+    with get_connection(readonly=True) as conn:
+        dubai = conn.execute(
+            "SELECT price FROM crude_prices WHERE benchmark='oman_dubai' ORDER BY date DESC LIMIT 1"
+        ).fetchone()
+        brent = conn.execute(
+            "SELECT price FROM crude_prices WHERE benchmark='brent' ORDER BY date DESC LIMIT 1"
+        ).fetchone()
+    d = float(dubai["price"]) if dubai else None
+    b = float(brent["price"]) if brent else 80.0
+    if d:
+        return round(0.72 * d + 0.28 * b, 2), d, b
+    return round(b, 2), None, b
+
+
+def get_current_product_prices():
+    """Fetch latest product prices (Singapore-adjusted) for Indian refinery context."""
+    basket, _, brent = get_indian_basket_price()
     with get_connection(readonly=True) as conn:
         rows = conn.execute(
             """SELECT product, price FROM product_prices
                WHERE unit='USD/bbl' AND product IN ('petrol','diesel','atf','lpg')
                GROUP BY product HAVING date = MAX(date)"""
         ).fetchall()
-        brent_row = conn.execute(
-            "SELECT price FROM crude_prices WHERE benchmark='brent' ORDER BY date DESC LIMIT 1"
-        ).fetchone()
-    prices = {r["product"]: r["price"] for r in rows}
-    brent = float(brent_row["price"]) if brent_row else 80.0
-    # Always derive estimated products from current Brent
+    prices = {}
+    for r in rows:
+        p = r["product"]
+        prices[p] = round(r["price"] + _SINGAPORE_DIFF.get(p, 0), 2)
     if "petrol" in prices:
-        prices["naphtha"] = round(prices["petrol"] * 0.90, 2)
+        prices["naphtha"] = round(prices["petrol"] * 0.90 + _SINGAPORE_DIFF["naphtha"], 2)
     else:
-        prices["naphtha"] = round(brent * 0.81, 2)
-    prices["fuel_oil"] = round(brent * 0.65, 2)
+        prices["naphtha"] = round(basket * 0.81, 2)
+    prices["fuel_oil"] = round(basket * 0.65 + _SINGAPORE_DIFF["fuel_oil"], 2)
     return prices
 
 
@@ -376,13 +394,13 @@ def _compute_ranges(scenarios, horizon):
 # Strategic narrative generation — LLM synthesizes across articles
 # ---------------------------------------------------------------------------
 
-_NARRATIVE_SYSTEM = """You are a McKinsey senior partner briefing a refinery CEO. Write like a top-tier strategy consultant:
-- Every word earns its place. No filler, no hedging, no "it is worth noting".
-- Use HTML bullet points (<ul><li>). Max 4 bullets for narrative, 1 bullet each for KPI explanations.
-- Lead each bullet with the insight, not the setup. Start with "what" not "given that".
-- Be specific: name countries, percentages, mechanisms. Never say "various factors".
-- Narrative bullets: (1) Situation now (2) Key driver (3) Implication for Indian refiners (4) Watch item
-- KPI explanations: one sharp sentence with the causal mechanism."""
+_NARRATIVE_SYSTEM = """You are a McKinsey senior partner. Ultra-concise. Every word earns its place.
+Rules:
+- HTML bullet list (<ul><li>). EXACTLY 3 bullets for narrative, max 15 words each.
+- KPI explanations: 1 sentence, max 12 words. State the causal mechanism only.
+- No filler. No hedging. No "it is worth noting" or "given that".
+- Lead with the insight. Be specific: name countries, %, mechanisms.
+- Bullet 1: What's happening now. Bullet 2: Key risk/driver. Bullet 3: So-what for Indian refiners."""
 
 _NARRATIVE_USER = """Scenario probabilities: {weights}
 Expected values: Brent ${oil_ev:.0f}/bbl (range {oil_range}), GRM ${grm_ev:.1f}/bbl (range {grm_range})
@@ -391,9 +409,9 @@ Top signals:
 {articles}
 
 Return ONLY valid JSON with exactly these keys:
-- "narrative": HTML string with <ul><li> bullets. Max 4 bullets, each 1 sentence. MBB partner voice.
-- "oil_explanation": 1 sentence. Why this price, what's the mechanism.
-- "grm_explanation": 1 sentence. What's compressing or expanding margins and why.
+- "narrative": HTML <ul><li> with EXACTLY 3 bullets. Max 15 words per bullet. No sub-bullets.
+- "oil_explanation": 1 sentence, max 12 words. The causal mechanism only.
+- "grm_explanation": 1 sentence, max 12 words. The causal mechanism only.
 
 No markdown fences. No preamble."""
 
