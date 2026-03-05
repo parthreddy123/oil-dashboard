@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scenario Engine &mdash; 2026-03-05 16:34</title>
+<title>Scenario Engine &mdash; 2026-03-05 16:38</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -255,7 +255,7 @@ table td { padding: 5px 10px; }
 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
     <div>
         <h1 style="margin-bottom:0.2rem;">&#127919; Scenario Engine</h1>
-        <div class="subtitle" style="margin-bottom:0;">Geopolitical scenario analysis for Indian refinery strategy &middot; 2026-03-05 16:34</div>
+        <div class="subtitle" style="margin-bottom:0;">Geopolitical scenario analysis for Indian refinery strategy &middot; 2026-03-05 16:38</div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;">
         <button class="refresh-btn" id="refreshBtn" onclick="doRefresh()">&#8635; Refresh Data</button>
@@ -519,17 +519,35 @@ table td { padding: 5px 10px; }
 <div class="t-line t-dim">// The ask: something sharper. A scenario engine.</div>
 <div class="t-gap"></div>
 
-<div class="t-line t-section">&#9608; PHASE 1: THE BRIEF</div>
+<div class="t-line t-section">&#9608; PHASE 1: THE BRIEF &amp; ARCHITECTURE</div>
 <div class="t-line t-user">build a scenario engine. 5 geopolitical scenarios for middle east crisis. score news articles against them with AI. show probabilities, expected brent price, GRM impact.</div>
+<div class="t-line t-user">use Claude Haiku for the scoring- it's cheap and fast enough. batch articles through the API.</div>
+<div class="t-line t-user">I want softmax probabilities, not just raw scores. and expected values weighted by probability.</div>
 <div class="t-gap"></div>
-<div class="t-line t-ai">Designing 5 scenarios: Ceasefire, Quick Resolution, Regime Change, Prolonged Standoff, Conflagration...</div>
-<div class="t-line t-prompt">creating database/schema.py &mdash; new table: article_signals</div>
-<div class="t-line t-prompt">creating processing/scenario_analyzer.py &mdash; LLM scoring pipeline</div>
+<div class="t-line t-ai">Good call on Haiku &mdash; ~$0.005 per full run. Designing the scoring pipeline...</div>
+<div class="t-line t-dim">// Parth made the key architecture calls early:</div>
+<div class="t-line t-dim">// - LLM choice: Claude Haiku 4.5 (cost-effective, fast enough for batch scoring)</div>
+<div class="t-line t-dim">// - Scoring approach: per-article signals [-1, +1] across all 5 scenarios</div>
+<div class="t-line t-dim">// - Probability model: softmax with temperature (not simple averaging)</div>
+<div class="t-line t-dim">// - Output: expected values, not point estimates. probability-weighted.</div>
+<div class="t-line t-dim">// - Deployment: static HTML on GitHub Pages (no server costs, CDN-fast)</div>
+<div class="t-line t-dim">// - Data: SQLite WAL mode (single file, concurrent reads, zero config)</div>
+<div class="t-gap"></div>
+<div class="t-line t-user">make the LLM generate a strategic narrative too- like what a consulting partner would write</div>
+<div class="t-line t-user">and each scenario should have its own LLM assessment explaining why the probability is what it is</div>
+<div class="t-line t-ai">So that's: 1 call for article scoring (batched), 1 call for strategic narrative, 1 call for scenario assessments. Three LLM agent roles per refresh.</div>
+<div class="t-line t-user">exactly. and the narrative should be sharp- MBB partner voice, not academic.</div>
+<div class="t-gap"></div>
+<div class="t-line t-prompt">creating database/schema.py &mdash; new tables: article_signals, scenario_weights, strategic_narratives</div>
+<div class="t-line t-prompt">creating processing/scenario_analyzer.py &mdash; LLM scoring + narrative pipeline</div>
 <div class="t-line t-ai">Each article scored [-1, +1] against all 5 scenarios. Softmax over avg signals &rarr; probabilities. EV = probability-weighted price across scenarios.</div>
 <div class="t-line t-prompt">python -m processing.scenario_analyzer</div>
 <div class="t-line t-ok">Scored 47 articles. Prolonged Standoff: 34%, Conflagration: 22%, Quick Resolution: 18%...</div>
 <div class="t-line t-prompt">python export_html.py &amp;&amp; git push origin gh-pages</div>
 <div class="t-line t-ok">Report live at github.io. LLM narratives, scenario cards, momentum tracking. v1 working.</div>
+<div class="t-line t-user">can we also add a "last 12 hours" breaking signal section? show momentum direction per scenario.</div>
+<div class="t-line t-ai">Adding momentum computation: 12h avg signal vs 7-day baseline per scenario. Rising/falling/stable.</div>
+<div class="t-line t-ok">Breaking signal window + momentum indicators live.</div>
 <div class="t-gap"></div>
 
 <div class="t-line t-section">&#9608; PHASE 2: "THIS WILL GO PUBLIC"</div>
@@ -728,12 +746,26 @@ table td { padding: 5px 10px; }
 <div class="t-line t-prompt">cd /tmp/gh-deploy &amp;&amp; git init &amp;&amp; git push origin gh-pages --force</div>
 <div class="t-line t-ok">Gave up on clean merges. Nuke and pave. It works.</div>
 <div class="t-gap"></div>
+<div class="t-line t-user">also make another tab that shows the tool schematic, the inputs, engine, output</div>
+<div class="t-line t-user">we created this for the oil dashboard before- remember the nice visual value chain?</div>
+<div class="t-line t-ai">Adding Architecture tab. Plain HTML boxes with the pipeline flow.</div>
+<div class="t-line t-user">the architecture doesn't show the nice visual value chain we had created for the oil dashboard</div>
+<div class="t-line t-dim">// Parth wanted the Mermaid-based interactive diagrams from docs/index.html, not static boxes.</div>
+<div class="t-line t-ai">Switching to Mermaid.js diagrams. System Architecture, GRM Calculation, Scenario Scoring Engine.</div>
+<div class="t-line t-prompt">adding mermaid CDN to &lt;head&gt;, dark theme config, three graph definitions...</div>
+<div class="t-line t-prompt">deploy &rarr; click Architecture tab &rarr; nothing renders</div>
 <div class="t-line t-user">the architecture diagrams aren't showing up :(</div>
-<div class="t-line t-dim">// mermaid.js was trying to render diagrams inside a hidden tab (display:none). silent failure.</div>
+<div class="t-line t-dim">// mermaid.js was trying to render inside a hidden tab (display:none). SVG needs visible DOM to calculate dimensions.</div>
+<div class="t-line t-dim">// startOnLoad: true + hidden div = silent failure. no error. just... nothing.</div>
 <div class="t-line t-ai">Setting startOnLoad: false, deferring render to first tab click...</div>
 <div class="t-line t-prompt">deploy &rarr; check live &rarr; CDN cached old version &rarr; wait &rarr; check again</div>
-<div class="t-line t-dim">// even the deploy-verify cycle had friction. GitHub Pages CDN caches aggressively.</div>
+<div class="t-line t-dim">// WebFetch said the mermaid script tag was missing. curl said it was there. GitHub Pages CDN was serving stale HTML.</div>
+<div class="t-line t-dim">// spent 20 minutes debugging a problem that was just... caching.</div>
 <div class="t-line t-ok">Finally rendering. Three Mermaid diagrams + value chain pipeline. In the dark.</div>
+<div class="t-gap"></div>
+<div class="t-line t-user">can we remove the reference to "bad program" and "senior partner" please? sorry for that claude- I love you</div>
+<div class="t-line t-ai">Sanitizing. Also changing "human&gt;" to "parth&gt;" in the terminal.</div>
+<div class="t-line t-dim">// we're now editing the story about editing the story. this is getting meta.</div>
 <div class="t-gap"></div>
 
 <div class="t-line t-section">&#9608; WHAT ACTUALLY HAPPENED</div>
