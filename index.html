@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scenario Engine &mdash; 2026-03-07 19:07</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0E1117; color: #E5E7EB; line-height: 1.6; padding: 2rem;
+    max-width: 1100px; margin: 0 auto;
+}
+h1 { font-size: 1.6rem; font-weight: 800; color: #F9FAFB; margin-bottom: 0.3rem; }
+h2 {
+    color: #E5E7EB; font-weight: 700; font-size: 1.15rem;
+    border-bottom: 2px solid rgba(0, 212, 170, 0.3); padding-bottom: 0.4rem;
+    margin: 1.8rem 0 1rem;
+}
+.subtitle { font-size: 0.75rem; color: #6B7280; margin-bottom: 1.5rem; }
+a { color: #00D4FF; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.narrative-box {
+    background: linear-gradient(135deg, #0D2818 0%, #1A1F2E 100%);
+    border: 1px solid rgba(16, 185, 129, 0.3); border-left: 4px solid #10B981;
+    border-radius: 12px; padding: 1.2rem 1.5rem; margin-bottom: 1.5rem;
+    line-height: 1.7; font-size: 0.88rem;
+}
+.narrative-box strong { color: #F9FAFB; }
+.narrative-label {
+    font-size: 0.68rem; font-weight: 700; color: #10B981;
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;
+}
+
+.kpi-row { display: flex; gap: 16px; margin-bottom: 1.5rem; }
+.kpi-card {
+    flex: 1; background: linear-gradient(135deg, #1A1F2E, #151A28);
+    border: 1px solid rgba(255,255,255,0.06); border-radius: 10px;
+    padding: 14px 16px 12px; position: relative;
+}
+.kpi-card .label {
+    font-size: 0.68rem; font-weight: 600; color: #9CA3AF;
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;
+}
+.kpi-card .value {
+    font-size: 1.5rem; font-weight: 700; color: #F9FAFB;
+    font-variant-numeric: tabular-nums;
+}
+.kpi-card .range { font-size: 0.68rem; color: #4B5563; margin-top: 4px; }
+.kpi-explanation {
+    font-size: 0.72rem; color: #9CA3AF; line-height: 1.5; margin-top: 8px;
+    padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.06); font-style: italic;
+}
+
+.momentum-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1rem; }
+.momentum-box {
+    background: linear-gradient(135deg, #1A1F2E, #151A28);
+    border: 1px solid rgba(255,255,255,0.06); border-radius: 8px;
+    padding: 8px 14px; min-width: 120px; flex: 1; text-align: center;
+}
+.momentum-box .name {
+    font-size: 0.65rem; color: #9CA3AF; text-transform: uppercase;
+    letter-spacing: 0.06em; font-weight: 600;
+}
+.momentum-box .delta { font-size: 1rem; font-weight: 700; margin-top: 2px; }
+
+.breaking-article {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.82rem;
+}
+.breaking-article:hover { background: rgba(255,255,255,0.02); }
+.breaking-article .ts {
+    font-size: 0.7rem; color: #6B7280; white-space: nowrap;
+    font-variant-numeric: tabular-nums; min-width: 42px;
+}
+.signal-tag {
+    font-size: 0.65rem; font-weight: 700; padding: 2px 6px;
+    border-radius: 4px; white-space: nowrap; display: inline-block;
+}
+
+.scenario-card {
+    background: linear-gradient(135deg, #1A1F2E, #151A28);
+    border: 1px solid rgba(255,255,255,0.06); border-radius: 12px;
+    margin-bottom: 14px; overflow: hidden;
+}
+.scenario-header {
+    padding: 14px 18px 10px; display: flex; justify-content: space-between;
+    align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.scenario-header .name { font-size: 1rem; font-weight: 700; color: #F9FAFB; }
+.scenario-header .desc { font-size: 0.72rem; color: #6B7280; margin-left: 8px; }
+.scenario-header .pct { font-size: 1.3rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.scenario-bar { height: 4px; background: rgba(255,255,255,0.04); }
+.scenario-body { display: flex; }
+.scenario-articles {
+    flex: 1; padding: 14px 18px; border-right: 1px solid rgba(255,255,255,0.06);
+    min-width: 0;
+}
+.scenario-kpis { width: 280px; flex-shrink: 0; padding: 14px 18px; }
+.scenario-kpis .row { display: flex; gap: 12px; margin-bottom: 8px; }
+.scenario-kpis .item { text-align: center; }
+.scenario-kpis .item .lbl { font-size: 0.6rem; color: #4B5563; text-transform: uppercase; }
+.scenario-kpis .item .val { font-size: 0.95rem; font-weight: 700; color: #F9FAFB; }
+
+.art-reasoning {
+    font-size: 0.7rem; color: #6B7280; line-height: 1.4; margin-top: 3px;
+    padding-left: 8px; border-left: 2px solid rgba(255,255,255,0.06); font-style: italic;
+}
+.scenario-assessment {
+    background: rgba(0, 212, 170, 0.06); border: 1px solid rgba(0, 212, 170, 0.2);
+    border-left: 3px solid #00D4AA; border-radius: 8px; padding: 10px 12px;
+    margin-top: 10px; font-size: 0.78rem; color: #D1D5DB; line-height: 1.5;
+}
+.scenario-assessment .lbl {
+    font-size: 0.65rem; font-weight: 700; color: #00D4AA;
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;
+}
+
+.footer {
+    margin-top: 2rem; padding: 12px 16px; background: #151A28;
+    border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);
+    font-size: 0.7rem; color: #4B5563; display: flex;
+    justify-content: space-between; flex-wrap: wrap; gap: 8px;
+}
+
+table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); }
+table td { padding: 5px 10px; }
+.narrative-box ul { margin: 0; padding-left: 1.2em; }
+.narrative-box li { margin-bottom: 4px; }
+
+/* Tabs */
+.tab-bar {
+    display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 2px solid rgba(255,255,255,0.08);
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.tab-btn {
+    background: none; border: none; color: #6B7280; padding: 10px 20px;
+    font-size: 0.82rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+    border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;
+    font-family: inherit;
+}
+.tab-btn:hover { color: #D1D5DB; }
+.tab-btn.active { color: #00D4AA; border-bottom-color: #00D4AA; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Terminal build story */
+.terminal {
+    background: #0a0a0a; border: 1px solid #333; border-radius: 8px;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+    font-size: 0.78rem; line-height: 1.7; overflow: hidden;
+}
+.terminal-bar {
+    background: #1a1a1a; padding: 8px 14px; display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid #333;
+}
+.terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+.terminal-bar .title { color: #666; font-size: 0.7rem; margin-left: 8px; }
+.terminal-body { padding: 16px 18px; max-height: 75vh; overflow-y: auto; }
+.t-line { margin-bottom: 2px; }
+.t-prompt { color: #10B981; }
+.t-prompt::before { content: '$ '; color: #F59E0B; }
+.t-user { color: #FCD34D; }
+.t-user::before { content: 'parth> '; color: #F59E0B; font-weight: 700; }
+.t-ai { color: #9CA3AF; }
+.t-ai::before { content: 'claude> '; color: #00D4AA; font-weight: 700; }
+.t-err { color: #EF4444; }
+.t-err::before { content: 'ERROR: '; font-weight: 700; }
+.t-ok { color: #10B981; }
+.t-ok::before { content: '  OK: '; font-weight: 700; }
+.t-warn { color: #F59E0B; }
+.t-dim { color: #4B5563; }
+.t-section {
+    color: #00D4FF; font-weight: 700; margin-top: 16px; margin-bottom: 4px;
+    border-bottom: 1px solid #1a2a3a; padding-bottom: 4px;
+}
+.t-gap { height: 12px; }
+
+/* Architecture */
+.arch-row { display: flex; gap: 16px; margin-bottom: 20px; align-items: stretch; }
+.arch-col { flex: 1; min-width: 0; }
+.arch-box {
+    background: linear-gradient(135deg, #1A1F2E, #151A28);
+    border: 1px solid rgba(255,255,255,0.06); border-radius: 10px;
+    padding: 16px; height: 100%;
+}
+.arch-box .arch-label {
+    font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; margin-bottom: 10px;
+}
+.arch-item {
+    font-size: 0.78rem; color: #D1D5DB; padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.arch-item:last-child { border-bottom: none; }
+.arch-item .src { color: #F9FAFB; font-weight: 600; }
+.arch-item .note { color: #6B7280; font-size: 0.7rem; }
+.arch-flow {
+    display: flex; align-items: center; gap: 12px; margin: 24px 0;
+    flex-wrap: wrap; justify-content: center;
+}
+.arch-step {
+    background: linear-gradient(135deg, #1A1F2E, #151A28);
+    border: 1px solid rgba(0, 212, 170, 0.2); border-radius: 10px;
+    padding: 12px 16px; text-align: center; min-width: 120px;
+}
+.arch-step .step-name { font-size: 0.75rem; font-weight: 700; color: #F9FAFB; }
+.arch-step .step-detail { font-size: 0.65rem; color: #6B7280; margin-top: 2px; }
+.arch-connector { color: #00D4AA; font-size: 1.2rem; font-weight: 700; }
+
+@media (max-width: 768px) {
+    body { padding: 0.7rem; font-size: 0.82rem; }
+    h1 { font-size: 1.1rem; }
+    h2 { font-size: 1rem; margin: 1.2rem 0 0.6rem; }
+    .kpi-row { flex-direction: column; gap: 8px; }
+    .kpi-card { padding: 10px 12px; }
+    .kpi-card .value { font-size: 1.2rem; }
+    .kpi-card .label { font-size: 0.62rem; }
+    .scenario-body { flex-direction: column; }
+    .scenario-kpis { width: 100%; border-right: none; border-top: 1px solid rgba(255,255,255,0.06); padding: 10px 14px; }
+    .scenario-articles { padding: 10px 14px; }
+    .scenario-header { padding: 10px 14px 8px; flex-wrap: wrap; gap: 4px; }
+    .scenario-header .desc { display: none; }
+    .scenario-header .pct { font-size: 1.1rem; }
+    .momentum-row { gap: 6px; }
+    .momentum-box { min-width: 0; padding: 6px 8px; }
+    .narrative-box { padding: 10px 12px; font-size: 0.78rem; line-height: 1.5; }
+    .narrative-box li { margin-bottom: 2px; }
+    .art-reasoning { display: none; }
+    .breaking-article { font-size: 0.72rem; padding: 6px 8px; }
+    .scenario-assessment { font-size: 0.72rem; padding: 8px 10px; }
+    .footer { font-size: 0.62rem; flex-direction: column; gap: 4px; }
+    table { font-size: 0.7rem !important; }
+    table th, table td { padding: 4px 6px !important; }
+    .tab-btn { padding: 8px 14px; font-size: 0.75rem; }
+    .phase-card { padding: 14px 16px; }
+    .arch-row { flex-direction: column; }
+    .arch-flow { flex-direction: column; }
+    .arch-connector { transform: rotate(90deg); display: block; text-align: center; }
+}
+
+.refresh-btn {
+    background: linear-gradient(135deg, #00D4AA 0%, #00B894 100%);
+    color: #0E1117; border: none; padding: 8px 20px; border-radius: 8px;
+    font-weight: 700; font-size: 0.82rem; cursor: pointer; letter-spacing: 0.02em;
+}
+.refresh-btn:hover { box-shadow: 0 4px 16px rgba(0,212,170,0.3); }
+.refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+    <div>
+        <h1 style="margin-bottom:0.2rem;">&#127919; Scenario Engine</h1>
+        <div class="subtitle" style="margin-bottom:0;">Geopolitical scenario analysis for Indian refinery strategy &middot; 2026-03-07 19:07</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+        <button class="refresh-btn" id="refreshBtn" onclick="doRefresh()">&#8635; Refresh Data</button>
+        <span id="refreshStatus" style="font-size:0.75rem;color:#9CA3AF;"></span>
+    </div>
+</div>
+
+<div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('analysis')">Analysis</button>
+    <button class="tab-btn" onclick="switchTab('build')">How We Built This</button>
+    <button class="tab-btn" onclick="switchTab('arch')">Architecture</button>
+</div>
+
+<div id="tab-analysis" class="tab-panel active">
+<div style="font-size:0.85rem;margin-bottom:1rem;"><span style="color:#F59E0B;">Brent: <strong>$92.69/bbl</strong></span> &nbsp;&middot;&nbsp; <span style="color:#00D4AA;">Indian Basket: <strong>$91.40/bbl</strong> <span style="font-size:0.75rem;color:#6B7280;">(72% Dubai + 28% Brent)</span></span></div>
+
+<div style="background:linear-gradient(135deg,#151A28,#1A1F2E);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px 18px;margin-bottom:1.2rem;font-size:0.8rem;color:#9CA3AF;line-height:1.5;">
+    AI-powered geopolitical scenario analysis for Indian refinery strategy. LLM scores news articles against 5 scenarios; <strong style="color:#F9FAFB;">EV</strong> = probability-weighted expectation, not a forecast.
+    <details style="margin-top:8px;"><summary style="cursor:pointer;color:#00D4AA;font-weight:600;font-size:0.75rem;">Methodology details</summary>
+    <div style="margin-top:8px;font-size:0.75rem;line-height:1.5;">
+    <strong style="color:#00D4AA;">GRM</strong> = (weighted product revenue) &minus; crude cost. Crude = <strong>Indian basket</strong> (72% Dubai + 28% Brent). Products = Singapore-benchmarked (Platts SG vs US Gulf differentials). Slate: diesel 42%, petrol 22%, naphtha 12%, ATF 10%, fuel oil 8%, LPG 6%.<br><br>
+    <strong style="color:#F59E0B;">Scenario prices</strong> from analyst consensus (GS, JPM, MS, Citi, WoodMac, Rystad, Mar 2026). Product prices from observed crisis crack spreads. Singapore adjustments: diesel &minus;$3, petrol &minus;$2.5, ATF &minus;$2, fuel oil +$10 vs USGC.
+    </div></details>
+</div>
+
+
+        <div class="horizon-section">
+            <h2 style="font-size:1.3rem;margin-top:2.5rem;">3-Month Horizon</h2>
+            
+        <div class="narrative-box">
+            <div class="narrative-label">Strategic Assessment</div>
+            <div><ul><li>Prolonged Standoff (34%) most probable: Hormuz closure strands tankers, Iran controls strait, supplies disrupted 45 days.</li><li>Conflagration risk (23%) critical: Drone strikes hit Saudi refineries, Iraqi production lost, OPEC spare capacity exhausted.</li><li>Indian refiners face feedstock crisis: MRPL force majeure, crude access severed, GRM compression $6.6 range unsustainable.</li></ul></div>
+        </div>
+
+    <div class="kpi-row">
+        <div class="kpi-card" style="border-left:3px solid #F59E0B;">
+            <div class="label">Brent Price (Expected Value)</div>
+            <div class="value">$93/bbl</div>
+            <div class="range">range: $68-130</div>
+            <div style="font-size:0.72rem;color:#F59E0B;margin-top:4px;">Current Brent: $92.69/bbl</div>
+            <div class="kpi-explanation">Hormuz closure + Iraqi losses + Saudi refinery damage remove 5M bbl/day supply, pushing Brent toward $130.</div>
+        </div>
+        <div class="kpi-card" style="border-left:3px solid #00D4AA;">
+            <div class="label">Typical Indian Refinery GRM (EV)</div>
+            <div class="value">$6.6/bbl</div>
+            <div class="range">range: $-2.0-13.0</div>
+            <div style="font-size:0.72rem;color:#00D4AA;margin-top:4px;">Indian Basket: $91.40/bbl (Dubai $90.90 &times; 72% + Brent $92.69 &times; 28%)</div>
+            <div class="kpi-explanation">Feedstock scarcity forces refiners to reject low-margin crude purchases; output cuts compress GRM downside to -$2.</div>
+        </div>
+    </div>
+
+    <div style="overflow-x:auto;margin-bottom:1.5rem;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.78rem;">
+            <thead><tr style="border-bottom:2px solid rgba(255,255,255,0.1);text-align:left;">
+                <th style="padding:6px 10px;color:#9CA3AF;font-weight:600;font-size:0.68rem;text-transform:uppercase;">Product</th>
+                <th style="padding:6px 10px;color:#9CA3AF;font-weight:600;font-size:0.68rem;text-transform:uppercase;">Current (SG)</th>
+                <th style="padding:6px 10px;color:#9CA3AF;font-weight:600;font-size:0.68rem;text-transform:uppercase;">EV (3m)</th>
+                <th style="padding:6px 10px;color:#9CA3AF;font-weight:600;font-size:0.68rem;text-transform:uppercase;">Chg</th>
+                <th style="padding:6px 10px;color:#9CA3AF;font-weight:600;font-size:0.68rem;text-transform:uppercase;">GRM Wt</th>
+            </tr></thead>
+            <tbody style="color:#E5E7EB;"><tr><td>Diesel</td><td>$115</td><td>$136</td><td><span style="color:#EF4444;font-weight:600;">+18%</span></td><td style="color:#4B5563;">42%</td></tr><tr><td>Petrol</td><td>$93</td><td>$88</td><td><span style="color:#10B981;font-weight:600;">-6%</span></td><td style="color:#4B5563;">22%</td></tr><tr><td>ATF</td><td>$113</td><td>$132</td><td><span style="color:#EF4444;font-weight:600;">+17%</span></td><td style="color:#4B5563;">10%</td></tr><tr><td>Naphtha</td><td>$84</td><td>$71</td><td><span style="color:#10B981;font-weight:600;">-15%</span></td><td style="color:#4B5563;">12%</td></tr><tr><td>Fuel Oil</td><td>$69</td><td>$66</td><td><span style="color:#10B981;font-weight:600;">-5%</span></td><td style="color:#4B5563;">8%</td></tr><tr><td>LPG</td><td>$33</td><td>$29</td><td><span style="color:#10B981;font-weight:600;">-14%</span></td><td style="color:#4B5563;">6%</td></tr></tbody>
+        </table>
+    </div>
+<h2>Last 12 Hours</h2><div class="momentum-row">
+            <div class="momentum-box" style="border-top:2px solid #10B981;">
+                <div class="name">Quick</div>
+                <div class="delta" style="color:#10B981;">&#9650; +0.20</div>
+            </div>
+            <div class="momentum-box" style="border-top:2px solid #F59E0B;">
+                <div class="name">Prolong</div>
+                <div class="delta" style="color:#EF4444;">&#9660; -0.38</div>
+            </div>
+            <div class="momentum-box" style="border-top:2px solid #EF4444;">
+                <div class="name">Conflag</div>
+                <div class="delta" style="color:#EF4444;">&#9660; -0.17</div>
+            </div>
+            <div class="momentum-box" style="border-top:2px solid #00D4FF;">
+                <div class="name">Ceasefire</div>
+                <div class="delta" style="color:#10B981;">&#9650; +0.13</div>
+            </div>
+            <div class="momentum-box" style="border-top:2px solid #8B5CF6;">
+                <div class="name">Regime</div>
+                <div class="delta" style="color:#EF4444;">&#9660; -0.11</div>
+            </div></div>
+<h2>Scenario Analysis</h2>
+
+        <div class="scenario-card">
+            <div class="scenario-header">
+                <div>
+                    <span class="name">Prolonged Standoff</span>
+                    <span class="desc">Neither escalation nor resolution. Partial Hormuz disruption persists with naval escort corridors. Elevated premiums, rerouted tankers.</span>
+                </div>
+                <span class="pct" style="color:#F59E0B;">34%</span>
+            </div>
+            <div class="scenario-bar"><div style="height:100%;width:85.99190401253809%;background:#F59E0B;border-radius:0 2px 2px 0;"></div></div>
+            <div class="scenario-body">
+                <div class="scenario-articles"><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.95]</span><a href="https://oilprice.com/Energy/Natural-Gas/Strait-of-Hormuz-Closure-Sends-European-Gas-Benchmark-Soaring.html" target="_blank" style="color:#F9FAFB;text-decoration:none;">Strait of Hormuz Closure Sends European Gas Benchmark Soaring</a></div><div class="art-reasoning">Effective Hormuz closure with sharp market spikes is the quintessential signal of prolonged standoff with sustained maritime disruption.</div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.95]</span><a href="https://oilprice.com/Latest-Energy-News/World-News/Dozens-of-Asia-Flagged-Oil-Tankers-Stranded-near-Strait-of-Hormuz.html" target="_blank" style="color:#F9FAFB;text-decoration:none;">Dozens of Asia-Flagged Oil Tankers Stranded near Strait of Hormuz</a></div><div class="art-reasoning">Dozens of stranded tankers with crews is the quintessential prolonged standoff outcome representing sustained partial closure.</div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.90]</span><a href="https://news.google.com/rss/articles/CBMiwwJBVV95cUxPLThmSnlCdS1PZzJhc1BMeEdJUDFuYW1yZUhKSXJ3ZUNFTzA1YjlLYXNMYTE1OFo1Zm5IZEJPLTdPSjY1cl82V3BObkFLdnhRN21ReXEtU1hIOEsyOEgtaHIyYWNyQ0doOTFncWJmMERyUmk2cm5MVEF4YVhwZXZaLXVoelRmbEd6cUJjMVlnTUFRQThSRXFhdDNWRy1aTXRjeFhaSWg4d2N4TklGNkdLbGZNQk9OQTczaXFLY0stOS1iLVVDNXEyRHFkdjVraC0tTFNrQlF0Q191cEwxcF96bzFNQUJJamlucVVLODRib1BjS0RPTHE4TDBZVXR4eFNvemFrUW5CRlJ1NVJERFkzTnhkUTA1Y2dDNzNYdkJtMl9CTHZNLU9MRkZqd2taRnY5WmxiNHlBM3ZjRmx4WmxlZFVrMNIByAJBVV95cUxOekMwYm03d0hZNVFjY3drZlUzQ0d1MVZKbms3NVR6NS02YThUX2FpVTlOVWxrNVdVMGFUeWgzbkJ1UW9iQkFUVll4NEpWUU9FWFV3UjNQODJneXc2XzZZajRQN3lETy12b0NVa2RDN2pQYUNTSVpfRWJYSjJibHkzeElVRlVPVXI1ejVhcU4zdS1wXy02RFRZWHZQSGx0SzA2Rk5EWE1aQm9YRU5pSkpqXzFRNkplckk2QU9ZMmh4UVFkaDc0TFN3Y1p6dUZva3FqREtna25jdFhaYWx6TkotZDNkbk5xWGZ5Sl9JeEdtT0pxOURlVWJxMUlrSlIzakJtQ19lTGJTS0ptVWNxeXUxdlpjSHFZdVFNUGx1UTNlZEg4Ti1XbXJmUmhsX3pNUE1qZEJyMTBobWhtamotQlh1cjM5SjNyOUMz?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">Global oil supply chains face historic stress: Crude prices and tanker rates now at all-time highs — here’</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.90]</span><a href="https://oilprice.com/Latest-Energy-News/World-News/Goldman-Sachs-Hikes-Q2-Brent-Oil-Price-Forecast-by-10.html" target="_blank" style="color:#F9FAFB;text-decoration:none;">Goldman Sachs Hikes Q2 Brent Oil Price Forecast by $10</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.90]</span><a href="https://news.google.com/rss/articles/CBMitgFBVV95cUxPWi1MVXpjbGtrTHBtS1o0c1dKQ0p5V0JQWGVBRVlhNUdBR0JrNGp2Z0g0M0hFdUt4Sk5tbTVBOUxyNnRWZE1iczFFQjZxMllPVFoxbk4xTG13aTR2Xy1lbm5JYW1zS3JPeW1OZDN6QTdXV0RCMkgwbFZoeXZUc05SX0lHbjJONnhrTzJlbEVwLXFNdlk1OUl3dWdvVmJPbGpGVHZ4Z0xGSHczOVJmeHF0dWJVeUJyQQ?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">Markets latest: Massive oil producer declares it won't fulfil contracts</a></div></div></div>
+                <div class="scenario-kpis">
+                    <div class="row">
+                        <div class="item"><div class="lbl">Brent</div><div class="val">$90</div></div>
+                        <div class="item"><div class="lbl">GRM</div><div class="val">$7.0</div></div>
+                    </div>
+                    <div style="font-size:0.65rem;color:#6B7280;margin-top:6px;line-height:1.6;"><span style="white-space:nowrap;">Die $135</span> | <span style="white-space:nowrap;">Pet $86</span> | <span style="white-space:nowrap;">ATF $130</span></div>
+                    <div class="scenario-assessment"><div class="lbl">LLM Assessment</div><div>34% probability—the modal outcome—reflects sustained Hormuz blockade with stranded Asian tankers creating persistent supply constraints without escalation to broader regional conflict.</div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="scenario-card">
+            <div class="scenario-header">
+                <div>
+                    <span class="name">Conflagration</span>
+                    <span class="desc">Full regional war with complete Hormuz closure, refinery attacks, and global supply chain disruption.</span>
+                </div>
+                <span class="pct" style="color:#EF4444;">23%</span>
+            </div>
+            <div class="scenario-bar"><div style="height:100%;width:56.64306349957951%;background:#EF4444;border-radius:0 2px 2px 0;"></div></div>
+            <div class="scenario-body">
+                <div class="scenario-articles"><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.95]</span><a href="https://news.google.com/rss/articles/CBMiwwJBVV95cUxPLThmSnlCdS1PZzJhc1BMeEdJUDFuYW1yZUhKSXJ3ZUNFTzA1YjlLYXNMYTE1OFo1Zm5IZEJPLTdPSjY1cl82V3BObkFLdnhRN21ReXEtU1hIOEsyOEgtaHIyYWNyQ0doOTFncWJmMERyUmk2cm5MVEF4YVhwZXZaLXVoelRmbEd6cUJjMVlnTUFRQThSRXFhdDNWRy1aTXRjeFhaSWg4d2N4TklGNkdLbGZNQk9OQTczaXFLY0stOS1iLVVDNXEyRHFkdjVraC0tTFNrQlF0Q191cEwxcF96bzFNQUJJamlucVVLODRib1BjS0RPTHE4TDBZVXR4eFNvemFrUW5CRlJ1NVJERFkzTnhkUTA1Y2dDNzNYdkJtMl9CTHZNLU9MRkZqd2taRnY5WmxiNHlBM3ZjRmx4WmxlZFVrMNIByAJBVV95cUxOekMwYm03d0hZNVFjY3drZlUzQ0d1MVZKbms3NVR6NS02YThUX2FpVTlOVWxrNVdVMGFUeWgzbkJ1UW9iQkFUVll4NEpWUU9FWFV3UjNQODJneXc2XzZZajRQN3lETy12b0NVa2RDN2pQYUNTSVpfRWJYSjJibHkzeElVRlVPVXI1ejVhcU4zdS1wXy02RFRZWHZQSGx0SzA2Rk5EWE1aQm9YRU5pSkpqXzFRNkplckk2QU9ZMmh4UVFkaDc0TFN3Y1p6dUZva3FqREtna25jdFhaYWx6TkotZDNkbk5xWGZ5Sl9JeEdtT0pxOURlVWJxMUlrSlIzakJtQ19lTGJTS0ptVWNxeXUxdlpjSHFZdVFNUGx1UTNlZEg4Ti1XbXJmUmhsX3pNUE1qZEJyMTBobWhtamotQlh1cjM5SjNyOUMz?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">Global oil supply chains face historic stress: Crude prices and tanker rates now at all-time highs — here’</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.90]</span><a href="https://news.google.com/rss/articles/CBMitwFBVV95cUxNMElheUU5NU13TEJpcnFYNl9kRkt4aTBxR2ZIcEhNRGpoSlhXMVdmRlZYWWNLU1BzTlh2SlFnZS1tLVpWUUVrOXFaQjZMWkx2NkRUMVFLc1ZFd0h5MDJpNlBQSHBuOEM2b01DOUp5bHlUSWtEVXMtamptYWZZcUNiZU9HZjZBMTFCVnEwbkFrX1JXQ3M2Mlg3aXV1a2l1WVJYMUltdVZqdk9WNGd3SUYyNi1PbXQ4ZEXSAb4BQVVfeXFMT3RzVWx4UmU3RG9hd1hIYklIZVgxYXgxUXU2cmdRQnVCTGJiMHhSWWw2TkhsZVhRaTkyc3l5SVBRT3VYakhqQUYzd196OVBEZ2NKU3lkcjBMVExNbm5paEJwbnFvakc1QTY2Wk5IQWZFdmZQcHc4RXVlQ0FwcmNRQVU2eXctaFpNVzlMUU5UMldJbG9NTVFzalJYYW9melVwRDlialRKcGFwNlRSc2p3RzZxWHJZc0hzMzZmbGxGUQ?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">Qatar halts LNG production, Saudi’s Aramco shuts Ras Tanura refinery after drone strike</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.90]</span><a href="https://news.google.com/rss/articles/CBMivAJBVV95cUxNc3pja0Q1Z19keG1FV2hJWGoyWGdSSkZtMHg2NldvMGMxSmhNMV96ZGZHLUVDZjBNUFI1Z0ExZ2dHa3pNQmtOQW51R3Zfb3UxSnJYdWY3Z2RDNUhtQXcydmNDV2FKcWRxNHdWTEZQRUJYQy1lLWRzNE1ySWh5UFFUYllNc09WUnUzLUhDTlMwdldaNHc3VHZnLV90Z2pmOV94TE45NkJRM1RNOVRGN0F4VWwwNUpPWG8xeXNvYVFYYk9KemtoRUdfWTNQUDBIU3ZnRXYxNXBsSF9BWWdXVXBzUWtUaHV2T2tnbEF3OFRuT2xQTEZUZkw5dHdjX1JlYjVSeGJTYlVncEdMSlJtX045X0tNX2x2dVdGVmVmUHdVM256SkpuMTZINzFWVkpLRmQwRnVXbS0teUNjRGRH0gHCAkFVX3lxTFBSUGRPZGp4UG5JMFZQd1BVNzJaXzZSVzZNU3IyNFFzcjFJSDlsanBvSzNwVDdFT3MwMFNneUFBcmFtUWpPaGR4eXFzVUZOaVlFc0QwRFlmMnVLQUtoa2JOSzVfTVRlNUYyc3ZKT2hyemZhS2E4WmZLU3JEQlV5T2JGQVA1STByMmx0WXFINC01cGM3MS1kNlo5dHdXTUp4eS1hQ3VxOE8xT1B2djhzUnJEeXNsS3h1Xy1EMHVrRVEtRDc2RFQ3bWgweFViS3huUmFZblhvUnE5a2hfTUlKY2g3WjhJX05uSE52TWVCWUJ5NGNKLWdHYVJvcjlhUVlSaXVDTEtldUZXWDZ0VHVUZDQ0ZlZoaXQ5VWMtQ2RtNE1jelpMOTFGWUZaVlAybmRYX1g0YjJPSDF3aUpZbjNFX1pMQ1E?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">45-Day Warning: How long before India's oil tanks run dry if Hormuz shuts?</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.90]</span><a href="https://news.google.com/rss/articles/CBMilAJBVV95cUxQaGkxT05hS0Rwa2hvMHE4cmVHSWtrdUxJR29DdXB5bHhCMkJVdWtwaXBDNnprcThzOTVJMjFSWWlJTzk5aXdQSkhiS1VQbU5hUkV0Qjd2Q05XbGs4OEVhWGpGajFaSTFkazJSVHBKdTZ0V2NFX1NIYzZGNXN5ck9NMkZwZF9qSE5LSjRuYkFDbE5WTl9vbDRubzVQSTNVbmtENDVnS1dmSXFDSkI1ZERWU0FBMUFzRlpMOTRmRWRFaXRZdmVnRGUwMG9BVVJMd0lzS1hnMzlOUjdCY0tldTRwTVcybWRaa3gxSHZSYWJuLU5RaU9wbEVEcHY5Wmx1cHJtMXEzTnVKSXhsdjRlNEhWQmJfOGfSAZoCQVVfeXFMTjZTeThOVFF3MXp4MVJGMmNMSS1EcWtfRFBNRXQ2SW1Jbmp5UTlzMjR5ZkczSGhJSm15RHVwSk9MckxxWG1wU0dkbkxmNURIYUJ3elFwd3NOelEtNU1zdy15WW9kV1ZrbVItNWhRM0ZhNE9HRC1YdmNFb0QyTk5KeHNyaEMzeWRJb3N2NFpiZnJmVU5OLThQd1hxdGVxdUVVQzZnZU9JRkhJXzFtUk8zSVUyNnBmLV90MG8wcnhSM0ZSQjM2cy1zUGNES3hJOW9OSjk4RXVHWHM3VmNMNnE4aFV3aklHNHFHX0NuMjhybGFNYnBwREdpMFlxRFlrazBfV0ptNF95UmJMUmo4WXNQTlZNTUUzN2NIM21n?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">'Will set on fire any ship that passes through': Iran shuts down Strait of Hormuz - Why it matters</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.90]</span><a href="https://news.google.com/rss/articles/CBMi8AFBVV95cUxNYVlWN21ucml4a0ZJa1kxOXBjSDd3ZUhFWk1yT29Kb0U0cGlMTVRWWjByRDBYOVNCSVRzMlZCVGotSWpCRDZIcFhVTzBwWnV3LXViemhZOXA0cW1rMjNBaWg5a2llQnp6Q0l2RndMaVdWVmJvYWZFenhXTWVjYVNPZW43Sk9UM0JDbjV6bVJkUEhCYWozd01vVloxdElnWENvSTF2LXAtTFVScE5tZWN4MHctTG5MMy02MkJsOXpZMTFCN2l5a1VGU3BZNFEzWDY1eEtBQ2xrYmhsVmpORzdYa3p3RWVjZTV4dnpXUHB0TDTSAfYBQVVfeXFMTmh6enYxWFNJX1ZYc0I3WEdWZk8tRk5VMnJ4clJzUFQwa1RRQzhYbWVPWk82enBqelFDakNDSGJZeTlJX0lZQjNkZUVMd0RfZDlGa1ZRaldXS0NhRkR1RVN4YkJQOTA5cWlkWHdmaGRydzBKRURvSUs2dG8wWDJDU2I5elBKZWhHMHVvc3FXMC1KVEdXYml0ZmhWOTBCeG9kZ3UyUUw5cVpiZE0zRUVPOHl4d3JRMTJtV3pwOVlneGVRc1FPdU1uQWxJMEVzWGNRNEw1XzRyam82R1EwZXBDWXRfTmpFdnFnd3ZxWjNiNlN6aW83eEN3?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">Crude oil price to touch $150 amid US-Iran war? What brokerages fear in worst case</a></div></div></div>
+                <div class="scenario-kpis">
+                    <div class="row">
+                        <div class="item"><div class="lbl">Brent</div><div class="val">$130</div></div>
+                        <div class="item"><div class="lbl">GRM</div><div class="val">$-2.0</div></div>
+                    </div>
+                    <div style="font-size:0.65rem;color:#6B7280;margin-top:6px;line-height:1.6;"><span style="white-space:nowrap;">Die $200</span> | <span style="white-space:nowrap;">Pet $118</span> | <span style="white-space:nowrap;">ATF $195</span></div>
+                    <div class="scenario-assessment"><div class="lbl">LLM Assessment</div><div>Widening Middle East war language combined with $130 oil and negative GRM signals market-priced risk of conflict spreading beyond Strait closure to refinery strikes or regional escalation.</div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="scenario-card">
+            <div class="scenario-header">
+                <div>
+                    <span class="name">Regime Change</span>
+                    <span class="desc">Internal power shift in key state creates unpredictable transition. Temporary disruption followed by uncertain new equilibrium.</span>
+                </div>
+                <span class="pct" style="color:#8B5CF6;">20%</span>
+            </div>
+            <div class="scenario-bar"><div style="height:100%;width:50.26818733587276%;background:#8B5CF6;border-radius:0 2px 2px 0;"></div></div>
+            <div class="scenario-body">
+                <div class="scenario-articles"><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.50]</span><a href="https://news.google.com/rss/articles/CBMitgFBVV95cUxPWi1MVXpjbGtrTHBtS1o0c1dKQ0p5V0JQWGVBRVlhNUdBR0JrNGp2Z0g0M0hFdUt4Sk5tbTVBOUxyNnRWZE1iczFFQjZxMllPVFoxbk4xTG13aTR2Xy1lbm5JYW1zS3JPeW1OZDN6QTdXV0RCMkgwbFZoeXZUc05SX0lHbjJONnhrTzJlbEVwLXFNdlk1OUl3dWdvVmJPbGpGVHZ4Z0xGSHczOVJmeHF0dWJVeUJyQQ?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">Markets latest: Massive oil producer declares it won't fulfil contracts</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.50]</span><a href="https://news.google.com/rss/articles/CBMimgJBVV95cUxOZnpoc1h5SVAzc2dIRVhUZjhUeEhzR1o4OWpycWthN3k4ODVNeU1pRGtxQ3dYSGNVeXZLQnRETzBaaW1NY2lxY0Jtb2ttcUk1bFdUQk5IVkFiV1FaTlFUN0lHd1E1SUNBRGdnZHNNRXEtU3kteWNjc2hjSkZDMExhNzhzcWlXdklOSkZaV3JWcXlGV3RseHRRUTl3VjJ4S2REc3h4cGJkUGg2M1BSRnZLZW5iMGtXMkszdXkwVHFvZjBwbVZCM0xMYmRQWGQ2aldnT24wTmdjaXJkdjFNSVhDLUd3SmlpQ2UtLVdsUTUyMlV4aEJjLVdNd29ua2hEVllOdlN4Qk9qTmdaemZNU2VLdHJWcjRkQWdzcHfSAZ8CQVVfeXFMTlhXNUdtOXF0dTJSZkp6NGs0UnpKeFEwR2F2Nk5qWWJ0VmF6YTFwa2xzNC1XeC1QbEhLZ2RhQ3FCX016MTZ5S0hiangwWU1oQm1wdml5cU1TUld0UWt1blpTeXgwTmFxREhCNDI3Mk9TUkJma3hrZEh1NEY4UFJGdHJITzN5Z2pFLXBFSjFyMFJWZGd4aVdiMTlHRkZUSnc2ZEJzLXRQckxRSXNkWVBzNnQtNWN5NGU3eWVDMkUzWE5lU281Skd6QUhzOVdmdlVpOFRiZ1JWcUo1MDVGUkxTR2JoVVlEUU5XMzFYeGU5OUZWX0NRcmYxUEYzSmhVX1hJeGtWVUl0M01fcVhZUXJicXd3V3NDbFBpVzhVbmFwQms?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">India has 25 days of fuel stock, Japan refiners plead to open strategic reserves: Oil-importing nations scramble as Iran conflict causes supply woes</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.40]</span><a href="https://news.google.com/rss/articles/CBMiwwJBVV95cUxPLThmSnlCdS1PZzJhc1BMeEdJUDFuYW1yZUhKSXJ3ZUNFTzA1YjlLYXNMYTE1OFo1Zm5IZEJPLTdPSjY1cl82V3BObkFLdnhRN21ReXEtU1hIOEsyOEgtaHIyYWNyQ0doOTFncWJmMERyUmk2cm5MVEF4YVhwZXZaLXVoelRmbEd6cUJjMVlnTUFRQThSRXFhdDNWRy1aTXRjeFhaSWg4d2N4TklGNkdLbGZNQk9OQTczaXFLY0stOS1iLVVDNXEyRHFkdjVraC0tTFNrQlF0Q191cEwxcF96bzFNQUJJamlucVVLODRib1BjS0RPTHE4TDBZVXR4eFNvemFrUW5CRlJ1NVJERFkzTnhkUTA1Y2dDNzNYdkJtMl9CTHZNLU9MRkZqd2taRnY5WmxiNHlBM3ZjRmx4WmxlZFVrMNIByAJBVV95cUxOekMwYm03d0hZNVFjY3drZlUzQ0d1MVZKbms3NVR6NS02YThUX2FpVTlOVWxrNVdVMGFUeWgzbkJ1UW9iQkFUVll4NEpWUU9FWFV3UjNQODJneXc2XzZZajRQN3lETy12b0NVa2RDN2pQYUNTSVpfRWJYSjJibHkzeElVRlVPVXI1ejVhcU4zdS1wXy02RFRZWHZQSGx0SzA2Rk5EWE1aQm9YRU5pSkpqXzFRNkplckk2QU9ZMmh4UVFkaDc0TFN3Y1p6dUZva3FqREtna25jdFhaYWx6TkotZDNkbk5xWGZ5Sl9JeEdtT0pxOURlVWJxMUlrSlIzakJtQ19lTGJTS0ptVWNxeXUxdlpjSHFZdVFNUGx1UTNlZEg4Ti1XbXJmUmhsX3pNUE1qZEJyMTBobWhtamotQlh1cjM5SjNyOUMz?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">Global oil supply chains face historic stress: Crude prices and tanker rates now at all-time highs — here’</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.40]</span><a href="https://news.google.com/rss/articles/CBMiwgFBVV95cUxOc21JVFhyRVNFNGRrWmlGXzdfZy1kUll2UVpyNjFZUWlyUlVEYjcwM2lrWUlJREpXMzlMeVE5SFBmTVg0T2pSWms1Q3FiWHdoYlBhdlJnVmg1UEowMllvTHFoeXBjSXlkeEFCX3I2RHBDblVBVEVqQXNEckNHQVVPYTlYbU5KWTA1em56VmxPcTRnOV9LSmo1RXJjZ2h1cFluLUFrUXNnVVRpLUNCUEFQSEFFWFRLb2l3SWhmd1hueHM1Zw?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">After US Talks Rejection, Iranian Drone Strike Hits Major Oil Supplier to India’s Refineries</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.40]</span><a href="https://news.google.com/rss/articles/CBMitwFBVV95cUxNMElheUU5NU13TEJpcnFYNl9kRkt4aTBxR2ZIcEhNRGpoSlhXMVdmRlZYWWNLU1BzTlh2SlFnZS1tLVpWUUVrOXFaQjZMWkx2NkRUMVFLc1ZFd0h5MDJpNlBQSHBuOEM2b01DOUp5bHlUSWtEVXMtamptYWZZcUNiZU9HZjZBMTFCVnEwbkFrX1JXQ3M2Mlg3aXV1a2l1WVJYMUltdVZqdk9WNGd3SUYyNi1PbXQ4ZEXSAb4BQVVfeXFMT3RzVWx4UmU3RG9hd1hIYklIZVgxYXgxUXU2cmdRQnVCTGJiMHhSWWw2TkhsZVhRaTkyc3l5SVBRT3VYakhqQUYzd196OVBEZ2NKU3lkcjBMVExNbm5paEJwbnFvakc1QTY2Wk5IQWZFdmZQcHc4RXVlQ0FwcmNRQVU2eXctaFpNVzlMUU5UMldJbG9NTVFzalJYYW9melVwRDlialRKcGFwNlRSc2p3RzZxWHJZc0hzMzZmbGxGUQ?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">Qatar halts LNG production, Saudi’s Aramco shuts Ras Tanura refinery after drone strike</a></div></div></div>
+                <div class="scenario-kpis">
+                    <div class="row">
+                        <div class="item"><div class="lbl">Brent</div><div class="val">$85</div></div>
+                        <div class="item"><div class="lbl">GRM</div><div class="val">$9.0</div></div>
+                    </div>
+                    <div style="font-size:0.65rem;color:#6B7280;margin-top:6px;line-height:1.6;"><span style="white-space:nowrap;">Die $118</span> | <span style="white-space:nowrap;">Pet $80</span> | <span style="white-space:nowrap;">ATF $114</span></div>
+                    <div class="scenario-assessment"><div class="lbl">LLM Assessment</div><div>20% probability reflects geopolitical risk that sustained Hormuz closure and supply stress catalyze internal instability, supported by 'staggering' war language indicating systemic regional instability.</div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="scenario-card">
+            <div class="scenario-header">
+                <div>
+                    <span class="name">Ceasefire & Talks</span>
+                    <span class="desc">Formal ceasefire with ongoing negotiations. Markets normalize rapidly, crude flows resume, risk premiums evaporate.</span>
+                </div>
+                <span class="pct" style="color:#00D4FF;">12%</span>
+            </div>
+            <div class="scenario-bar"><div style="height:100%;width:30.42213850365398%;background:#00D4FF;border-radius:0 2px 2px 0;"></div></div>
+            <div class="scenario-body">
+                <div class="scenario-articles"><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#EF4444;font-weight:700;font-size:0.78rem;margin-right:6px;">[-0.90]</span><a href="https://oilprice.com/Latest-Energy-News/World-News/Dozens-of-Asia-Flagged-Oil-Tankers-Stranded-near-Strait-of-Hormuz.html" target="_blank" style="color:#F9FAFB;text-decoration:none;">Dozens of Asia-Flagged Oil Tankers Stranded near Strait of Hormuz</a></div><div class="art-reasoning">Ceasefire would immediately unlock stranded vessels; current status indicates active crisis continuation.</div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#EF4444;font-weight:700;font-size:0.78rem;margin-right:6px;">[-0.80]</span><a href="https://oilprice.com/Energy/Natural-Gas/Strait-of-Hormuz-Closure-Sends-European-Gas-Benchmark-Soaring.html" target="_blank" style="color:#F9FAFB;text-decoration:none;">Strait of Hormuz Closure Sends European Gas Benchmark Soaring</a></div><div class="art-reasoning">Active Strait closure with soaring gas prices contradicts the rapid market normalization expected after ceasefire agreements.</div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#EF4444;font-weight:700;font-size:0.78rem;margin-right:6px;">[-0.80]</span><a href="https://news.google.com/rss/articles/CBMiwgFBVV95cUxOc21JVFhyRVNFNGRrWmlGXzdfZy1kUll2UVpyNjFZUWlyUlVEYjcwM2lrWUlJREpXMzlMeVE5SFBmTVg0T2pSWms1Q3FiWHdoYlBhdlJnVmg1UEowMllvTHFoeXBjSXlkeEFCX3I2RHBDblVBVEVqQXNEckNHQVVPYTlYbU5KWTA1em56VmxPcTRnOV9LSmo1RXJjZ2h1cFluLUFrUXNnVVRpLUNCUEFQSEFFWFRLb2l3SWhmd1hueHM1Zw?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">After US Talks Rejection, Iranian Drone Strike Hits Major Oil Supplier to India’s Refineries</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#EF4444;font-weight:700;font-size:0.78rem;margin-right:6px;">[-0.80]</span><a href="https://oilprice.com/Latest-Energy-News/World-News/Iran-Claims-It-Has-Complete-Control-Over-Strait-of-Hormuz.html" target="_blank" style="color:#F9FAFB;text-decoration:none;">Iran Claims It Has “Complete Control” Over Strait of Hormuz</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#EF4444;font-weight:700;font-size:0.78rem;margin-right:6px;">[-0.80]</span><a href="https://news.google.com/rss/articles/CBMitgFBVV95cUxQR0NsMWhHZ200ZGhnT3hma1hQVW1rSjdIVG1LLTZIVnowQko4dmN6MkRzVkFWeTNxcm1EaElONXdZWUk2QTBPbFJTUFZWQmQ0NXNfbGgzVGVDTWRrSG00MHlyR1UzV3ZIdjZOU2g1LUxLMHEtakZzSXo4Y2ItR3hOQjBVUUNqM2UwOVlpdG5scGgxTjlzUE5tNVdlMG9oMHpzR1VaWVFja3RPRGE0Y3JuVkw2SGFGUQ?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">Indian Refiner MRPL Halts Fuel Export as Iran War Hits Feedstock</a></div><div class="art-reasoning">Current production halts contradict the rapid feedstock recovery and export resumption implied by ceasefire scenarios.</div></div></div>
+                <div class="scenario-kpis">
+                    <div class="row">
+                        <div class="item"><div class="lbl">Brent</div><div class="val">$68</div></div>
+                        <div class="item"><div class="lbl">GRM</div><div class="val">$13.0</div></div>
+                    </div>
+                    <div style="font-size:0.65rem;color:#6B7280;margin-top:6px;line-height:1.6;"><span style="white-space:nowrap;">Die $88</span> | <span style="white-space:nowrap;">Pet $65</span> | <span style="white-space:nowrap;">ATF $86</span></div>
+                    <div class="scenario-assessment"><div class="lbl">LLM Assessment</div><div>Talks-triggered ceasefire at 12% probability requires diplomatic breakthrough reversing current trajectory, with oil reverting to $68 only if Strait reopens and tanker normalcy returns swiftly.</div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="scenario-card">
+            <div class="scenario-header">
+                <div>
+                    <span class="name">Quick Resolution</span>
+                    <span class="desc">Diplomatic breakthrough leads to rapid de-escalation within weeks. Strait of Hormuz fully reopens, insurance premiums drop.</span>
+                </div>
+                <span class="pct" style="color:#10B981;">11%</span>
+            </div>
+            <div class="scenario-bar"><div style="height:100%;width:26.67470664835564%;background:#10B981;border-radius:0 2px 2px 0;"></div></div>
+            <div class="scenario-body">
+                <div class="scenario-articles"><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#EF4444;font-weight:700;font-size:0.78rem;margin-right:6px;">[-0.90]</span><a href="https://news.google.com/rss/articles/CBMinwFBVV95cUxOc1MyNXZPb3NBVEFqVGpERGVuVS00S2h1MlkyLVQwMS1TT05oZWF1QmdlQUFPNW84dFFEVHU0cnZINEk3ZlZ4Vm9WWjcyVHJwSkRMQjhsMzc5b0FHSW9lT04tOVYxa0JSMkp4ak1GSk1OeGIyekZDYjZoSElVQ01nVEpQVnVZdk1vVjRqZktNS2ZPSlZBbF95dEk2QnBVM0E?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">Oil Rally Builds as ‘Staggering’ Middle East War Jolts Energy</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#EF4444;font-weight:700;font-size:0.78rem;margin-right:6px;">[-0.90]</span><a href="https://news.google.com/rss/articles/CBMiwgFBVV95cUxOc21JVFhyRVNFNGRrWmlGXzdfZy1kUll2UVpyNjFZUWlyUlVEYjcwM2lrWUlJREpXMzlMeVE5SFBmTVg0T2pSWms1Q3FiWHdoYlBhdlJnVmg1UEowMllvTHFoeXBjSXlkeEFCX3I2RHBDblVBVEVqQXNEckNHQVVPYTlYbU5KWTA1em56VmxPcTRnOV9LSmo1RXJjZ2h1cFluLUFrUXNnVVRpLUNCUEFQSEFFWFRLb2l3SWhmd1hueHM1Zw?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">After US Talks Rejection, Iranian Drone Strike Hits Major Oil Supplier to India’s Refineries</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#EF4444;font-weight:700;font-size:0.78rem;margin-right:6px;">[-0.90]</span><a href="https://oilprice.com/Energy/Crude-Oil/Iraqi-Supply-Loss-Could-Expose-the-Real-Limits-of-OPEC-Spare-Capacity.html" target="_blank" style="color:#F9FAFB;text-decoration:none;">Iraqi Supply Loss Could Expose the Real Limits of OPEC Spare Capacity</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#EF4444;font-weight:700;font-size:0.78rem;margin-right:6px;">[-0.90]</span><a href="https://oilprice.com/Latest-Energy-News/World-News/Iran-Claims-It-Has-Complete-Control-Over-Strait-of-Hormuz.html" target="_blank" style="color:#F9FAFB;text-decoration:none;">Iran Claims It Has “Complete Control” Over Strait of Hormuz</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#EF4444;font-weight:700;font-size:0.78rem;margin-right:6px;">[-0.90]</span><a href="https://news.google.com/rss/articles/CBMijgFBVV95cUxQcXJJdVZjRE9ZZnNWNEpJczZsLUl1WEsxZUxoc3VNLUQ4LUY5WlpEN1pxMzNQZlRPZ01sd1J3RjBCaVR1MldXLTNKMi1VSTFyS2gySE9yMHRpd0thQ1JCU0tfcG9qaGxPOXBqZUNab0xnLVlMb05SMGF5WjBmMWRfZTZuUEU5TVBiS201T0xn?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">India's MRPL Declares Force Majeure on Fuel Exports as Iran Conflict Disrupts Crude Supplies</a></div></div></div>
+                <div class="scenario-kpis">
+                    <div class="row">
+                        <div class="item"><div class="lbl">Brent</div><div class="val">$72</div></div>
+                        <div class="item"><div class="lbl">GRM</div><div class="val">$11.5</div></div>
+                    </div>
+                    <div style="font-size:0.65rem;color:#6B7280;margin-top:6px;line-height:1.6;"><span style="white-space:nowrap;">Die $94</span> | <span style="white-space:nowrap;">Pet $68</span> | <span style="white-space:nowrap;">ATF $93</span></div>
+                    <div class="scenario-assessment"><div class="lbl">LLM Assessment</div><div>Tanker stranding severity and all-time rate peaks signal immediate diplomatic pressure, but 11% probability reflects low historical precedent for rapid de-escalation when Strait closure already achieved supply shock.</div></div>
+                </div>
+            </div>
+        </div>
+        </div>
+        <hr style="border-color:rgba(255,255,255,0.08);margin:2rem 0;">
+        
+        <div class="horizon-section">
+            <h2 style="font-size:1.3rem;margin-top:2.5rem;">6-Month Horizon</h2>
+            
+        <div class="narrative-box">
+            <div class="narrative-label">Strategic Assessment</div>
+            <div><ul><li>Hormuz closure risk dominates: Iran threatens strait shutdown; tankers stranded; force majeure declared.</li><li>Prolonged standoff most probable (signal strength +0.85): sanctions persist, supply chains fractured, no negotiation momentum.</li><li>Indian refiners face 45-day crude depletion; GRM compression from refinery shutdowns (Ras Tanura, MRPL exports halted).</li></ul></div>
+        </div>
+
+    <div class="kpi-row">
+        <div class="kpi-card" style="border-left:3px solid #F59E0B;">
+            <div class="label">Brent Price (Expected Value)</div>
+            <div class="value">$83/bbl</div>
+            <div class="range">range: $63-120</div>
+            <div style="font-size:0.72rem;color:#F59E0B;margin-top:4px;">Current Brent: $92.69/bbl</div>
+            <div class="kpi-explanation">Hormuz blockade cuts ~21% global supply; OPEC spare capacity exhausted; $120 tail-risk realized.</div>
+        </div>
+        <div class="kpi-card" style="border-left:3px solid #00D4AA;">
+            <div class="label">Typical Indian Refinery GRM (EV)</div>
+            <div class="value">$8.3/bbl</div>
+            <div class="range">range: $0.0-12.5</div>
+            <div style="font-size:0.72rem;color:#00D4AA;margin-top:4px;">Indian Basket: $91.40/bbl (Dubai $90.90 &times; 72% + Brent $92.69 &times; 28%)</div>
+            <div class="kpi-explanation">Refinery closures reduce crude demand faster than products; downstream margins compress despite high crude prices.</div>
+        </div>
+    </div>
+
+    <div style="overflow-x:auto;margin-bottom:1.5rem;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.78rem;">
+            <thead><tr style="border-bottom:2px solid rgba(255,255,255,0.1);text-align:left;">
+                <th style="padding:6px 10px;color:#9CA3AF;font-weight:600;font-size:0.68rem;text-transform:uppercase;">Product</th>
+                <th style="padding:6px 10px;color:#9CA3AF;font-weight:600;font-size:0.68rem;text-transform:uppercase;">Current (SG)</th>
+                <th style="padding:6px 10px;color:#9CA3AF;font-weight:600;font-size:0.68rem;text-transform:uppercase;">EV (6m)</th>
+                <th style="padding:6px 10px;color:#9CA3AF;font-weight:600;font-size:0.68rem;text-transform:uppercase;">Chg</th>
+                <th style="padding:6px 10px;color:#9CA3AF;font-weight:600;font-size:0.68rem;text-transform:uppercase;">GRM Wt</th>
+            </tr></thead>
+            <tbody style="color:#E5E7EB;"><tr><td>Diesel</td><td>$115</td><td>$117</td><td><span style="color:#EF4444;font-weight:600;">+2%</span></td><td style="color:#4B5563;">42%</td></tr><tr><td>Petrol</td><td>$93</td><td>$78</td><td><span style="color:#10B981;font-weight:600;">-16%</span></td><td style="color:#4B5563;">22%</td></tr><tr><td>ATF</td><td>$113</td><td>$115</td><td><span style="color:#EF4444;font-weight:600;">+1%</span></td><td style="color:#4B5563;">10%</td></tr><tr><td>Naphtha</td><td>$84</td><td>$65</td><td><span style="color:#10B981;font-weight:600;">-23%</span></td><td style="color:#4B5563;">12%</td></tr><tr><td>Fuel Oil</td><td>$69</td><td>$58</td><td><span style="color:#10B981;font-weight:600;">-17%</span></td><td style="color:#4B5563;">8%</td></tr><tr><td>LPG</td><td>$33</td><td>$26</td><td><span style="color:#10B981;font-weight:600;">-23%</span></td><td style="color:#4B5563;">6%</td></tr></tbody>
+        </table>
+    </div>
+        </div>
+        <hr style="border-color:rgba(255,255,255,0.08);margin:2rem 0;">
+        
+
+<div class="footer">
+    <span>Generated: 2026-03-07 19:07</span>
+    <span>Articles analyzed: 763</span>
+    <span>Model: claude-haiku-4-5-20251001</span>
+    <span>Horizons: 3m, 6m</span>
+</div>
+</div>
+
+<div id="tab-build" class="tab-panel">
+
+<div class="terminal">
+<div class="terminal-bar">
+    <div class="terminal-dot" style="background:#EF4444;"></div>
+    <div class="terminal-dot" style="background:#F59E0B;"></div>
+    <div class="terminal-dot" style="background:#10B981;"></div>
+    <span class="title">scenario-engine-build-log &mdash; one session, start to finish</span>
+</div>
+<div class="terminal-body">
+
+<div class="t-line t-dim">// March 2026. Starting from an existing oil dashboard with price data, news scraping, and a Streamlit frontend.</div>
+<div class="t-line t-dim">// The ask: something sharper. A scenario engine.</div>
+<div class="t-gap"></div>
+
+<div class="t-line t-section">&#9608; PHASE 1: THE BRIEF &amp; ARCHITECTURE</div>
+<div class="t-line t-user">build a scenario engine. 5 geopolitical scenarios for middle east crisis. score news articles against them with AI. show probabilities, expected brent price, GRM impact.</div>
+<div class="t-line t-user">use an LLM to score the articles. keep costs low. and I want probabilities not just scores- weight the outcomes.</div>
+<div class="t-gap"></div>
+<div class="t-line t-ai">Going with Claude Haiku 4.5 &mdash; cheapest model that can handle nuanced geopolitical scoring. ~$0.005 per full run.</div>
+<div class="t-line t-ai">Scoring each article [-1, +1] per scenario. Softmax over averages &rarr; probabilities. Expected values = probability &times; scenario price.</div>
+<div class="t-line t-dim">// Parth set the direction: LLM-scored articles, probabilistic output, cost-conscious.</div>
+<div class="t-line t-dim">// I filled in the specifics: Haiku model, softmax with temperature, SQLite WAL for storage,</div>
+<div class="t-line t-dim">// static HTML on GitHub Pages for zero hosting cost.</div>
+<div class="t-gap"></div>
+<div class="t-line t-user">make the LLM generate a strategic narrative too. and per-scenario assessments. like a consulting partner would brief.</div>
+<div class="t-line t-ai">Three LLM roles per refresh: article scorer, strategic narrator, scenario assessor.</div>
+<div class="t-line t-dim">// the "consulting partner" framing shaped everything. it wasn't a data dump &mdash; it was a brief.</div>
+<div class="t-gap"></div>
+<div class="t-line t-prompt">creating database/schema.py &mdash; new tables: article_signals, scenario_weights, strategic_narratives</div>
+<div class="t-line t-prompt">creating processing/scenario_analyzer.py &mdash; LLM scoring + narrative pipeline</div>
+<div class="t-line t-prompt">python -m processing.scenario_analyzer</div>
+<div class="t-line t-ok">Scored 47 articles. Prolonged Standoff: 34%, Conflagration: 22%, Quick Resolution: 18%...</div>
+<div class="t-line t-prompt">python export_html.py &amp;&amp; git push origin gh-pages</div>
+<div class="t-line t-ok">Report live at github.io. v1 working.</div>
+<div class="t-gap"></div>
+<div class="t-line t-user">add a breaking news section- last 12 hours. show which way momentum is moving per scenario.</div>
+<div class="t-line t-ai">Adding momentum: 12h avg signal vs 7-day baseline per scenario. Rising/falling/stable indicators.</div>
+<div class="t-line t-ok">Breaking signal window + momentum live.</div>
+<div class="t-gap"></div>
+
+<div class="t-line t-section">&#9608; PHASE 2: "THIS WILL GO PUBLIC"</div>
+<div class="t-line t-user">remove stock impact please. this is going public, keep it focused on crude and refining economics only</div>
+<div class="t-line t-ai">Removing all stock references from KPI cards, scenario cards, and narratives...</div>
+<div class="t-line t-user">how do I refresh the data? I don't want to run python every time</div>
+<div class="t-line t-ai">Adding a refresh button. It'll trigger GitHub Actions via repository_dispatch.</div>
+<div class="t-line t-prompt">fetch('https://api.github.com/repos/.../dispatches', { headers: { Authorization: 'token ghp_...' }})</div>
+<div class="t-line t-user">wait... you're putting my GitHub token in the HTML?? this is a public page!</div>
+<div class="t-line t-ai">Right. The token would be visible in page source. Can't do client-side GitHub API calls on a public page.</div>
+<div class="t-line t-dim">// first attempt: direct GitHub API from the browser. exposes PAT token to anyone who views source. obviously terrible.</div>
+<div class="t-line t-user">what if we just link to the GitHub Actions page so I can trigger it manually?</div>
+<div class="t-line t-ai">That works but then anyone visiting needs GitHub access. And they'd see the repo.</div>
+<div class="t-line t-user">the refresh button shouldn't expose any tokens or open GitHub. people will use this.</div>
+<div class="t-line t-dim">// the requirements keep tightening: no tokens in HTML, no GitHub redirect, works for anonymous users.</div>
+<div class="t-line t-dim">// need a server-side proxy. but we don't have a server. this is a static GitHub Pages site.</div>
+<div class="t-line t-ai">Need a proxy layer. Cloudflare Workers &mdash; free tier, serverless, sits between button and GitHub.</div>
+<div class="t-line t-dim">// the token lives in Cloudflare's environment variables. browser just POSTs to the worker URL. clean.</div>
+<div class="t-line t-prompt">npm create cloudflare@latest</div>
+<div class="t-line t-err">wrangler: command not found</div>
+<div class="t-line t-prompt">npm install -g wrangler</div>
+<div class="t-line t-prompt">wrangler deploy</div>
+<div class="t-line t-err">No workers.dev subdomain registered for this account</div>
+<div class="t-line t-dim">// great. need to register a subdomain before deploying. nowhere in the docs was this obvious.</div>
+<div class="t-line t-prompt">curl -X PUT api.cloudflare.com/.../workers/subdomain -d '{"subdomain":"parthreddy"}'</div>
+<div class="t-line t-ok">Subdomain registered.</div>
+<div class="t-line t-prompt">wrangler deploy</div>
+<div class="t-line t-ok">Worker live at oil-dashboard-refresh.parthreddy.workers.dev</div>
+<div class="t-line t-prompt">curl -X POST https://oil-dashboard-refresh.parthreddy.workers.dev</div>
+<div class="t-line t-err">403 Forbidden &mdash; error code 1010 (Cloudflare bot detection blocked our own request)</div>
+<div class="t-line t-dim">// ...Cloudflare is blocking requests to our own Cloudflare Worker. beautiful.</div>
+<div class="t-line t-ai">It's a User-Agent issue. Windows curl sends no UA. Browsers always do.</div>
+<div class="t-line t-prompt">curl -H "User-Agent: Mozilla/5.0" -X POST https://oil-dashboard-refresh.parthreddy.workers.dev</div>
+<div class="t-line t-ok">{"status":"triggered"} &mdash; GitHub Actions pipeline started.</div>
+<div class="t-line t-dim">// tested in browser. works. let's move on before something else breaks.</div>
+<div class="t-gap"></div>
+<div class="t-line t-dim">// narrator: something else broke.</div>
+<div class="t-gap"></div>
+<div class="t-line t-prompt">gh run view --log</div>
+<div class="t-line t-err">Run failed: ModuleNotFoundError: No module named 'anthropic'</div>
+<div class="t-line t-dim">// forgot to add anthropic to requirements.txt in the CI environment</div>
+<div class="t-line t-prompt">pip install anthropic added to workflow</div>
+<div class="t-line t-prompt">trigger refresh again...</div>
+<div class="t-line t-err">Run failed: git push rejected &mdash; remote contains work you don't have locally</div>
+<div class="t-line t-dim">// the pipeline pushes to main. we also push to main. they collide. every. single. time.</div>
+<div class="t-line t-ai">Adding git pull --rebase to workflow. Making main push non-fatal.</div>
+<div class="t-line t-prompt">trigger refresh again...</div>
+<div class="t-line t-ok">Run #17: success. Finally. The refresh button actually works end-to-end.</div>
+<div class="t-gap"></div>
+
+<div class="t-line t-section">&#9608; PHASE 3: THE PRICING DISASTER</div>
+<div class="t-line t-user">how does each scenario calculate the brent price?</div>
+<div class="t-line t-ai">Currently using multipliers off base Brent. Conflagration = Brent &times; 1.97...</div>
+<div class="t-line t-user">can we ensure the brent price per scenario is based on expert consensus?</div>
+<div class="t-line t-ai">Switching to dynamic multipliers based on historical crisis premiums...</div>
+<div class="t-line t-prompt">Conflagration: $83.95 &times; 1.97 = $165.38/bbl</div>
+<div class="t-line t-user" style="color:#EF4444;">the brent ratios don't work</div>
+<div class="t-line t-ai">Switching to additive premiums instead. Conflagration = Brent + $60...</div>
+<div class="t-line t-user" style="color:#EF4444;">noway we will have $160</div>
+<div class="t-line t-ai">Reducing premiums. Conflagration = Brent + $45...</div>
+<div class="t-line t-user" style="color:#EF4444;">i don't think the ratios work!!</div>
+<div class="t-line t-ai">Let me try a different approach&mdash;</div>
+<div class="t-gap"></div>
+<div class="t-line t-dim">// the dynamic pricing approach was fundamentally wrong.</div>
+<div class="t-line t-dim">// Parth saw it immediately. I kept trying to fix a broken model instead of changing the approach.</div>
+<div class="t-gap"></div>
+<div class="t-line t-user">why can't we find internet consensus per scenario already and hard code per scenario? also the product prices?</div>
+<div class="t-line t-dim">// this was the right call. stop trying to compute prices dynamically. go find what real analysts say.</div>
+<div class="t-gap"></div>
+<div class="t-line t-ai">Researching analyst consensus from Goldman Sachs, JPMorgan, Morgan Stanley, Citi, Wood Mackenzie, Rystad Energy, Deutsche Bank, ING, CSIS, Oxford Economics...</div>
+<div class="t-line t-prompt">Ceasefire: $68 (3m) / $63 (6m) &mdash; post-JCPOA normalization</div>
+<div class="t-line t-prompt">Quick Resolution: $72 / $67 &mdash; 2019 Abqaiq recovery pattern</div>
+<div class="t-line t-prompt">Regime Change: $85 / $80 &mdash; 2011 Arab Spring range</div>
+<div class="t-line t-prompt">Prolonged Standoff: $90 / $85 &mdash; 2022 sustained premium</div>
+<div class="t-line t-prompt">Conflagration: $130 / $120 &mdash; 1990 Gulf War + 2008 shock</div>
+<div class="t-line t-ok">Hardcoded consensus prices. Added per-scenario product prices from observed crisis crack spread data.</div>
+<div class="t-line t-user">cool shall we push for production?</div>
+<div class="t-line t-ai">Already live. Pushed to gh-pages 2 minutes ago.</div>
+<div class="t-line t-user">:)</div>
+<div class="t-gap"></div>
+
+<div class="t-line t-section">&#9608; PHASE 4: "WRONG BENCHMARK"</div>
+<div class="t-line t-user">hey the brent current price is not correct- can you check?</div>
+<div class="t-line t-prompt">SELECT * FROM crude_prices WHERE benchmark='brent' ORDER BY date DESC LIMIT 3</div>
+<div class="t-line t-err">2026-03-04 | brent | $50.00 | source: oilprice</div>
+<div class="t-line t-dim">// bad scraper data. $50 Brent? Brent hasn't been $50 since 2021.</div>
+<div class="t-line t-prompt">DELETE FROM crude_prices WHERE benchmark='brent' AND date='2026-03-04' AND source='oilprice'</div>
+<div class="t-line t-ok">Deleted bad entry. yfinance says Brent = $83.95. That's right.</div>
+<div class="t-gap"></div>
+<div class="t-line t-user">are you calculating the GRM based on india prices or global prices? what should it be?</div>
+<div class="t-line t-ai">Currently using EIA product prices (US Gulf Coast) and Brent as crude reference...</div>
+<div class="t-line t-dim">// Parth immediately caught that this is wrong for an Indian refinery tool.</div>
+<div class="t-line t-dim">// Indian refiners don't buy at US Gulf prices. They buy at Indian basket + Singapore products.</div>
+<div class="t-line t-user">yeah switch to indian basket and then maybe offset by product price singapore differential</div>
+<div class="t-line t-ai">Indian basket = 72% Dubai/Oman + 28% Brent. Researching Singapore vs USGC differentials...</div>
+<div class="t-line t-prompt">Dubai: $77.30 &times; 0.72 + Brent: $83.95 &times; 0.28 = Indian Basket: $79.16/bbl</div>
+<div class="t-line t-prompt">Singapore adjustments: diesel &minus;$3, petrol &minus;$2.5, ATF &minus;$2, fuel oil +$10 vs USGC</div>
+<div class="t-line t-ok">GRM now reflects actual Indian refinery economics. Not a USGC proxy anymore.</div>
+<div class="t-gap"></div>
+
+<div class="t-line t-section">&#9608; PHASE 5: THE DEPLOYMENT NIGHTMARE</div>
+<div class="t-line t-user">is it pushed live?</div>
+<div class="t-line t-ai">Yes, deployed to gh-pages.</div>
+<div class="t-line t-user">but the page is not loading</div>
+<div class="t-line t-prompt">curl -s https://parthreddy123.github.io/oil-dashboard/ | head -5</div>
+<div class="t-line t-ok">200 OK &mdash; page loads... but it's showing the OLD version. No tabs. No Indian basket.</div>
+<div class="t-line t-dim">// the GitHub Actions pipeline had just run and deployed the old code on top of our manual deploy.</div>
+<div class="t-line t-dim">// because we never committed export_html.py to main. so the pipeline used the old version.</div>
+<div class="t-line t-ai">Need to commit to main first, then deploy.</div>
+<div class="t-line t-prompt">git add export_html.py &amp;&amp; git commit -m "add tabs and Indian basket"</div>
+<div class="t-line t-prompt">git push origin main</div>
+<div class="t-line t-err">rejected &mdash; remote contains work that you do not have locally</div>
+<div class="t-line t-prompt">git pull --rebase origin main</div>
+<div class="t-line t-err">CONFLICT (content): Merge conflict in scenario_report.html</div>
+<div class="t-line t-dim">// of course.</div>
+<div class="t-line t-prompt">git checkout --theirs scenario_report.html &amp;&amp; git rebase --continue</div>
+<div class="t-line t-prompt">git push origin main</div>
+<div class="t-line t-err">rejected again &mdash; ANOTHER pipeline run happened while we were rebasing</div>
+<div class="t-line t-dim">// I am in git conflict hell. the CI pipeline runs every time someone pushes and it pushes back to main.</div>
+<div class="t-line t-dim">// so we're in a loop: push &rarr; pipeline runs &rarr; pipeline pushes &rarr; our next push conflicts.</div>
+<div class="t-line t-prompt">git pull --rebase origin main &amp;&amp; git push origin main</div>
+<div class="t-line t-ok">FINALLY pushed to main. Only took 4 attempts.</div>
+<div class="t-gap"></div>
+<div class="t-line t-dim">// now deploy to gh-pages...</div>
+<div class="t-line t-prompt">git checkout gh-pages</div>
+<div class="t-line t-err">error: The following untracked working tree files would be overwritten by checkout</div>
+<div class="t-line t-dim">// 30+ files listed. git refuses to switch branches because of untracked files.</div>
+<div class="t-line t-prompt">git stash &amp;&amp; git checkout gh-pages</div>
+<div class="t-line t-prompt">cp scenario_report.html index.html &amp;&amp; git push origin gh-pages</div>
+<div class="t-line t-prompt">git checkout main &amp;&amp; git stash pop</div>
+<div class="t-line t-err">CONFLICT: stash pop failed. changes lost.</div>
+<div class="t-line t-dim">// ...the stash pop failed. our working changes to export_html.py are GONE.</div>
+<div class="t-line t-dim">// 400+ lines of edits. tabs, terminal CSS, build story, architecture. all gone.</div>
+<div class="t-line t-dim">// this is the moment you stare at the screen for 30 seconds and then start over.</div>
+<div class="t-line t-ai">Rewriting export_html.py from scratch. All 900+ lines. For the second time today.</div>
+<div class="t-line t-dim">// from this point on: temp directory deploys only. never switching branches in the working tree again.</div>
+<div class="t-line t-prompt">mkdir /tmp/gh-deploy &amp;&amp; cp scenario_report.html /tmp/gh-deploy/index.html</div>
+<div class="t-line t-prompt">cd /tmp/gh-deploy &amp;&amp; git init &amp;&amp; git push --force origin gh-pages</div>
+<div class="t-line t-ok">Deployed. The hard way.</div>
+<div class="t-gap"></div>
+
+<div class="t-line t-section">&#9608; PHASE 6: "THE REFRESH IS BROKEN"</div>
+<div class="t-line t-user">i triggered update but its taking way longer- i don't think it works really</div>
+<div class="t-line t-ai">Let me check the pipeline logs...</div>
+<div class="t-line t-prompt">gh run list --limit 5</div>
+<div class="t-line t-err">Run #14: failed</div>
+<div class="t-line t-prompt">gh run view 14 --log 2>&amp;1 | tail -20</div>
+<div class="t-line t-err">git push origin main &mdash; rejected (remote contains work you don't have locally)</div>
+<div class="t-line t-dim">// the CI pipeline was pushing to main while we were also pushing to main. classic race condition.</div>
+<div class="t-line t-ai">Adding git pull --rebase to the workflow before push...</div>
+<div class="t-line t-prompt">editing .github/workflows/refresh.yml</div>
+<div class="t-line t-user">don't just trigger- check if it worked</div>
+<div class="t-line t-prompt">gh run list --limit 3</div>
+<div class="t-line t-err">Run #15: failed &mdash; same rejection. the rebase pulled in conflicts.</div>
+<div class="t-line t-user">its not working....i guess</div>
+<div class="t-line t-ai">Making main push non-fatal. The database commit to main is optional &mdash; the gh-pages deploy is what matters.</div>
+<div class="t-line t-prompt">git push origin main || echo "Push to main failed (non-fatal)"</div>
+<div class="t-line t-user">the refresh of values is too slow!!!- can you help make it faster?</div>
+<div class="t-line t-ai">Parallelizing all 9 scrapers with ThreadPoolExecutor(max_workers=6)...</div>
+<div class="t-line t-prompt">from concurrent.futures import ThreadPoolExecutor, as_completed</div>
+<div class="t-line t-ai">Also found duplicate work &mdash; pipeline was running scenario_analyzer twice. Removing the second call.</div>
+<div class="t-line t-user">3 minutes is too slow mate</div>
+<div class="t-line t-dim">// ~2m45s is LLM API calls. can't really speed those up without cutting features.</div>
+<div class="t-line t-dim">// parallelized what we could. the rest is physics &mdash; network latency to Anthropic's servers.</div>
+<div class="t-gap"></div>
+<div class="t-line t-user">but the page is not loading</div>
+<div class="t-line t-prompt">curl -s -o /dev/null -w "%{http_code}" https://parthreddy123.github.io/oil-dashboard/</div>
+<div class="t-line t-ok">200 &mdash; page loads fine. but it's showing the OLD version without the tabs.</div>
+<div class="t-line t-dim">// the automated pipeline had overwritten our tabs deployment. because export_html.py changes weren't committed to main yet.</div>
+<div class="t-line t-dim">// so the pipeline checked out old main, generated old HTML, deployed old HTML. nuked our work.</div>
+<div class="t-line t-err">all local changes to export_html.py LOST during git branch switching</div>
+<div class="t-line t-dim">// git stash + checkout between main and gh-pages ate our uncommitted edits. hundreds of lines gone.</div>
+<div class="t-line t-ai">Rewriting export_html.py from scratch. All 900+ lines. Again.</div>
+<div class="t-line t-dim">// lesson learned the hard way: commit to main BEFORE deploying to gh-pages. always.</div>
+<div class="t-gap"></div>
+
+<div class="t-line t-section">&#9608; PHASE 7: POLISH &amp; THE META MOMENT</div>
+<div class="t-line t-user">the narrative is still too long, can we make it a bit sharpened please</div>
+<div class="t-line t-ai">Rewriting LLM prompt: "MBB partner voice. EXACTLY 3 bullets. Max 15 words each."</div>
+<div class="t-line t-user">final touches the page should look great on mobile</div>
+<div class="t-line t-prompt">Adding responsive CSS: stacked KPIs, hidden verbose elements, collapsible methodology...</div>
+<div class="t-line t-ok">Mobile-optimized. Methodology collapsed into &lt;details&gt; element.</div>
+<div class="t-gap"></div>
+<div class="t-line t-user">I want to document how we went about creating this together</div>
+<div class="t-line t-user">make a tab that shows how we went about it but make it feel like a walkthrough</div>
+<div class="t-line t-user">show the real mess</div>
+<div class="t-line t-ai">Building this terminal you're reading right now.</div>
+<div class="t-gap"></div>
+<div class="t-line t-prompt">git push origin gh-pages</div>
+<div class="t-line t-err">rejected &mdash; remote contains work that you do not have locally</div>
+<div class="t-line t-dim">// GitHub Actions auto-deployed while we were pushing. Again.</div>
+<div class="t-line t-prompt">git pull --rebase origin gh-pages</div>
+<div class="t-line t-err">CONFLICT (content): Merge conflict in scenario_report.html</div>
+<div class="t-line t-dim">// this happened at least 6 times during this build. the CI pipeline and manual deploys kept fighting.</div>
+<div class="t-line t-prompt">git rebase --abort &amp;&amp; mkdir /tmp/gh-deploy &amp;&amp; cp scenario_report.html /tmp/gh-deploy/index.html</div>
+<div class="t-line t-prompt">cd /tmp/gh-deploy &amp;&amp; git init &amp;&amp; git push origin gh-pages --force</div>
+<div class="t-line t-ok">Gave up on clean merges. Nuke and pave. It works.</div>
+<div class="t-gap"></div>
+<div class="t-line t-user">also make another tab that shows the tool schematic, the inputs, engine, output</div>
+<div class="t-line t-user">we created this for the oil dashboard before- remember the nice visual value chain?</div>
+<div class="t-line t-ai">Adding Architecture tab. Plain HTML boxes with the pipeline flow.</div>
+<div class="t-line t-user">the architecture doesn't show the nice visual value chain we had created for the oil dashboard</div>
+<div class="t-line t-dim">// Parth wanted the Mermaid-based interactive diagrams from docs/index.html, not static boxes.</div>
+<div class="t-line t-ai">Switching to Mermaid.js diagrams. System Architecture, GRM Calculation, Scenario Scoring Engine.</div>
+<div class="t-line t-prompt">adding mermaid CDN to &lt;head&gt;, dark theme config, three graph definitions...</div>
+<div class="t-line t-prompt">deploy &rarr; click Architecture tab &rarr; nothing renders</div>
+<div class="t-line t-user">the architecture diagrams aren't showing up :(</div>
+<div class="t-line t-dim">// mermaid.js was trying to render inside a hidden tab (display:none). SVG needs visible DOM to calculate dimensions.</div>
+<div class="t-line t-dim">// startOnLoad: true + hidden div = silent failure. no error. just... nothing.</div>
+<div class="t-line t-ai">Setting startOnLoad: false, deferring render to first tab click...</div>
+<div class="t-line t-prompt">deploy &rarr; check live &rarr; CDN cached old version &rarr; wait &rarr; check again</div>
+<div class="t-line t-dim">// WebFetch said the mermaid script tag was missing. curl said it was there. GitHub Pages CDN was serving stale HTML.</div>
+<div class="t-line t-dim">// spent 20 minutes debugging a problem that was just... caching.</div>
+<div class="t-line t-ok">Finally rendering. Three Mermaid diagrams + value chain pipeline. In the dark.</div>
+<div class="t-gap"></div>
+
+<div class="t-line t-section">&#9608; WHAT ACTUALLY HAPPENED</div>
+<div class="t-line t-dim">// Total time: ~2 working sessions, felt like 10</div>
+<div class="t-line t-dim">// Files created or modified: ~15</div>
+<div class="t-line t-dim">// Git conflicts resolved: lost count (at least 8)</div>
+<div class="t-line t-dim">// Times the CI pipeline nuked a manual deploy: 4</div>
+<div class="t-line t-dim">// Times export_html.py was rewritten from scratch after losing changes: 2</div>
+<div class="t-line t-dim">// Failed GitHub Actions runs before the pipeline stabilized: 6</div>
+<div class="t-line t-dim">// Times Parth corrected a fundamentally wrong approach: 3</div>
+<div class="t-line t-dim">// Times "it's deployed" turned out to be the old cached version: 3</div>
+<div class="t-line t-dim">//</div>
+<div class="t-line t-dim">// The pattern: Parth knew WHAT was needed (remove stock, use real consensus,</div>
+<div class="t-line t-dim">// switch to Indian basket, make it sharper). The AI knew HOW to build it</div>
+<div class="t-line t-dim">// (softmax math, LLM prompts, Cloudflare Workers, CSS).</div>
+<div class="t-line t-dim">//</div>
+<div class="t-line t-dim">// The biggest lesson: the AI's first instinct on pricing was wrong.</div>
+<div class="t-line t-dim">// Dynamic ratios felt "smart" but produced garbage. Parth's instinct</div>
+<div class="t-line t-dim">// &mdash; just go find what real analysts say &mdash; was the right answer.</div>
+<div class="t-line t-dim">// Sometimes the simple, grounded approach beats the clever one.</div>
+<div class="t-line t-dim">//</div>
+<div class="t-line t-dim">// Second lesson: commit to main before deploying to gh-pages.</div>
+<div class="t-line t-dim">// Or the CI pipeline WILL overwrite your work. We learned this twice.</div>
+<div class="t-line t-dim">//</div>
+<div class="t-line t-dim">// Third lesson: the AI's context window ran out mid-session.</div>
+<div class="t-line t-dim">// Had to resume from a summary. Lost fine-grained memory of earlier decisions.</div>
+<div class="t-line t-dim">// Some things had to be rebuilt because neither of us remembered exactly how they worked.</div>
+<div class="t-line t-dim">//</div>
+<div class="t-line t-dim">// But here's the thing: it shipped. It works. You're reading it.</div>
+<div class="t-line t-dim">// That's what matters.</div>
+
+</div>
+</div>
+</div>
+
+<div id="tab-arch" class="tab-panel">
+
+<div style="max-width:960px;">
+
+<h2 style="font-size:1.1rem;">System Architecture</h2>
+<div class="mermaid">
+graph LR
+    subgraph Sources["Data Sources"]
+        EIA["EIA API&lt;br/&gt;Crude &amp; Products"]
+        YF["yfinance&lt;br/&gt;Live Brent BZ=F"]
+        OP["OilPrice.com&lt;br/&gt;Dubai/Oman"]
+        FX["ExchangeRate&lt;br/&gt;USD/INR"]
+        RSS["RSS Feeds&lt;br/&gt;Reuters, BBC, AJ"]
+        NAPI["NewsAPI&lt;br/&gt;Oil, Iran, OPEC"]
+    end
+
+    subgraph Engine["Scenario Engine"]
+        SCRAPE["9 Parallel&lt;br/&gt;Scrapers"]
+        DB[("SQLite&lt;br/&gt;11 Tables&lt;br/&gt;WAL Mode")]
+        LLM["Claude Haiku 4.5&lt;br/&gt;Article Scoring"]
+        SOFT["Softmax&lt;br/&gt;Probabilities"]
+        EV["Expected Value&lt;br/&gt;Computation"]
+        NAR["LLM Narratives&lt;br/&gt;MBB Voice"]
+    end
+
+    subgraph Output["Output"]
+        HTML["export_html.py&lt;br/&gt;Static HTML"]
+        GH["GitHub Pages&lt;br/&gt;CDN Hosting"]
+    end
+
+    subgraph Refresh["Refresh Trigger"]
+        BTN["Refresh Button"]
+        CF["Cloudflare Worker&lt;br/&gt;Token Proxy"]
+        GA["GitHub Actions&lt;br/&gt;CI/CD Pipeline"]
+    end
+
+    EIA --&gt; SCRAPE
+    YF --&gt; SCRAPE
+    OP --&gt; SCRAPE
+    FX --&gt; SCRAPE
+    RSS --&gt; SCRAPE
+    NAPI --&gt; SCRAPE
+    SCRAPE --&gt; DB
+    DB --&gt; LLM
+    LLM --&gt; DB
+    DB --&gt; SOFT
+    SOFT --&gt; EV
+    EV --&gt; NAR
+    NAR --&gt; DB
+    DB --&gt; HTML
+    HTML --&gt; GH
+
+    BTN --&gt; CF
+    CF --&gt; GA
+    GA --&gt; SCRAPE
+
+    style Sources fill:#1a2332,stroke:#60A5FA,color:#F9FAFB
+    style Engine fill:#1a2332,stroke:#00D4AA,color:#F9FAFB
+    style Output fill:#1a2332,stroke:#10B981,color:#F9FAFB
+    style Refresh fill:#1a2332,stroke:#F59E0B,color:#F9FAFB
+</div>
+
+<h2 style="font-size:1.1rem;">Value Chain</h2>
+<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:20px 0;">
+    <div style="background:rgba(96,165,250,0.12);border:1px solid rgba(96,165,250,0.3);border-radius:8px;padding:10px 16px;text-align:center;min-width:110px;">
+        <div style="font-size:0.72rem;font-weight:700;color:#60A5FA;">DATA IN</div>
+        <div style="font-size:0.65rem;color:#9CA3AF;margin-top:2px;">6 APIs + RSS</div>
+    </div>
+    <div style="color:#60A5FA;display:flex;align-items:center;font-size:1.2rem;">&#10132;</div>
+    <div style="background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.3);border-radius:8px;padding:10px 16px;text-align:center;min-width:110px;">
+        <div style="font-size:0.72rem;font-weight:700;color:#8B5CF6;">SCRAPE</div>
+        <div style="font-size:0.65rem;color:#9CA3AF;margin-top:2px;">9 parallel threads</div>
+    </div>
+    <div style="color:#8B5CF6;display:flex;align-items:center;font-size:1.2rem;">&#10132;</div>
+    <div style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);border-radius:8px;padding:10px 16px;text-align:center;min-width:110px;">
+        <div style="font-size:0.72rem;font-weight:700;color:#F59E0B;">STORE</div>
+        <div style="font-size:0.65rem;color:#9CA3AF;margin-top:2px;">SQLite WAL</div>
+    </div>
+    <div style="color:#F59E0B;display:flex;align-items:center;font-size:1.2rem;">&#10132;</div>
+    <div style="background:rgba(0,212,170,0.12);border:1px solid rgba(0,212,170,0.3);border-radius:8px;padding:10px 16px;text-align:center;min-width:110px;">
+        <div style="font-size:0.72rem;font-weight:700;color:#00D4AA;">LLM SCORE</div>
+        <div style="font-size:0.65rem;color:#9CA3AF;margin-top:2px;">Claude Haiku 4.5</div>
+    </div>
+    <div style="color:#00D4AA;display:flex;align-items:center;font-size:1.2rem;">&#10132;</div>
+    <div style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:10px 16px;text-align:center;min-width:110px;">
+        <div style="font-size:0.72rem;font-weight:700;color:#EF4444;">COMPUTE</div>
+        <div style="font-size:0.65rem;color:#9CA3AF;margin-top:2px;">Softmax + EV</div>
+    </div>
+    <div style="color:#EF4444;display:flex;align-items:center;font-size:1.2rem;">&#10132;</div>
+    <div style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);border-radius:8px;padding:10px 16px;text-align:center;min-width:110px;">
+        <div style="font-size:0.72rem;font-weight:700;color:#10B981;">DEPLOY</div>
+        <div style="font-size:0.65rem;color:#9CA3AF;margin-top:2px;">GitHub Pages</div>
+    </div>
+</div>
+
+<h2 style="font-size:1.1rem;">GRM Calculation</h2>
+<div class="mermaid">
+graph TD
+    subgraph Crude["Crude Cost"]
+        DUB["Dubai/Oman&lt;br/&gt;$77.30"]
+        BRT["Brent&lt;br/&gt;$83.95"]
+        BASKET["Indian Basket&lt;br/&gt;72% Dubai + 28% Brent&lt;br/&gt;= $79.16/bbl"]
+    end
+
+    subgraph Products["Product Revenue (Singapore-adjusted)"]
+        DIE["Diesel $115&lt;br/&gt;wt: 42%"]
+        PET["Petrol $93&lt;br/&gt;wt: 22%"]
+        NAP["Naphtha $84&lt;br/&gt;wt: 12%"]
+        ATF["ATF $113&lt;br/&gt;wt: 10%"]
+        FO["Fuel Oil $61&lt;br/&gt;wt: 8%"]
+        LPG["LPG $33&lt;br/&gt;wt: 6%"]
+    end
+
+    GRM["GRM = Product Revenue - Crude Cost"]
+
+    DUB --&gt; BASKET
+    BRT --&gt; BASKET
+    DIE --&gt; GRM
+    PET --&gt; GRM
+    NAP --&gt; GRM
+    ATF --&gt; GRM
+    FO --&gt; GRM
+    LPG --&gt; GRM
+    BASKET --&gt; GRM
+
+    style Crude fill:#1a2332,stroke:#F59E0B,color:#F9FAFB
+    style Products fill:#1a2332,stroke:#00D4AA,color:#F9FAFB
+    style GRM fill:#0D2818,stroke:#10B981,color:#10B981
+</div>
+
+<h2 style="font-size:1.1rem;">Scenario Scoring Engine</h2>
+<div class="mermaid">
+graph LR
+    ART["150 News&lt;br/&gt;Articles"] --&gt; LLM["Claude Haiku&lt;br/&gt;Score [-1, +1]&lt;br/&gt;per scenario"]
+    LLM --&gt; SIG["5 Signals&lt;br/&gt;per article"]
+    SIG --&gt; AVG["Average Signal&lt;br/&gt;per scenario"]
+    AVG --&gt; SOFT["Softmax&lt;br/&gt;temp=3"]
+    SOFT --&gt; PROB["Probabilities&lt;br/&gt;sum = 100%"]
+    PROB --&gt; EV_OIL["EV Brent&lt;br/&gt;= &amp;Sigma; prob &amp;times; price"]
+    PROB --&gt; EV_GRM["EV GRM&lt;br/&gt;= &amp;Sigma; prob &amp;times; margin"]
+
+    CONSENSUS["Analyst Consensus&lt;br/&gt;GS, JPM, MS, Citi&lt;br/&gt;WoodMac, Rystad"] --&gt; EV_OIL
+    CRISIS["Crisis Crack&lt;br/&gt;Spread Data"] --&gt; EV_GRM
+
+    style ART fill:#1a2332,stroke:#60A5FA,color:#F9FAFB
+    style LLM fill:#1a2332,stroke:#00D4AA,color:#F9FAFB
+    style CONSENSUS fill:#1a2332,stroke:#F59E0B,color:#F9FAFB
+    style CRISIS fill:#1a2332,stroke:#F59E0B,color:#F9FAFB
+</div>
+
+<div style="background:linear-gradient(135deg,#151A28,#1A1F2E);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px 18px;margin-top:24px;font-size:0.78rem;color:#6B7280;line-height:1.5;">
+    <strong style="color:#9CA3AF;">Stack:</strong> Python 3 &middot; SQLite (WAL) &middot; Claude Haiku 4.5 (Anthropic API) &middot; GitHub Actions &middot; GitHub Pages &middot; Cloudflare Workers &middot; EIA API &middot; yfinance &middot; NewsAPI &middot; ThreadPoolExecutor
+</div>
+</div>
+</div>
+
+<script>
+mermaid.initialize({
+    startOnLoad: false,
+    theme: 'dark',
+    themeVariables: {
+        primaryColor: '#1a2332',
+        primaryTextColor: '#E5E7EB',
+        primaryBorderColor: '#00D4AA',
+        lineColor: '#4B5563',
+        secondaryColor: '#151A28',
+        tertiaryColor: '#0E1117',
+        fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
+        fontSize: '14px'
+    }
+});
+var _mermaidRendered = false;
+function switchTab(id) {
+    document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+    document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.getElementById('tab-' + id).classList.add('active');
+    var btns = document.querySelectorAll('.tab-btn');
+    var map = {'analysis': 0, 'build': 1, 'arch': 2};
+    if (map[id] !== undefined) btns[map[id]].classList.add('active');
+    if (id === 'arch' && !_mermaidRendered) {
+        _mermaidRendered = true;
+        mermaid.run({ querySelector: '#tab-arch .mermaid' });
+    }
+}
+
+function doRefresh() {
+    var btn = document.getElementById('refreshBtn');
+    var st = document.getElementById('refreshStatus');
+    btn.disabled = true;
+    btn.textContent = 'Triggering...';
+    st.textContent = '';
+    fetch('https://oil-dashboard-refresh.parthreddy.workers.dev', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'}
+    }).then(function(r) { return r.json(); }).then(function(data) {
+        if (data.status === 'triggered') {
+            btn.textContent = 'Triggered!';
+            st.textContent = 'Pipeline running (~90s). Page will auto-reload.';
+            startPolling();
+        } else {
+            btn.disabled = false;
+            btn.textContent = '\u21BB Refresh Data';
+            st.textContent = 'Refresh failed. Try again.';
+        }
+    }).catch(function() {
+        btn.disabled = false;
+        btn.textContent = '\u21BB Refresh Data';
+        st.textContent = 'Network error. Try again.';
+    });
+}
+
+var _initialEtag = null;
+function checkForUpdate() {
+    fetch(window.location.href, {method: 'HEAD', cache: 'no-cache'})
+        .then(function(r) {
+            var etag = r.headers.get('etag') || r.headers.get('last-modified') || '';
+            if (_initialEtag === null) { _initialEtag = etag; return; }
+            if (etag && etag !== _initialEtag) { location.reload(); }
+        }).catch(function() {});
+}
+function startPolling() { setInterval(checkForUpdate, 15000); }
+checkForUpdate();
+setInterval(checkForUpdate, 60000);
+</script>
+</body>
+</html>
