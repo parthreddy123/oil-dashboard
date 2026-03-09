@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scenario Engine &mdash; 2026-03-09 15:17</title>
+<title>Scenario Engine &mdash; 2026-03-09 19:57</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -255,7 +255,7 @@ table td { padding: 5px 10px; }
 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
     <div>
         <h1 style="margin-bottom:0.2rem;">&#127919; Scenario Engine</h1>
-        <div class="subtitle" style="margin-bottom:0;">Geopolitical scenario analysis for Indian refinery strategy &middot; 2026-03-09 15:17</div>
+        <div class="subtitle" style="margin-bottom:0;">Geopolitical scenario analysis for Indian refinery strategy &middot; 2026-03-09 19:57</div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;">
         <button class="refresh-btn" id="refreshBtn" onclick="doRefresh()">&#8635; Refresh Data</button>
@@ -270,7 +270,7 @@ table td { padding: 5px 10px; }
 </div>
 
 <div id="tab-analysis" class="tab-panel active">
-<div style="font-size:0.85rem;margin-bottom:1rem;"><span style="color:#F59E0B;">Brent: <strong>$101.63/bbl</strong></span> &nbsp;&middot;&nbsp; <span style="color:#00D4AA;">Indian Basket: <strong>$100.99/bbl</strong> <span style="font-size:0.75rem;color:#6B7280;">(72% Dubai + 28% Brent)</span></span></div>
+<div style="font-size:0.85rem;margin-bottom:1rem;"><span style="color:#F59E0B;">Brent: <strong>$90.20/bbl</strong></span> &nbsp;&middot;&nbsp; <span style="color:#00D4AA;">Indian Basket: <strong>$85.20/bbl</strong> <span style="font-size:0.75rem;color:#6B7280;">(72% Dubai + 28% Brent)</span></span></div>
 
 <div style="background:linear-gradient(135deg,#151A28,#1A1F2E);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px 18px;margin-bottom:1.2rem;font-size:0.8rem;color:#9CA3AF;line-height:1.5;">
     AI-powered geopolitical scenario analysis for Indian refinery strategy. LLM scores news articles against 5 scenarios; <strong style="color:#F9FAFB;">EV</strong> = probability-weighted expectation, not a forecast.
@@ -287,7 +287,7 @@ table td { padding: 5px 10px; }
             
         <div class="narrative-box">
             <div class="narrative-label">Strategic Assessment</div>
-            <div><ul><li>Hormuz closure + Iranian strikes + OPEC output loss = prolonged supply shock.</li><li>Signals heavily favor prolonged standoff (35%) over quick resolution; conflagration (24%) tail risk materializing.</li><li>Indian refiners face 45-day crude runway; GRM compression from oversupply + export force majeure.</li></ul></div>
+            <div><ul><li>Hormuz closure + Iran escalation locks 21% global supply; Brent $94 expected, upside to $150.</li><li>Prolonged standoff (35%) most probable; quick resolution signals uniformly negative (-0.90 avg) near-impossible.</li><li>Indian refiners face 45-day crude runway; GRM compression ($6.3/bbl) as feed costs spike, margins vanish.</li></ul></div>
         </div>
 
     <div class="kpi-row">
@@ -295,15 +295,15 @@ table td { padding: 5px 10px; }
             <div class="label">Brent Price (Expected Value)</div>
             <div class="value">$94/bbl</div>
             <div class="range">range: $68-130</div>
-            <div style="font-size:0.72rem;color:#F59E0B;margin-top:4px;">Current Brent: $101.63/bbl</div>
-            <div class="kpi-explanation">Hormuz blockade removes ~21% global supply; no quick diplomatic off-ramp credible; $94 reflects protracted shortage.</div>
+            <div style="font-size:0.72rem;color:#F59E0B;margin-top:4px;">Current Brent: $90.20/bbl</div>
+            <div class="kpi-explanation">Supply loss via Hormuz closure overwhelms demand destruction; price floor rises structurally.</div>
         </div>
         <div class="kpi-card" style="border-left:3px solid #00D4AA;">
             <div class="label">Typical Indian Refinery GRM (EV)</div>
             <div class="value">$6.3/bbl</div>
             <div class="range">range: $-2.0-13.0</div>
-            <div style="font-size:0.72rem;color:#00D4AA;margin-top:4px;">Indian Basket: $100.99/bbl (Dubai $100.74 &times; 72% + Brent $101.63 &times; 28%)</div>
-            <div class="kpi-explanation">Crude scarcity raises feedstock costs; forced export halts collapse refiner margins and pricing power.</div>
+            <div style="font-size:0.72rem;color:#00D4AA;margin-top:4px;">Indian Basket: $85.20/bbl (Dubai $83.25 &times; 72% + Brent $90.20 &times; 28%)</div>
+            <div class="kpi-explanation">Refinery throughput collapses faster than product prices fall; margin compression inevitable.</div>
         </div>
     </div>
 
@@ -316,7 +316,7 @@ table td { padding: 5px 10px; }
                 <th style="padding:6px 10px;color:#9CA3AF;font-weight:600;font-size:0.68rem;text-transform:uppercase;">Chg</th>
                 <th style="padding:6px 10px;color:#9CA3AF;font-weight:600;font-size:0.68rem;text-transform:uppercase;">GRM Wt</th>
             </tr></thead>
-            <tbody style="color:#E5E7EB;"><tr><td>Diesel</td><td>$115</td><td>$138</td><td><span style="color:#EF4444;font-weight:600;">+20%</span></td><td style="color:#4B5563;">42%</td></tr><tr><td>Petrol</td><td>$93</td><td>$88</td><td><span style="color:#10B981;font-weight:600;">-5%</span></td><td style="color:#4B5563;">22%</td></tr><tr><td>ATF</td><td>$113</td><td>$134</td><td><span style="color:#EF4444;font-weight:600;">+18%</span></td><td style="color:#4B5563;">10%</td></tr><tr><td>Naphtha</td><td>$84</td><td>$72</td><td><span style="color:#10B981;font-weight:600;">-14%</span></td><td style="color:#4B5563;">12%</td></tr><tr><td>Fuel Oil</td><td>$76</td><td>$66</td><td><span style="color:#10B981;font-weight:600;">-12%</span></td><td style="color:#4B5563;">8%</td></tr><tr><td>LPG</td><td>$33</td><td>$29</td><td><span style="color:#10B981;font-weight:600;">-14%</span></td><td style="color:#4B5563;">6%</td></tr></tbody>
+            <tbody style="color:#E5E7EB;"><tr><td>Diesel</td><td>$115</td><td>$138</td><td><span style="color:#EF4444;font-weight:600;">+20%</span></td><td style="color:#4B5563;">42%</td></tr><tr><td>Petrol</td><td>$93</td><td>$88</td><td><span style="color:#10B981;font-weight:600;">-5%</span></td><td style="color:#4B5563;">22%</td></tr><tr><td>ATF</td><td>$113</td><td>$134</td><td><span style="color:#EF4444;font-weight:600;">+18%</span></td><td style="color:#4B5563;">10%</td></tr><tr><td>Naphtha</td><td>$84</td><td>$72</td><td><span style="color:#10B981;font-weight:600;">-14%</span></td><td style="color:#4B5563;">12%</td></tr><tr><td>Fuel Oil</td><td>$65</td><td>$66</td><td><span style="color:#EF4444;font-weight:600;">+2%</span></td><td style="color:#4B5563;">8%</td></tr><tr><td>LPG</td><td>$33</td><td>$29</td><td><span style="color:#10B981;font-weight:600;">-14%</span></td><td style="color:#4B5563;">6%</td></tr></tbody>
         </table>
     </div>
 <h2>Last 12 Hours</h2><div class="momentum-row">
@@ -334,7 +334,7 @@ table td { padding: 5px 10px; }
             </div>
             <div class="momentum-box" style="border-top:2px solid #00D4FF;">
                 <div class="name">Ceasefire</div>
-                <div class="delta" style="color:#10B981;">&#9650; +0.16</div>
+                <div class="delta" style="color:#10B981;">&#9650; +0.17</div>
             </div>
             <div class="momentum-box" style="border-top:2px solid #8B5CF6;">
                 <div class="name">Regime</div>
@@ -350,7 +350,7 @@ table td { padding: 5px 10px; }
                 </div>
                 <span class="pct" style="color:#F59E0B;">35%</span>
             </div>
-            <div class="scenario-bar"><div style="height:100%;width:87.51974574991021%;background:#F59E0B;border-radius:0 2px 2px 0;"></div></div>
+            <div class="scenario-bar"><div style="height:100%;width:87.63682347372365%;background:#F59E0B;border-radius:0 2px 2px 0;"></div></div>
             <div class="scenario-body">
                 <div class="scenario-articles"><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.95]</span><a href="https://oilprice.com/Energy/Natural-Gas/Strait-of-Hormuz-Closure-Sends-European-Gas-Benchmark-Soaring.html" target="_blank" style="color:#F9FAFB;text-decoration:none;">Strait of Hormuz Closure Sends European Gas Benchmark Soaring</a></div><div class="art-reasoning">Effective Hormuz closure with sharp market spikes is the quintessential signal of prolonged standoff with sustained maritime disruption.</div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.95]</span><a href="https://oilprice.com/Latest-Energy-News/World-News/Dozens-of-Asia-Flagged-Oil-Tankers-Stranded-near-Strait-of-Hormuz.html" target="_blank" style="color:#F9FAFB;text-decoration:none;">Dozens of Asia-Flagged Oil Tankers Stranded near Strait of Hormuz</a></div><div class="art-reasoning">Dozens of stranded tankers with crews is the quintessential prolonged standoff outcome representing sustained partial closure.</div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.90]</span><a href="https://news.google.com/rss/articles/CBMiwwJBVV95cUxPLThmSnlCdS1PZzJhc1BMeEdJUDFuYW1yZUhKSXJ3ZUNFTzA1YjlLYXNMYTE1OFo1Zm5IZEJPLTdPSjY1cl82V3BObkFLdnhRN21ReXEtU1hIOEsyOEgtaHIyYWNyQ0doOTFncWJmMERyUmk2cm5MVEF4YVhwZXZaLXVoelRmbEd6cUJjMVlnTUFRQThSRXFhdDNWRy1aTXRjeFhaSWg4d2N4TklGNkdLbGZNQk9OQTczaXFLY0stOS1iLVVDNXEyRHFkdjVraC0tTFNrQlF0Q191cEwxcF96bzFNQUJJamlucVVLODRib1BjS0RPTHE4TDBZVXR4eFNvemFrUW5CRlJ1NVJERFkzTnhkUTA1Y2dDNzNYdkJtMl9CTHZNLU9MRkZqd2taRnY5WmxiNHlBM3ZjRmx4WmxlZFVrMNIByAJBVV95cUxOekMwYm03d0hZNVFjY3drZlUzQ0d1MVZKbms3NVR6NS02YThUX2FpVTlOVWxrNVdVMGFUeWgzbkJ1UW9iQkFUVll4NEpWUU9FWFV3UjNQODJneXc2XzZZajRQN3lETy12b0NVa2RDN2pQYUNTSVpfRWJYSjJibHkzeElVRlVPVXI1ejVhcU4zdS1wXy02RFRZWHZQSGx0SzA2Rk5EWE1aQm9YRU5pSkpqXzFRNkplckk2QU9ZMmh4UVFkaDc0TFN3Y1p6dUZva3FqREtna25jdFhaYWx6TkotZDNkbk5xWGZ5Sl9JeEdtT0pxOURlVWJxMUlrSlIzakJtQ19lTGJTS0ptVWNxeXUxdlpjSHFZdVFNUGx1UTNlZEg4Ti1XbXJmUmhsX3pNUE1qZEJyMTBobWhtamotQlh1cjM5SjNyOUMz?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">Global oil supply chains face historic stress: Crude prices and tanker rates now at all-time highs — here’</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.90]</span><a href="https://oilprice.com/Latest-Energy-News/World-News/Goldman-Sachs-Hikes-Q2-Brent-Oil-Price-Forecast-by-10.html" target="_blank" style="color:#F9FAFB;text-decoration:none;">Goldman Sachs Hikes Q2 Brent Oil Price Forecast by $10</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.90]</span><a href="https://news.google.com/rss/articles/CBMitgFBVV95cUxPWi1MVXpjbGtrTHBtS1o0c1dKQ0p5V0JQWGVBRVlhNUdBR0JrNGp2Z0g0M0hFdUt4Sk5tbTVBOUxyNnRWZE1iczFFQjZxMllPVFoxbk4xTG13aTR2Xy1lbm5JYW1zS3JPeW1OZDN6QTdXV0RCMkgwbFZoeXZUc05SX0lHbjJONnhrTzJlbEVwLXFNdlk1OUl3dWdvVmJPbGpGVHZ4Z0xGSHczOVJmeHF0dWJVeUJyQQ?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">Markets latest: Massive oil producer declares it won't fulfil contracts</a></div></div></div>
                 <div class="scenario-kpis">
@@ -359,7 +359,7 @@ table td { padding: 5px 10px; }
                         <div class="item"><div class="lbl">GRM</div><div class="val">$7.0</div></div>
                     </div>
                     <div style="font-size:0.65rem;color:#6B7280;margin-top:6px;line-height:1.6;"><span style="white-space:nowrap;">Die $135</span> | <span style="white-space:nowrap;">Pet $86</span> | <span style="white-space:nowrap;">ATF $130</span></div>
-                    <div class="scenario-assessment"><div class="lbl">LLM Assessment</div><div>Intermittent Hormuz closures and tanker diversions persist for months without full-scale regional escalation, creating sustained but manageable supply constraints and margin compression.</div></div>
+                    <div class="scenario-assessment"><div class="lbl">LLM Assessment</div><div>35% probability—highest base case—reflects Strait closure persisting for months with tanker gridlock and supply constraints manageable enough to avoid economic collapse but severe enough to depress refining margins and equities.</div></div>
                 </div>
             </div>
         </div>
@@ -372,7 +372,7 @@ table td { padding: 5px 10px; }
                 </div>
                 <span class="pct" style="color:#EF4444;">24%</span>
             </div>
-            <div class="scenario-bar"><div style="height:100%;width:59.91056499892654%;background:#EF4444;border-radius:0 2px 2px 0;"></div></div>
+            <div class="scenario-bar"><div style="height:100%;width:59.905866564744414%;background:#EF4444;border-radius:0 2px 2px 0;"></div></div>
             <div class="scenario-body">
                 <div class="scenario-articles"><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+1.00]</span><a href="https://news.google.com/rss/articles/CBMiogFBVV95cUxQdC16a3BZVHpWX3BuLS0tejhMVzBvdGp1b1FzQVZya0JTMnNvRF9KT1dHV2dKNmp4enVfaVJrUkk4WFh1VzBHZWh1SW9haVNHWUhLdXMwR2hTc1pNOFFaNFd1SFRhZ2tVb1FYb1JURzZfZEoySzZBNVlGV2xZOHNHdUEyWTZfaVpoaVNFZnd2V3AwbUNHZlotcXZfbjJDYVRLVVHSAacBQVVfeXFMTmdrU0xjbXROQzJ1TTAyOWNNQ3Q5bjI5Y21UalNadENkVS1ObkF0QlVkTVYwUkFiMTNUb1owam9VTW9DeWJDU2RjSnItWC03anNNUTFwaVRxcHc2cXpXdHY0ZEVDSzg2NDJydnh3dTdsTWRUWDhzWU8xeDBQbXI5V0Z6Z2VTY2sxUnlITVFVVDM2dXJvTzNlRzEtOEMyZi0ycURKLXlENE0?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">The U.S.-Iran war is the biggest oil supply disruption in history</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.95]</span><a href="https://news.google.com/rss/articles/CBMiwwJBVV95cUxPLThmSnlCdS1PZzJhc1BMeEdJUDFuYW1yZUhKSXJ3ZUNFTzA1YjlLYXNMYTE1OFo1Zm5IZEJPLTdPSjY1cl82V3BObkFLdnhRN21ReXEtU1hIOEsyOEgtaHIyYWNyQ0doOTFncWJmMERyUmk2cm5MVEF4YVhwZXZaLXVoelRmbEd6cUJjMVlnTUFRQThSRXFhdDNWRy1aTXRjeFhaSWg4d2N4TklGNkdLbGZNQk9OQTczaXFLY0stOS1iLVVDNXEyRHFkdjVraC0tTFNrQlF0Q191cEwxcF96bzFNQUJJamlucVVLODRib1BjS0RPTHE4TDBZVXR4eFNvemFrUW5CRlJ1NVJERFkzTnhkUTA1Y2dDNzNYdkJtMl9CTHZNLU9MRkZqd2taRnY5WmxiNHlBM3ZjRmx4WmxlZFVrMNIByAJBVV95cUxOekMwYm03d0hZNVFjY3drZlUzQ0d1MVZKbms3NVR6NS02YThUX2FpVTlOVWxrNVdVMGFUeWgzbkJ1UW9iQkFUVll4NEpWUU9FWFV3UjNQODJneXc2XzZZajRQN3lETy12b0NVa2RDN2pQYUNTSVpfRWJYSjJibHkzeElVRlVPVXI1ejVhcU4zdS1wXy02RFRZWHZQSGx0SzA2Rk5EWE1aQm9YRU5pSkpqXzFRNkplckk2QU9ZMmh4UVFkaDc0TFN3Y1p6dUZva3FqREtna25jdFhaYWx6TkotZDNkbk5xWGZ5Sl9JeEdtT0pxOURlVWJxMUlrSlIzakJtQ19lTGJTS0ptVWNxeXUxdlpjSHFZdVFNUGx1UTNlZEg4Ti1XbXJmUmhsX3pNUE1qZEJyMTBobWhtamotQlh1cjM5SjNyOUMz?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">Global oil supply chains face historic stress: Crude prices and tanker rates now at all-time highs — here’</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.95]</span><a href="https://news.google.com/rss/articles/CBMimAJBVV95cUxOcFpmbmpPeDJGektMTk9XYVZzUU1YemFLSmNodllQZEdMZ2hyV3d0Yy10UDh3YXJYRm1GU2E5TTlkZVF3Mk5HNjhvVHIxdkR3YWIwRTZSX2x5czJSWjdLT0ZYVUdwSkVDbXNaZDI3MTVwT3o0RDdGLU1PTC1kT01GTlFkUnhfWXdnUkhTNS0ta1UtTXg0cU5Ba19oeGFNRTJrSVFILVBFZ2RXT2xWSmhhTUZSa0hvellpc3pmZlNzeW1XZnNXeE1XQmR5Vlhlcmtka052T0pzWTRqWnE2WDNBdUlTT0ZYdVozZS1RRk1UbnUwUTFkOGdidHVnNmt6Nk0zSkZVelB4NUE5U1luamxRWnM1VHNkTU9r0gGeAkFVX3lxTE9faGFMYU1MX3RFR0U1SDVMMUp3LXlKblhNbkxhOW1aUFdRekJGWjVhM3VpLWRhcHRUMWZQdkNQNDJnblBvUWRJbmVTa0NmaWUtZE8ya3lVaXpVMzVsZVN1TjhDZU1LSklXbGJnNW5fYWkzeXRvak5oYk9zeEdFZHNvdjQ5Y3lJZWxZRFhlck5paUlqRGMxdkZMTURpNExmaVhWaV9zNEt3RXp0ZFFqSDIwOHZyVzB3S1lhWU91UXpBaWluVUkwbnJkMmZQY083dHBteGpDWWhROFM2ME1ESm41NVhiNnVBY3dzVEZyMUJ3eURmbDVZeHdvMXl5M2tUXzdFZXR1SERlWEd1R2ZtSF9DWVNBUEY2Y1VsNnNKQWc?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">Iran bombs Israel's Haifa oil refinery, causing massive damage; It has connection with India</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.95]</span><a href="https://news.google.com/rss/articles/CBMioAFBVV95cUxQOWhTdUhhR2MtMFJLRUd0S0RVZEdLQU90NWFYQmQ1NzhRQ3NFTEgwZFZiMXNMcFI2UnBsNGt0YVFFSjBGNnhOMWFHc2RoSnhMenVZQXNXeXFBWVZGdGNMaDFuTDl1OXlkMVk5YVJPT2IwU3FKcktSaEd4MExtREo0M0lvZU1SbjZRbUEyQzlkLVc2UGY0VjljVzF4U2tnQndl?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">'Nightmare scenario' looms as global markets head for the biggest oil output disruption in history, top energy guru warns</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.95]</span><a href="https://news.google.com/rss/articles/CBMivgFBVV95cUxPV0xVUEFFQTBLbU1VU1Y5SlI1eWJGcGE3dVpUMXpJOFBoWkRHV3ZZUGR0YlNNeUgwRFZZM0RiaWZiVDRGbE1ZRkp6TzdUOU1OWC1jMUNJakllN1N4WDc2UllKY1dxVUNJTHFscWFtOG1WMXlrQ2E4eEVpTElMTTU5a0YtcklJWjNza3pxdldKTjJ0WXFOSWUxcjNsTVBIX3N0MndROVFmUXZhTGdLOUJIOWxvRVFRWnBrd0g4STNB?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">Oil surges toward $120 as Iran war shuts Hormuz, OPEC output falls</a></div></div></div>
                 <div class="scenario-kpis">
@@ -381,7 +381,7 @@ table td { padding: 5px 10px; }
                         <div class="item"><div class="lbl">GRM</div><div class="val">$-2.0</div></div>
                     </div>
                     <div style="font-size:0.65rem;color:#6B7280;margin-top:6px;line-height:1.6;"><span style="white-space:nowrap;">Die $200</span> | <span style="white-space:nowrap;">Pet $118</span> | <span style="white-space:nowrap;">ATF $195</span></div>
-                    <div class="scenario-assessment"><div class="lbl">LLM Assessment</div><div>Regional conflict spreads to critical infrastructure, shipping routes face near-total closure, and global refining capacity drops materially—evidenced by stranded tanker fleets indicating supply chain collapse.</div></div>
+                    <div class="scenario-assessment"><div class="lbl">LLM Assessment</div><div>24% probability anchored on oil spiking to $130 and crushing refining economics (−$2 GRM), indicating escalation to regional warfare that extends beyond Hormuz chokepoint into broader Middle East infrastructure.</div></div>
                 </div>
             </div>
         </div>
@@ -394,7 +394,7 @@ table td { padding: 5px 10px; }
                 </div>
                 <span class="pct" style="color:#8B5CF6;">20%</span>
             </div>
-            <div class="scenario-bar"><div style="height:100%;width:50.78256983908599%;background:#8B5CF6;border-radius:0 2px 2px 0;"></div></div>
+            <div class="scenario-bar"><div style="height:100%;width:50.74530772791433%;background:#8B5CF6;border-radius:0 2px 2px 0;"></div></div>
             <div class="scenario-body">
                 <div class="scenario-articles"><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.70]</span><a href="https://oilprice.com/Geopolitics/Middle-East/Irans-New-Supreme-Leader-Opens-Tenure-With-Missile-Attacks-Across-Region.html" target="_blank" style="color:#F9FAFB;text-decoration:none;">Iran’s New Supreme Leader Opens Tenure With Missile Attacks Across Region</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.60]</span><a href="https://news.google.com/rss/articles/CBMiogFBVV95cUxQdC16a3BZVHpWX3BuLS0tejhMVzBvdGp1b1FzQVZya0JTMnNvRF9KT1dHV2dKNmp4enVfaVJrUkk4WFh1VzBHZWh1SW9haVNHWUhLdXMwR2hTc1pNOFFaNFd1SFRhZ2tVb1FYb1JURzZfZEoySzZBNVlGV2xZOHNHdUEyWTZfaVpoaVNFZnd2V3AwbUNHZlotcXZfbjJDYVRLVVHSAacBQVVfeXFMTmdrU0xjbXROQzJ1TTAyOWNNQ3Q5bjI5Y21UalNadENkVS1ObkF0QlVkTVYwUkFiMTNUb1owam9VTW9DeWJDU2RjSnItWC03anNNUTFwaVRxcHc2cXpXdHY0ZEVDSzg2NDJydnh3dTdsTWRUWDhzWU8xeDBQbXI5V0Z6Z2VTY2sxUnlITVFVVDM2dXJvTzNlRzEtOEMyZi0ycURKLXlENE0?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">The U.S.-Iran war is the biggest oil supply disruption in history</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.50]</span><a href="https://news.google.com/rss/articles/CBMimAJBVV95cUxOcFpmbmpPeDJGektMTk9XYVZzUU1YemFLSmNodllQZEdMZ2hyV3d0Yy10UDh3YXJYRm1GU2E5TTlkZVF3Mk5HNjhvVHIxdkR3YWIwRTZSX2x5czJSWjdLT0ZYVUdwSkVDbXNaZDI3MTVwT3o0RDdGLU1PTC1kT01GTlFkUnhfWXdnUkhTNS0ta1UtTXg0cU5Ba19oeGFNRTJrSVFILVBFZ2RXT2xWSmhhTUZSa0hvellpc3pmZlNzeW1XZnNXeE1XQmR5Vlhlcmtka052T0pzWTRqWnE2WDNBdUlTT0ZYdVozZS1RRk1UbnUwUTFkOGdidHVnNmt6Nk0zSkZVelB4NUE5U1luamxRWnM1VHNkTU9r0gGeAkFVX3lxTE9faGFMYU1MX3RFR0U1SDVMMUp3LXlKblhNbkxhOW1aUFdRekJGWjVhM3VpLWRhcHRUMWZQdkNQNDJnblBvUWRJbmVTa0NmaWUtZE8ya3lVaXpVMzVsZVN1TjhDZU1LSklXbGJnNW5fYWkzeXRvak5oYk9zeEdFZHNvdjQ5Y3lJZWxZRFhlck5paUlqRGMxdkZMTURpNExmaVhWaV9zNEt3RXp0ZFFqSDIwOHZyVzB3S1lhWU91UXpBaWluVUkwbnJkMmZQY083dHBteGpDWWhROFM2ME1ESm41NVhiNnVBY3dzVEZyMUJ3eURmbDVZeHdvMXl5M2tUXzdFZXR1SERlWEd1R2ZtSF9DWVNBUEY2Y1VsNnNKQWc?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">Iran bombs Israel's Haifa oil refinery, causing massive damage; It has connection with India</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.50]</span><a href="https://news.google.com/rss/articles/CBMioAFBVV95cUxQOWhTdUhhR2MtMFJLRUd0S0RVZEdLQU90NWFYQmQ1NzhRQ3NFTEgwZFZiMXNMcFI2UnBsNGt0YVFFSjBGNnhOMWFHc2RoSnhMenVZQXNXeXFBWVZGdGNMaDFuTDl1OXlkMVk5YVJPT2IwU3FKcktSaEd4MExtREo0M0lvZU1SbjZRbUEyQzlkLVc2UGY0VjljVzF4U2tnQndl?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">'Nightmare scenario' looms as global markets head for the biggest oil output disruption in history, top energy guru warns</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#10B981;font-weight:700;font-size:0.78rem;margin-right:6px;">[+0.50]</span><a href="https://news.google.com/rss/articles/CBMitgFBVV95cUxPWi1MVXpjbGtrTHBtS1o0c1dKQ0p5V0JQWGVBRVlhNUdBR0JrNGp2Z0g0M0hFdUt4Sk5tbTVBOUxyNnRWZE1iczFFQjZxMllPVFoxbk4xTG13aTR2Xy1lbm5JYW1zS3JPeW1OZDN6QTdXV0RCMkgwbFZoeXZUc05SX0lHbjJONnhrTzJlbEVwLXFNdlk1OUl3dWdvVmJPbGpGVHZ4Z0xGSHczOVJmeHF0dWJVeUJyQQ?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">Markets latest: Massive oil producer declares it won't fulfil contracts</a></div></div></div>
                 <div class="scenario-kpis">
@@ -403,7 +403,7 @@ table td { padding: 5px 10px; }
                         <div class="item"><div class="lbl">GRM</div><div class="val">$9.0</div></div>
                     </div>
                     <div style="font-size:0.65rem;color:#6B7280;margin-top:6px;line-height:1.6;"><span style="white-space:nowrap;">Die $118</span> | <span style="white-space:nowrap;">Pet $80</span> | <span style="white-space:nowrap;">ATF $114</span></div>
-                    <div class="scenario-assessment"><div class="lbl">LLM Assessment</div><div>Internal Iranian political instability or external intervention triggers power transition, restoring supply flows within weeks while creating medium-term geopolitical uncertainty that moderates upside.</div></div>
+                    <div class="scenario-assessment"><div class="lbl">LLM Assessment</div><div>20% probability reflecting internal Iranian political upheaval following war losses, which would create transitional oil supply uncertainty (landing between prolonged standoff and quick resolution outcomes).</div></div>
                 </div>
             </div>
         </div>
@@ -416,7 +416,7 @@ table td { padding: 5px 10px; }
                 </div>
                 <span class="pct" style="color:#00D4FF;">11%</span>
             </div>
-            <div class="scenario-bar"><div style="height:100%;width:27.642994158859366%;background:#00D4FF;border-radius:0 2px 2px 0;"></div></div>
+            <div class="scenario-bar"><div style="height:100%;width:27.560180641704548%;background:#00D4FF;border-radius:0 2px 2px 0;"></div></div>
             <div class="scenario-body">
                 <div class="scenario-articles"><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#EF4444;font-weight:700;font-size:0.78rem;margin-right:6px;">[-0.90]</span><a href="https://oilprice.com/Latest-Energy-News/World-News/Dozens-of-Asia-Flagged-Oil-Tankers-Stranded-near-Strait-of-Hormuz.html" target="_blank" style="color:#F9FAFB;text-decoration:none;">Dozens of Asia-Flagged Oil Tankers Stranded near Strait of Hormuz</a></div><div class="art-reasoning">Ceasefire would immediately unlock stranded vessels; current status indicates active crisis continuation.</div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#EF4444;font-weight:700;font-size:0.78rem;margin-right:6px;">[-0.85]</span><a href="https://news.google.com/rss/articles/CBMiogFBVV95cUxQdC16a3BZVHpWX3BuLS0tejhMVzBvdGp1b1FzQVZya0JTMnNvRF9KT1dHV2dKNmp4enVfaVJrUkk4WFh1VzBHZWh1SW9haVNHWUhLdXMwR2hTc1pNOFFaNFd1SFRhZ2tVb1FYb1JURzZfZEoySzZBNVlGV2xZOHNHdUEyWTZfaVpoaVNFZnd2V3AwbUNHZlotcXZfbjJDYVRLVVHSAacBQVVfeXFMTmdrU0xjbXROQzJ1TTAyOWNNQ3Q5bjI5Y21UalNadENkVS1ObkF0QlVkTVYwUkFiMTNUb1owam9VTW9DeWJDU2RjSnItWC03anNNUTFwaVRxcHc2cXpXdHY0ZEVDSzg2NDJydnh3dTdsTWRUWDhzWU8xeDBQbXI5V0Z6Z2VTY2sxUnlITVFVVDM2dXJvTzNlRzEtOEMyZi0ycURKLXlENE0?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">The U.S.-Iran war is the biggest oil supply disruption in history</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#EF4444;font-weight:700;font-size:0.78rem;margin-right:6px;">[-0.80]</span><a href="https://oilprice.com/Energy/Natural-Gas/Strait-of-Hormuz-Closure-Sends-European-Gas-Benchmark-Soaring.html" target="_blank" style="color:#F9FAFB;text-decoration:none;">Strait of Hormuz Closure Sends European Gas Benchmark Soaring</a></div><div class="art-reasoning">Active Strait closure with soaring gas prices contradicts the rapid market normalization expected after ceasefire agreements.</div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#EF4444;font-weight:700;font-size:0.78rem;margin-right:6px;">[-0.80]</span><a href="https://news.google.com/rss/articles/CBMioAFBVV95cUxQOWhTdUhhR2MtMFJLRUd0S0RVZEdLQU90NWFYQmQ1NzhRQ3NFTEgwZFZiMXNMcFI2UnBsNGt0YVFFSjBGNnhOMWFHc2RoSnhMenVZQXNXeXFBWVZGdGNMaDFuTDl1OXlkMVk5YVJPT2IwU3FKcktSaEd4MExtREo0M0lvZU1SbjZRbUEyQzlkLVc2UGY0VjljVzF4U2tnQndl?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">'Nightmare scenario' looms as global markets head for the biggest oil output disruption in history, top energy guru warns</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#EF4444;font-weight:700;font-size:0.78rem;margin-right:6px;">[-0.80]</span><a href="https://news.google.com/rss/articles/CBMivgFBVV95cUxPV0xVUEFFQTBLbU1VU1Y5SlI1eWJGcGE3dVpUMXpJOFBoWkRHV3ZZUGR0YlNNeUgwRFZZM0RiaWZiVDRGbE1ZRkp6TzdUOU1OWC1jMUNJakllN1N4WDc2UllKY1dxVUNJTHFscWFtOG1WMXlrQ2E4eEVpTElMTTU5a0YtcklJWjNza3pxdldKTjJ0WXFOSWUxcjNsTVBIX3N0MndROVFmUXZhTGdLOUJIOWxvRVFRWnBrd0g4STNB?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">Oil surges toward $120 as Iran war shuts Hormuz, OPEC output falls</a></div></div></div>
                 <div class="scenario-kpis">
@@ -425,7 +425,7 @@ table td { padding: 5px 10px; }
                         <div class="item"><div class="lbl">GRM</div><div class="val">$13.0</div></div>
                     </div>
                     <div style="font-size:0.65rem;color:#6B7280;margin-top:6px;line-height:1.6;"><span style="white-space:nowrap;">Die $88</span> | <span style="white-space:nowrap;">Pet $65</span> | <span style="white-space:nowrap;">ATF $86</span></div>
-                    <div class="scenario-assessment"><div class="lbl">LLM Assessment</div><div>Rapid diplomatic intervention restores Hormuz transit within days and reverses risk premium, with talks de-escalating before widespread supply disruption takes hold.</div></div>
+                    <div class="scenario-assessment"><div class="lbl">LLM Assessment</div><div>11% probability tied to rapid diplomatic breakthrough that clears the Strait, restores tanker flows, and lifts refining spreads to $13—the most optimistic outcome given current entrenched military postures.</div></div>
                 </div>
             </div>
         </div>
@@ -438,7 +438,7 @@ table td { padding: 5px 10px; }
                 </div>
                 <span class="pct" style="color:#10B981;">10%</span>
             </div>
-            <div class="scenario-bar"><div style="height:100%;width:24.144125253217904%;background:#10B981;border-radius:0 2px 2px 0;"></div></div>
+            <div class="scenario-bar"><div style="height:100%;width:24.151821591913034%;background:#10B981;border-radius:0 2px 2px 0;"></div></div>
             <div class="scenario-body">
                 <div class="scenario-articles"><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#EF4444;font-weight:700;font-size:0.78rem;margin-right:6px;">[-0.95]</span><a href="https://news.google.com/rss/articles/CBMivgFBVV95cUxPV0xVUEFFQTBLbU1VU1Y5SlI1eWJGcGE3dVpUMXpJOFBoWkRHV3ZZUGR0YlNNeUgwRFZZM0RiaWZiVDRGbE1ZRkp6TzdUOU1OWC1jMUNJakllN1N4WDc2UllKY1dxVUNJTHFscWFtOG1WMXlrQ2E4eEVpTElMTTU5a0YtcklJWjNza3pxdldKTjJ0WXFOSWUxcjNsTVBIX3N0MndROVFmUXZhTGdLOUJIOWxvRVFRWnBrd0g4STNB?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">Oil surges toward $120 as Iran war shuts Hormuz, OPEC output falls</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#EF4444;font-weight:700;font-size:0.78rem;margin-right:6px;">[-0.90]</span><a href="https://news.google.com/rss/articles/CBMiogFBVV95cUxQdC16a3BZVHpWX3BuLS0tejhMVzBvdGp1b1FzQVZya0JTMnNvRF9KT1dHV2dKNmp4enVfaVJrUkk4WFh1VzBHZWh1SW9haVNHWUhLdXMwR2hTc1pNOFFaNFd1SFRhZ2tVb1FYb1JURzZfZEoySzZBNVlGV2xZOHNHdUEyWTZfaVpoaVNFZnd2V3AwbUNHZlotcXZfbjJDYVRLVVHSAacBQVVfeXFMTmdrU0xjbXROQzJ1TTAyOWNNQ3Q5bjI5Y21UalNadENkVS1ObkF0QlVkTVYwUkFiMTNUb1owam9VTW9DeWJDU2RjSnItWC03anNNUTFwaVRxcHc2cXpXdHY0ZEVDSzg2NDJydnh3dTdsTWRUWDhzWU8xeDBQbXI5V0Z6Z2VTY2sxUnlITVFVVDM2dXJvTzNlRzEtOEMyZi0ycURKLXlENE0?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">The U.S.-Iran war is the biggest oil supply disruption in history</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#EF4444;font-weight:700;font-size:0.78rem;margin-right:6px;">[-0.90]</span><a href="https://news.google.com/rss/articles/CBMimAJBVV95cUxOcFpmbmpPeDJGektMTk9XYVZzUU1YemFLSmNodllQZEdMZ2hyV3d0Yy10UDh3YXJYRm1GU2E5TTlkZVF3Mk5HNjhvVHIxdkR3YWIwRTZSX2x5czJSWjdLT0ZYVUdwSkVDbXNaZDI3MTVwT3o0RDdGLU1PTC1kT01GTlFkUnhfWXdnUkhTNS0ta1UtTXg0cU5Ba19oeGFNRTJrSVFILVBFZ2RXT2xWSmhhTUZSa0hvellpc3pmZlNzeW1XZnNXeE1XQmR5Vlhlcmtka052T0pzWTRqWnE2WDNBdUlTT0ZYdVozZS1RRk1UbnUwUTFkOGdidHVnNmt6Nk0zSkZVelB4NUE5U1luamxRWnM1VHNkTU9r0gGeAkFVX3lxTE9faGFMYU1MX3RFR0U1SDVMMUp3LXlKblhNbkxhOW1aUFdRekJGWjVhM3VpLWRhcHRUMWZQdkNQNDJnblBvUWRJbmVTa0NmaWUtZE8ya3lVaXpVMzVsZVN1TjhDZU1LSklXbGJnNW5fYWkzeXRvak5oYk9zeEdFZHNvdjQ5Y3lJZWxZRFhlck5paUlqRGMxdkZMTURpNExmaVhWaV9zNEt3RXp0ZFFqSDIwOHZyVzB3S1lhWU91UXpBaWluVUkwbnJkMmZQY083dHBteGpDWWhROFM2ME1ESm41NVhiNnVBY3dzVEZyMUJ3eURmbDVZeHdvMXl5M2tUXzdFZXR1SERlWEd1R2ZtSF9DWVNBUEY2Y1VsNnNKQWc?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">Iran bombs Israel's Haifa oil refinery, causing massive damage; It has connection with India</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#EF4444;font-weight:700;font-size:0.78rem;margin-right:6px;">[-0.90]</span><a href="https://news.google.com/rss/articles/CBMioAFBVV95cUxQOWhTdUhhR2MtMFJLRUd0S0RVZEdLQU90NWFYQmQ1NzhRQ3NFTEgwZFZiMXNMcFI2UnBsNGt0YVFFSjBGNnhOMWFHc2RoSnhMenVZQXNXeXFBWVZGdGNMaDFuTDl1OXlkMVk5YVJPT2IwU3FKcktSaEd4MExtREo0M0lvZU1SbjZRbUEyQzlkLVc2UGY0VjljVzF4U2tnQndl?oc=5" target="_blank" style="color:#F9FAFB;text-decoration:none;">'Nightmare scenario' looms as global markets head for the biggest oil output disruption in history, top energy guru warns</a></div></div><div style="margin-bottom:8px;"><div style="font-size:0.82rem;line-height:1.4;"><span style="color:#EF4444;font-weight:700;font-size:0.78rem;margin-right:6px;">[-0.90]</span><a href="https://oilprice.com/Geopolitics/Middle-East/Irans-New-Supreme-Leader-Opens-Tenure-With-Missile-Attacks-Across-Region.html" target="_blank" style="color:#F9FAFB;text-decoration:none;">Iran’s New Supreme Leader Opens Tenure With Missile Attacks Across Region</a></div></div></div>
                 <div class="scenario-kpis">
@@ -447,7 +447,7 @@ table td { padding: 5px 10px; }
                         <div class="item"><div class="lbl">GRM</div><div class="val">$11.5</div></div>
                     </div>
                     <div style="font-size:0.65rem;color:#6B7280;margin-top:6px;line-height:1.6;"><span style="white-space:nowrap;">Die $94</span> | <span style="white-space:nowrap;">Pet $68</span> | <span style="white-space:nowrap;">ATF $93</span></div>
-                    <div class="scenario-assessment"><div class="lbl">LLM Assessment</div><div>Strait of Hormuz remains navigable with minimal disruption and diplomatic off-ramps emerge within weeks, preventing sustained supply shock despite historical conflict scale.</div></div>
+                    <div class="scenario-assessment"><div class="lbl">LLM Assessment</div><div>10% probability driven by stranded tankers and soaring benchmark prices signaling acute but containable disruption that could resolve if diplomatic channels reopen within weeks.</div></div>
                 </div>
             </div>
         </div>
@@ -459,7 +459,7 @@ table td { padding: 5px 10px; }
             
         <div class="narrative-box">
             <div class="narrative-label">Strategic Assessment</div>
-            <div><ul><li>Hormuz closure + Iranian strikes on Gulf infrastructure lock 20% global supply.</li><li>Prolonged standoff signals dominate; quick resolution highly discounted by market positioning.</li><li>Indian refiners face 45-day crude buffer; GRM compression from export restrictions/force majeure.</li></ul></div>
+            <div><ul><li>Hormuz closure + Iranian attacks on refineries entrench prolonged standoff (40% probability adjusted).</li><li>Supply loss forces Indian refiners into spot crude at $100+, crushing margins.</li><li>MRPL force majeure signals forced inventory drawdown; 45-day runway exhaustion imminent.</li></ul></div>
         </div>
 
     <div class="kpi-row">
@@ -467,15 +467,15 @@ table td { padding: 5px 10px; }
             <div class="label">Brent Price (Expected Value)</div>
             <div class="value">$83/bbl</div>
             <div class="range">range: $63-120</div>
-            <div style="font-size:0.72rem;color:#F59E0B;margin-top:4px;">Current Brent: $101.63/bbl</div>
-            <div class="kpi-explanation">Hormuz blockade eliminates ~4M bbl/d supply; OPEC spare capacity exhausted; $120 upside.</div>
+            <div style="font-size:0.72rem;color:#F59E0B;margin-top:4px;">Current Brent: $90.20/bbl</div>
+            <div class="kpi-explanation">Hormuz blockade + regional refinery damage = 3-5M bbl/day supply loss, no quick resolution.</div>
         </div>
         <div class="kpi-card" style="border-left:3px solid #00D4AA;">
             <div class="label">Typical Indian Refinery GRM (EV)</div>
             <div class="value">$8.3/bbl</div>
             <div class="range">range: $0.0-12.5</div>
-            <div style="font-size:0.72rem;color:#00D4AA;margin-top:4px;">Indian Basket: $100.99/bbl (Dubai $100.74 &times; 72% + Brent $101.63 &times; 28%)</div>
-            <div class="kpi-explanation">Force majeure declarations + export curbs reduce Indian refiner throughput utilization rates sharply.</div>
+            <div style="font-size:0.72rem;color:#00D4AA;margin-top:4px;">Indian Basket: $85.20/bbl (Dubai $83.25 &times; 72% + Brent $90.20 &times; 28%)</div>
+            <div class="kpi-explanation">Crude scarcity forces Indian refiners to spot markets; poor spreads on forced high-cost inputs.</div>
         </div>
     </div>
 
@@ -488,7 +488,7 @@ table td { padding: 5px 10px; }
                 <th style="padding:6px 10px;color:#9CA3AF;font-weight:600;font-size:0.68rem;text-transform:uppercase;">Chg</th>
                 <th style="padding:6px 10px;color:#9CA3AF;font-weight:600;font-size:0.68rem;text-transform:uppercase;">GRM Wt</th>
             </tr></thead>
-            <tbody style="color:#E5E7EB;"><tr><td>Diesel</td><td>$115</td><td>$117</td><td><span style="color:#EF4444;font-weight:600;">+2%</span></td><td style="color:#4B5563;">42%</td></tr><tr><td>Petrol</td><td>$93</td><td>$78</td><td><span style="color:#10B981;font-weight:600;">-16%</span></td><td style="color:#4B5563;">22%</td></tr><tr><td>ATF</td><td>$113</td><td>$115</td><td><span style="color:#EF4444;font-weight:600;">+1%</span></td><td style="color:#4B5563;">10%</td></tr><tr><td>Naphtha</td><td>$84</td><td>$65</td><td><span style="color:#10B981;font-weight:600;">-23%</span></td><td style="color:#4B5563;">12%</td></tr><tr><td>Fuel Oil</td><td>$76</td><td>$58</td><td><span style="color:#10B981;font-weight:600;">-24%</span></td><td style="color:#4B5563;">8%</td></tr><tr><td>LPG</td><td>$33</td><td>$26</td><td><span style="color:#10B981;font-weight:600;">-23%</span></td><td style="color:#4B5563;">6%</td></tr></tbody>
+            <tbody style="color:#E5E7EB;"><tr><td>Diesel</td><td>$115</td><td>$117</td><td><span style="color:#EF4444;font-weight:600;">+2%</span></td><td style="color:#4B5563;">42%</td></tr><tr><td>Petrol</td><td>$93</td><td>$78</td><td><span style="color:#10B981;font-weight:600;">-16%</span></td><td style="color:#4B5563;">22%</td></tr><tr><td>ATF</td><td>$113</td><td>$115</td><td><span style="color:#EF4444;font-weight:600;">+1%</span></td><td style="color:#4B5563;">10%</td></tr><tr><td>Naphtha</td><td>$84</td><td>$65</td><td><span style="color:#10B981;font-weight:600;">-23%</span></td><td style="color:#4B5563;">12%</td></tr><tr><td>Fuel Oil</td><td>$65</td><td>$58</td><td><span style="color:#10B981;font-weight:600;">-12%</span></td><td style="color:#4B5563;">8%</td></tr><tr><td>LPG</td><td>$33</td><td>$26</td><td><span style="color:#10B981;font-weight:600;">-23%</span></td><td style="color:#4B5563;">6%</td></tr></tbody>
         </table>
     </div>
         </div>
@@ -496,8 +496,8 @@ table td { padding: 5px 10px; }
         
 
 <div class="footer">
-    <span>Generated: 2026-03-09 15:17</span>
-    <span>Articles analyzed: 951</span>
+    <span>Generated: 2026-03-09 19:57</span>
+    <span>Articles analyzed: 984</span>
     <span>Model: claude-haiku-4-5-20251001</span>
     <span>Horizons: 3m, 6m</span>
 </div>
