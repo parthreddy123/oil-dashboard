@@ -326,7 +326,7 @@ def render():
     momentum = compute_momentum(horizon)
     _render_momentum_row(momentum)
 
-    recent_articles = get_recent_articles_with_signals(hours=12, limit=20)
+    recent_articles = get_recent_articles_with_signals(hours=36, limit=30)
     _render_breaking_feed(recent_articles)
 
     # 4. Scenario Cards

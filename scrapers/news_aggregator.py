@@ -3,7 +3,7 @@
 import os
 import re
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib.parse import quote_plus
 
 import sys
@@ -106,7 +106,8 @@ class NewsAggregator(BaseScraper):
             return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     def _process_entry(self, entry, seen_urls, source_name, category, extract_source_from_title=False):
-        """Process a single RSS entry. Returns True if inserted, False otherwise."""
+        """Process a single RSS entry. Returns True if inserted, False otherwise.
+        Skips articles older than 36 hours."""
         title = entry.get("title", "").strip()
         link = entry.get("link", "").strip()
         summary = self._clean_html(entry.get("summary", ""))
@@ -117,6 +118,11 @@ class NewsAggregator(BaseScraper):
         seen_urls.add(link)
 
         pub_date = self._parse_pub_date(published)
+
+        # Skip articles older than 36 hours
+        cutoff = (datetime.now() - timedelta(hours=36)).strftime("%Y-%m-%d %H:%M:%S")
+        if pub_date < cutoff:
+            return False
 
         # Extract source from title for Google News (format: "Title - Source")
         if extract_source_from_title:

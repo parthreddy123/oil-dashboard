@@ -627,7 +627,7 @@ def generate_html(output_path="scenario_report.html"):
 
     # Shared data
     momentum = compute_momentum(DEFAULT_HORIZON)
-    recent_articles = get_recent_articles_with_signals(hours=12, limit=20)
+    recent_articles = get_recent_articles_with_signals(hours=36, limit=30)
     top_articles = get_top_articles_across_scenarios(limit=30)
 
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
