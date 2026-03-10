@@ -117,7 +117,7 @@ def run_post_processing():
     # Scenario Engine — score articles and generate scenario narratives
     try:
         from processing.scenario_analyzer import analyze_articles, compute_weights, HORIZONS
-        scored = analyze_articles("3m")
+        scored = analyze_articles("1m")
         results["scenario_signals"] = {"status": "success", "count": scored}
         for h in HORIZONS:
             compute_weights(h, generate_narratives=True)

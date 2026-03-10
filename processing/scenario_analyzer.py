@@ -54,10 +54,12 @@ SCENARIOS = {
             "Formal ceasefire agreement signed by both parties (-> Ceasefire)",
         ],
         "horizons": {
+            "1m":  {"oil": 100, "grm": 4.5, "stock": -22},
             "3m":  {"oil": 97, "grm": 5.5, "stock": -18},
             "6m":  {"oil": 95, "grm": 6.0, "stock": -14},
         },
         "products": {
+            "1m":  {"diesel": 150, "petrol": 95, "atf": 145, "naphtha": 80, "fuel_oil": 70, "lpg": 31},
             "3m":  {"diesel": 145, "petrol": 92, "atf": 140, "naphtha": 78, "fuel_oil": 68, "lpg": 30},
             "6m":  {"diesel": 138, "petrol": 88, "atf": 135, "naphtha": 74, "fuel_oil": 65, "lpg": 28},
         },
@@ -79,10 +81,12 @@ SCENARIOS = {
             "Formal ceasefire signed (-> Ceasefire)",
         ],
         "horizons": {
+            "1m":  {"oil": 92, "grm": 6.5, "stock": -14},
             "3m":  {"oil": 90, "grm": 7.0, "stock": -12},
             "6m":  {"oil": 85, "grm": 7.5, "stock": -8},
         },
         "products": {
+            "1m":  {"diesel": 138, "petrol": 88, "atf": 133, "naphtha": 74, "fuel_oil": 65, "lpg": 29},
             "3m":  {"diesel": 135, "petrol": 86, "atf": 130, "naphtha": 72, "fuel_oil": 63, "lpg": 28},
             "6m":  {"diesel": 125, "petrol": 81, "atf": 122, "naphtha": 68, "fuel_oil": 59, "lpg": 26},
         },
@@ -104,10 +108,12 @@ SCENARIOS = {
             "Internal regime collapse in aggressor state (-> Regime Change)",
         ],
         "horizons": {
+            "1m":  {"oil": 140, "grm": -4.0, "stock": -40},
             "3m":  {"oil": 130, "grm": -2.0, "stock": -35},
             "6m":  {"oil": 120, "grm": 0.0,  "stock": -28},
         },
         "products": {
+            "1m":  {"diesel": 210, "petrol": 125, "atf": 205, "naphtha": 88, "fuel_oil": 105, "lpg": 37},
             "3m":  {"diesel": 200, "petrol": 118, "atf": 195, "naphtha": 85, "fuel_oil": 98, "lpg": 35},
             "6m":  {"diesel": 182, "petrol": 110, "atf": 178, "naphtha": 80, "fuel_oil": 90, "lpg": 33},
         },
@@ -129,10 +135,12 @@ SCENARIOS = {
             "Collapse of mediator credibility or withdrawal (-> Prolonged Standoff)",
         ],
         "horizons": {
+            "1m":  {"oil": 72, "grm": 12.0, "stock": 12},
             "3m":  {"oil": 68, "grm": 13.0, "stock": 18},
             "6m":  {"oil": 63, "grm": 12.5, "stock": 15},
         },
         "products": {
+            "1m":  {"diesel": 92, "petrol": 68, "atf": 90, "naphtha": 60, "fuel_oil": 47, "lpg": 25},
             "3m":  {"diesel": 88, "petrol": 65, "atf": 86, "naphtha": 58, "fuel_oil": 44, "lpg": 24},
             "6m":  {"diesel": 82, "petrol": 60, "atf": 80, "naphtha": 54, "fuel_oil": 41, "lpg": 22},
         },
@@ -154,10 +162,12 @@ SCENARIOS = {
             "Power vacuum triggers regional intervention (-> Conflagration)",
         ],
         "horizons": {
+            "1m":  {"oil": 88, "grm": 8.0,  "stock": -8},
             "3m":  {"oil": 85, "grm": 9.0,  "stock": -5},
             "6m":  {"oil": 80, "grm": 9.5,  "stock": 0},
         },
         "products": {
+            "1m":  {"diesel": 122, "petrol": 82, "atf": 118, "naphtha": 70, "fuel_oil": 59, "lpg": 28},
             "3m":  {"diesel": 118, "petrol": 80, "atf": 114, "naphtha": 68, "fuel_oil": 57, "lpg": 27},
             "6m":  {"diesel": 110, "petrol": 76, "atf": 106, "naphtha": 64, "fuel_oil": 54, "lpg": 25},
         },
@@ -242,9 +252,9 @@ def compute_ev_products(weights, horizon):
     return {p: round(v, 1) for p, v in ev.items()}
 
 
-HORIZONS = ["3m", "6m"]
+HORIZONS = ["1m", "3m", "6m"]
 SCENARIO_IDS = list(SCENARIOS.keys())
-DEFAULT_HORIZON = "3m"
+DEFAULT_HORIZON = "1m"
 
 # Prior probabilities (uniform)
 PRIOR_WEIGHTS = {sid: 1.0 / len(SCENARIOS) for sid in SCENARIOS}
@@ -624,7 +634,7 @@ Current Brent spot: ${current_brent}/bbl
 
 Return ONLY valid JSON with this exact structure:
 {{
-    "scenario_id": {{"oil_3m": int, "oil_6m": int, "reasoning": "1 sentence"}},
+    "scenario_id": {{"oil_1m": int, "oil_3m": int, "oil_6m": int, "reasoning": "1 sentence"}},
     ...for each scenario...
 }}
 No markdown fences."""
@@ -651,7 +661,7 @@ def update_scenario_prices_from_consensus():
     basket, _, brent = get_indian_basket_price()
 
     scenario_prices_text = "\n".join(
-        f"- {sid} ({s['name']}): 3m=${s['horizons']['3m']['oil']}, 6m=${s['horizons']['6m']['oil']}"
+        f"- {sid} ({s['name']}): " + ", ".join(f"{h}=${s['horizons'][h]['oil']}" for h in HORIZONS)
         for sid, s in SCENARIOS.items()
     )
 
@@ -680,21 +690,18 @@ def update_scenario_prices_from_consensus():
         for sid, data in updates.items():
             if sid not in SCENARIOS:
                 continue
-            base_3m = SCENARIOS[sid]["horizons"]["3m"]["oil"]
-            base_6m = SCENARIOS[sid]["horizons"]["6m"]["oil"]
 
-            new_3m = data.get("oil_3m", base_3m)
-            new_6m = data.get("oil_6m", base_6m)
-
-            # Clamp to +/-15% of base to prevent hallucinated extremes
-            new_3m = max(int(base_3m * 0.85), min(int(base_3m * 1.15), int(new_3m)))
-            new_6m = max(int(base_6m * 0.85), min(int(base_6m * 1.15), int(new_6m)))
-
-            SCENARIOS[sid]["horizons"]["3m"]["oil"] = new_3m
-            SCENARIOS[sid]["horizons"]["6m"]["oil"] = new_6m
+            applied_data = {"reasoning": data.get("reasoning", "")}
+            for h in HORIZONS:
+                base = SCENARIOS[sid]["horizons"][h]["oil"]
+                new_val = data.get(f"oil_{h}", base)
+                # Clamp to +/-15% of base to prevent hallucinated extremes
+                new_val = max(int(base * 0.85), min(int(base * 1.15), int(new_val)))
+                SCENARIOS[sid]["horizons"][h]["oil"] = new_val
+                applied_data[f"oil_{h}"] = new_val
 
             # Recalculate GRM based on updated oil price for each horizon
-            for h in ["3m", "6m"]:
+            for h in HORIZONS:
                 crude = SCENARIOS[sid]["horizons"][h]["oil"]
                 products = SCENARIOS[sid]["products"][h]
                 grm = sum(
@@ -702,13 +709,9 @@ def update_scenario_prices_from_consensus():
                     for p in _PRODUCT_LIST
                 )
                 SCENARIOS[sid]["horizons"][h]["grm"] = round(grm, 1)
+                applied_data[f"grm_{h}"] = SCENARIOS[sid]["horizons"][h]["grm"]
 
-            applied[sid] = {
-                "oil_3m": new_3m, "oil_6m": new_6m,
-                "reasoning": data.get("reasoning", ""),
-                "grm_3m": SCENARIOS[sid]["horizons"]["3m"]["grm"],
-                "grm_6m": SCENARIOS[sid]["horizons"]["6m"]["grm"],
-            }
+            applied[sid] = applied_data
 
         logger.info(f"Updated scenario prices from consensus: {len(applied)} scenarios adjusted")
         return applied

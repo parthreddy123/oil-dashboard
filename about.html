@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How It Was Built &mdash; Oil Scenario Engine</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0E1117; color: #E5E7EB; line-height: 1.7; padding: 2rem;
+    max-width: 900px; margin: 0 auto;
+}
+h1 { font-size: 1.8rem; font-weight: 800; color: #F9FAFB; margin-bottom: 0.3rem; }
+h2 {
+    color: #00D4AA; font-weight: 700; font-size: 1.2rem;
+    border-bottom: 2px solid rgba(0, 212, 170, 0.3); padding-bottom: 0.4rem;
+    margin: 2rem 0 1rem;
+}
+h3 { color: #F59E0B; font-size: 1rem; margin: 1.2rem 0 0.5rem; }
+a { color: #00D4FF; text-decoration: none; }
+a:hover { text-decoration: underline; }
+p { margin-bottom: 0.8rem; font-size: 0.88rem; }
+ul, ol { margin: 0.5rem 0 1rem 1.5rem; font-size: 0.85rem; }
+li { margin-bottom: 0.4rem; }
+code {
+    background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px;
+    font-size: 0.82rem; color: #00D4AA;
+}
+pre {
+    background: #151A28; border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px; padding: 16px; overflow-x: auto;
+    font-size: 0.78rem; line-height: 1.5; margin: 0.8rem 0 1.2rem;
+}
+pre code { background: none; padding: 0; }
+.subtitle { font-size: 0.78rem; color: #6B7280; margin-bottom: 1.5rem; }
+.back-link { font-size: 0.82rem; margin-bottom: 1.5rem; display: inline-block; }
+
+.card {
+    background: linear-gradient(135deg, #1A1F2E, #151A28);
+    border: 1px solid rgba(255,255,255,0.06); border-radius: 12px;
+    padding: 18px 22px; margin-bottom: 16px;
+}
+.card .label {
+    font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; margin-bottom: 8px;
+}
+
+.tech-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px; margin: 1rem 0;
+}
+.tech-item {
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px; padding: 12px 14px;
+}
+.tech-item .name { font-weight: 700; color: #F9FAFB; font-size: 0.85rem; }
+.tech-item .role { color: #6B7280; font-size: 0.72rem; margin-top: 2px; }
+
+.phase-card {
+    background: linear-gradient(135deg, #1A1F2E, #151A28);
+    border: 1px solid rgba(255,255,255,0.06); border-left: 3px solid;
+    border-radius: 10px; padding: 16px 20px; margin-bottom: 14px;
+}
+.phase-num {
+    font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; margin-bottom: 6px;
+}
+
+.formula {
+    background: rgba(0,212,170,0.06); border: 1px solid rgba(0,212,170,0.2);
+    border-radius: 8px; padding: 12px 16px; margin: 0.8rem 0;
+    font-family: 'Courier New', monospace; font-size: 0.82rem; color: #00D4AA;
+}
+
+.footer {
+    margin-top: 3rem; padding: 14px 18px; background: #151A28;
+    border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);
+    font-size: 0.72rem; color: #4B5563; text-align: center;
+}
+
+@media (max-width: 768px) {
+    body { padding: 0.8rem; }
+    h1 { font-size: 1.3rem; }
+    .tech-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<a href="./" class="back-link">&larr; Back to Dashboard</a>
+
+<h1>How the Oil Scenario Engine Was Built</h1>
+<div class="subtitle">A technical deep-dive into an AI-powered geopolitical intelligence platform for Indian refinery strategy</div>
+
+<!-- ===== OVERVIEW ===== -->
+<h2>The Problem</h2>
+<p>Indian oil refiners face a complex decision environment: crude prices are driven by geopolitical events (Hormuz disruption, OPEC politics, regional conflict), and refining margins depend on a basket of 6+ product crack spreads across Singapore benchmarks.</p>
+<p>This system was built to <strong>continuously ingest news, score it against geopolitical scenarios using an LLM, and compute probability-weighted expected values</strong> for Brent crude and refinery gross margins &mdash; deployed as a static page that auto-refreshes every 6 hours.</p>
+
+<!-- ===== TECH STACK ===== -->
+<h2>Tech Stack</h2>
+<div class="tech-grid">
+    <div class="tech-item"><div class="name">Python 3.12</div><div class="role">Core language &mdash; scrapers, processing, engine</div></div>
+    <div class="tech-item"><div class="name">Claude Haiku 4.5</div><div class="role">LLM &mdash; article scoring, narratives, assessments</div></div>
+    <div class="tech-item"><div class="name">SQLite (WAL)</div><div class="role">Database &mdash; 11 tables, concurrent reads</div></div>
+    <div class="tech-item"><div class="name">Streamlit</div><div class="role">Interactive dashboard (local use)</div></div>
+    <div class="tech-item"><div class="name">GitHub Actions</div><div class="role">CI/CD &mdash; 6-hourly auto-refresh pipeline</div></div>
+    <div class="tech-item"><div class="name">GitHub Pages</div><div class="role">Static HTML hosting via CDN</div></div>
+    <div class="tech-item"><div class="name">Cloudflare Workers</div><div class="role">Token proxy for manual refresh button</div></div>
+    <div class="tech-item"><div class="name">Plotly + Mermaid</div><div class="role">Charts &amp; architecture diagrams</div></div>
+</div>
+
+<!-- ===== DATA SOURCES ===== -->
+<h2>Data Ingestion (6 APIs + RSS)</h2>
+<div class="card">
+    <div class="label" style="color:#60A5FA;">9 Parallel Scrapers via ThreadPoolExecutor</div>
+    <ul>
+        <li><strong>EIA API v2</strong> &mdash; Brent (RBRTE), WTI (RWTC), petrol, diesel, ATF, propane spot prices. USD/gallon &times; 42 = USD/bbl.</li>
+        <li><strong>yfinance</strong> &mdash; Live Brent futures (BZ=F) for more current pricing than EIA's daily close.</li>
+        <li><strong>OilPrice.com</strong> &mdash; Dubai/Oman crude benchmarks + RSS news feed.</li>
+        <li><strong>ExchangeRate API</strong> &mdash; USD/INR for converting Indian prices.</li>
+        <li><strong>Google News</strong> &mdash; 24 search queries covering oil, OPEC, Iran, India refineries, geopolitics.</li>
+        <li><strong>9 RSS Feeds</strong> &mdash; Reuters, Al Jazeera, Bloomberg, Rigzone, S&amp;P Global, Hellenic Shipping, Middle East Eye.</li>
+        <li><strong>PPAC (India Govt)</strong> &mdash; Refinery throughput/utilization from PDF reports.</li>
+        <li><strong>OPEC MOMR</strong> &mdash; Monthly production data for 11 member countries.</li>
+        <li><strong>Company Press Releases</strong> &mdash; IOCL, BPCL, HPCL, Reliance, ONGC.</li>
+    </ul>
+</div>
+<p>Each scraper inherits from <code>BaseScraper</code> with built-in retry logic, response caching (by URL+params hash), and rate limiting. All 9 run in parallel using Python's <code>ThreadPoolExecutor(max_workers=6)</code>.</p>
+
+<!-- ===== SCENARIO ENGINE ===== -->
+<h2>The Scenario Engine (Core Intelligence)</h2>
+<p>The heart of the system. Five geopolitical scenarios, each with analyst-consensus price targets, preconditions, and invalidators.</p>
+
+<h3>5 Scenarios</h3>
+<div class="card">
+    <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+        <tr style="border-bottom:2px solid rgba(255,255,255,0.1);">
+            <th style="text-align:left;padding:6px 10px;color:#6B7280;">Scenario</th>
+            <th style="text-align:center;padding:6px 10px;color:#6B7280;">Brent (1m)</th>
+            <th style="text-align:center;padding:6px 10px;color:#6B7280;">Brent (3m)</th>
+            <th style="text-align:center;padding:6px 10px;color:#6B7280;">Brent (6m)</th>
+        </tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+            <td style="padding:6px 10px;color:#F97316;font-weight:600;">Managed Escalation</td>
+            <td style="padding:6px 10px;text-align:center;">$100</td>
+            <td style="padding:6px 10px;text-align:center;">$97</td>
+            <td style="padding:6px 10px;text-align:center;">$95</td>
+        </tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+            <td style="padding:6px 10px;color:#F59E0B;font-weight:600;">Prolonged Standoff</td>
+            <td style="padding:6px 10px;text-align:center;">$92</td>
+            <td style="padding:6px 10px;text-align:center;">$90</td>
+            <td style="padding:6px 10px;text-align:center;">$85</td>
+        </tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+            <td style="padding:6px 10px;color:#EF4444;font-weight:600;">Conflagration</td>
+            <td style="padding:6px 10px;text-align:center;">$140</td>
+            <td style="padding:6px 10px;text-align:center;">$130</td>
+            <td style="padding:6px 10px;text-align:center;">$120</td>
+        </tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+            <td style="padding:6px 10px;color:#00D4FF;font-weight:600;">Ceasefire &amp; Talks</td>
+            <td style="padding:6px 10px;text-align:center;">$72</td>
+            <td style="padding:6px 10px;text-align:center;">$68</td>
+            <td style="padding:6px 10px;text-align:center;">$63</td>
+        </tr>
+        <tr>
+            <td style="padding:6px 10px;color:#8B5CF6;font-weight:600;">Regime Change</td>
+            <td style="padding:6px 10px;text-align:center;">$88</td>
+            <td style="padding:6px 10px;text-align:center;">$85</td>
+            <td style="padding:6px 10px;text-align:center;">$80</td>
+        </tr>
+    </table>
+</div>
+
+<h3>Step-by-Step Scoring Algorithm</h3>
+
+<div class="phase-card" style="border-left-color:#60A5FA;">
+    <div class="phase-num" style="color:#60A5FA;">Phase 1 &mdash; Article Scoring (LLM)</div>
+    <p>Each unscored news article is sent to <strong>Claude Haiku 4.5</strong> in batches of 10. The LLM rates every article against all 5 scenarios on a <code>[-1.0, +1.0]</code> scale, citing which precondition or invalidator is affected:</p>
+    <ul>
+        <li><strong>+0.3 to +0.6</strong> &mdash; Confirms a precondition</li>
+        <li><strong>-0.3 to -0.6</strong> &mdash; Undermines a precondition</li>
+        <li><strong>-0.7 to -1.0</strong> &mdash; Matches an invalidator</li>
+        <li><strong>-0.1 to +0.1</strong> &mdash; Neutral</li>
+    </ul>
+    <p>Result: 5 signals per article, stored in <code>article_signals</code> table.</p>
+</div>
+
+<div class="phase-card" style="border-left-color:#8B5CF6;">
+    <div class="phase-num" style="color:#8B5CF6;">Phase 2 &mdash; Softmax Probability Computation</div>
+    <p>Average signal per scenario is computed across all scored articles, then converted to probabilities via softmax:</p>
+    <div class="formula">
+        score[s] = AVG(signal) for scenario s<br>
+        weight[s] = exp(score[s] / T) / &Sigma; exp(score[i] / T)<br>
+        <span style="color:#6B7280;">where T = 0.5 (temperature)</span>
+    </div>
+    <p>Lower temperature = more decisive separation between scenarios. Result: probabilities summing to 100%.</p>
+</div>
+
+<div class="phase-card" style="border-left-color:#F59E0B;">
+    <div class="phase-num" style="color:#F59E0B;">Phase 3 &mdash; Expected Value Computation</div>
+    <p>Probability-weighted expected values for each KPI across 3 horizons (1m, 3m, 6m):</p>
+    <div class="formula">
+        EV(Brent) = &Sigma; weight[s] &times; scenario_price[s]<br>
+        EV(GRM) = &Sigma; weight[s] &times; scenario_grm[s]
+    </div>
+</div>
+
+<div class="phase-card" style="border-left-color:#00D4AA;">
+    <div class="phase-num" style="color:#00D4AA;">Phase 4 &mdash; Strategic Narrative (LLM)</div>
+    <p>Top 20 articles + probabilities are synthesized into a <strong>3-bullet executive narrative</strong> by Claude Haiku, prompted with McKinsey senior partner tone: concise, specific, no hedging. Max 15 words per bullet.</p>
+</div>
+
+<div class="phase-card" style="border-left-color:#EF4444;">
+    <div class="phase-num" style="color:#EF4444;">Phase 5 &mdash; Per-Scenario Assessment</div>
+    <p>LLM writes 1 sentence per scenario explaining its probability, citing the specific signal or event driving the score.</p>
+</div>
+
+<!-- ===== GRM ===== -->
+<h2>Indian Refinery GRM Calculation</h2>
+<p>The Gross Refining Margin uses the Indian crude basket and Singapore-benchmarked product prices:</p>
+
+<div class="formula">
+    Indian Basket = 0.72 &times; Dubai/Oman + 0.28 &times; Brent<br><br>
+    GRM = (Weighted Product Revenue) &minus; Crude Cost<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;= (0.42&times;Diesel + 0.22&times;Petrol + 0.12&times;Naphtha + 0.10&times;ATF + 0.08&times;FuelOil + 0.06&times;LPG) &minus; Basket
+</div>
+
+<p>Product prices are adjusted from US Gulf Coast to Singapore benchmarks:</p>
+<ul>
+    <li>Diesel: &minus;$3/bbl, Petrol: &minus;$2.5/bbl, ATF: &minus;$2/bbl</li>
+    <li>Naphtha: estimated at 90% of petrol (no direct EIA series)</li>
+    <li>Fuel Oil: estimated at 65% of crude + $10 Singapore premium</li>
+    <li>LPG: +$5/bbl Singapore premium</li>
+</ul>
+
+<!-- ===== CI/CD ===== -->
+<h2>CI/CD Pipeline</h2>
+<div class="card">
+    <div class="label" style="color:#F59E0B;">GitHub Actions &mdash; Every 6 Hours</div>
+    <ol>
+        <li><strong>Checkout</strong> main branch</li>
+        <li><strong>Setup</strong> Python 3.12 with pip cache</li>
+        <li><strong>Run full pipeline</strong> &mdash; 9 parallel scrapers &rarr; impact tagging &rarr; scenario scoring &rarr; narrative generation &rarr; email digest</li>
+        <li><strong>Generate HTML</strong> via <code>export_html.py</code> &mdash; reads DB, renders Mermaid diagrams, outputs static report</li>
+        <li><strong>Deploy</strong> to <code>gh-pages</code> branch (force orphan = clean history each run)</li>
+    </ol>
+</div>
+
+<h3>Manual Refresh</h3>
+<p>The dashboard has a "Refresh Data" button that triggers the pipeline on-demand:</p>
+<div class="formula" style="color:#9CA3AF;">
+    Button click &rarr; Cloudflare Worker (token proxy) &rarr; GitHub Actions repository_dispatch &rarr; Full pipeline &rarr; New HTML deployed
+</div>
+<p>The page auto-polls with HEAD requests (ETag/Last-Modified) and reloads when new content is detected.</p>
+
+<!-- ===== DATABASE ===== -->
+<h2>Database Schema</h2>
+<p>SQLite in WAL mode for concurrent reads during scraping. 11 tables:</p>
+<div class="card">
+    <ul style="columns:2;column-gap:2rem;">
+        <li><code>crude_prices</code> &mdash; Brent, WTI, Dubai, Indian Basket</li>
+        <li><code>product_prices</code> &mdash; Diesel, petrol, ATF, LPG</li>
+        <li><code>crack_spreads</code> &mdash; Product-crude differentials</li>
+        <li><code>refinery_data</code> &mdash; Throughput, utilization</li>
+        <li><code>trade_flows</code> &mdash; Import/export volumes</li>
+        <li><code>global_events</code> &mdash; OPEC production, turnarounds</li>
+        <li><code>news_articles</code> &mdash; 1000+ articles, sentiment tagged</li>
+        <li><code>article_signals</code> &mdash; LLM scores per scenario</li>
+        <li><code>scenario_narratives</code> &mdash; LLM-generated insights</li>
+        <li><code>scenario_accuracy</code> &mdash; Prediction tracking</li>
+        <li><code>fx_rates</code> &mdash; USD/INR exchange rates</li>
+    </ul>
+</div>
+
+<!-- ===== EMAIL ===== -->
+<h2>Daily Email Digest</h2>
+<p>Automated daily email via Gmail SMTP with:</p>
+<ul>
+    <li>Strategic narrative (3 bullets)</li>
+    <li>Scenario probability table with deltas vs yesterday</li>
+    <li>Top 5 signal articles</li>
+    <li>Prediction accuracy (10-day rolling average error)</li>
+</ul>
+
+<!-- ===== ARCHITECTURE ===== -->
+<h2>System Architecture</h2>
+<pre><code>
+  [EIA API]  [yfinance]  [OilPrice]  [FX API]  [Google News + 9 RSS]
+       \          |          |          |          /
+        +----+----+----+-----+----+-----+----+----+
+             |                                    |
+        ThreadPoolExecutor (6 workers)
+             |
+        SQLite WAL (11 tables)
+             |
+        Claude Haiku 4.5
+        ├── Score articles [-1, +1] per scenario
+        ├── Softmax → probabilities
+        ├── Expected values (EV)
+        └── Strategic narratives
+             |
+        export_html.py → scenario_report.html
+             |
+        GitHub Actions (6h cron)
+             |
+        GitHub Pages CDN → parthreddy123.github.io/oil-dashboard
+</code></pre>
+
+<!-- ===== KEY DECISIONS ===== -->
+<h2>Key Design Decisions</h2>
+<ul>
+    <li><strong>Static HTML over server</strong> &mdash; GitHub Pages is free, fast, and globally cached. No server to maintain. The "backend" runs only during CI/CD.</li>
+    <li><strong>Claude Haiku over GPT-4</strong> &mdash; Faster, cheaper, sufficient for signal scoring. Full scenario context fits in one prompt.</li>
+    <li><strong>Softmax over simple averaging</strong> &mdash; Creates decisive probability separation. Temperature=0.5 amplifies signal differences.</li>
+    <li><strong>Preconditions + Invalidators</strong> &mdash; Gives the LLM structured criteria rather than open-ended scoring. Reduces hallucination.</li>
+    <li><strong>36-hour article window</strong> &mdash; Keeps signals fresh. Older articles are still in DB but don't dominate probabilities.</li>
+    <li><strong>Analyst consensus as base prices</strong> &mdash; Scenario oil prices from GS, JPM, MS, Citi, WoodMac, Rystad (Mar 2026). LLM can adjust &plusmn;15% based on recent news.</li>
+    <li><strong>3 horizons (1m, 3m, 6m)</strong> &mdash; 1-month captures immediate shock pricing; 3-month for tactical planning; 6-month for strategic decisions.</li>
+</ul>
+
+<!-- ===== FOOTER ===== -->
+<div class="footer">
+    Built by Parth Reddy &middot; Powered by Claude (Anthropic) &middot;
+    <a href="./">View Dashboard</a> &middot;
+    <a href="https://github.com/parthreddy123/oil-dashboard">GitHub</a>
+</div>
+
+</body>
+</html>

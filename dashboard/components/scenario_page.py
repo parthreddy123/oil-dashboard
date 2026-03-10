@@ -262,7 +262,7 @@ def render():
     col_hz, col_run, _ = st.columns([2, 1, 5])
     with col_hz:
         horizon = st.selectbox("Horizon", HORIZONS, index=0, format_func=lambda h: {
-            "3m": "3 Months", "6m": "6 Months", "12m": "12 Months"
+            "1m": "1 Month", "3m": "3 Months", "6m": "6 Months"
         }.get(h, h))
     with col_run:
         st.markdown("<div style='height:28px'></div>", unsafe_allow_html=True)

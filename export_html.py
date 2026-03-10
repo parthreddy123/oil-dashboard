@@ -631,7 +631,7 @@ def generate_html(output_path="scenario_report.html"):
     top_articles = get_top_articles_across_scenarios(limit=30)
 
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
-    horizon_labels = {"3m": "3-Month", "6m": "6-Month", "12m": "12-Month"}
+    horizon_labels = {"1m": "1-Month", "3m": "3-Month", "6m": "6-Month"}
 
     # Render each horizon
     horizon_sections = ""
@@ -699,6 +699,7 @@ def generate_html(output_path="scenario_report.html"):
 <div class="tab-bar">
     <button class="tab-btn active" onclick="switchTab('analysis')">Analysis</button>
     <button class="tab-btn" onclick="switchTab('arch')">Architecture</button>
+    <a href="about.html" class="tab-btn" style="text-decoration:none;">How It Was Built</a>
 </div>
 
 <div id="tab-analysis" class="tab-panel active">

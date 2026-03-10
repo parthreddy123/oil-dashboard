@@ -52,6 +52,7 @@ jobs:
         run: |
           mkdir -p deploy
           cp scenario_report.html deploy/index.html
+          cp about.html deploy/about.html
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
