@@ -5,7 +5,7 @@ on:
   repository_dispatch:
     types: [refresh]
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: '0 */3 * * *'
 
 permissions:
   contents: write
