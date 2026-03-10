@@ -473,8 +473,8 @@ graph LR
         YF["yfinance&lt;br/&gt;Live Brent BZ=F"]
         OP["OilPrice.com&lt;br/&gt;Dubai/Oman"]
         FX["ExchangeRate&lt;br/&gt;USD/INR"]
-        RSS["RSS Feeds&lt;br/&gt;Reuters, BBC, AJ"]
-        NAPI["NewsAPI&lt;br/&gt;Oil, Iran, OPEC"]
+        RSS["RSS Feeds&lt;br/&gt;Reuters, AJ, Bloomberg"]
+        GNEWS["Google News&lt;br/&gt;24 queries"]
     end
 
     subgraph Engine["Scenario Engine"]
@@ -494,7 +494,7 @@ graph LR
     subgraph Refresh["Refresh Trigger"]
         BTN["Refresh Button"]
         CF["Cloudflare Worker&lt;br/&gt;Token Proxy"]
-        GA["GitHub Actions&lt;br/&gt;CI/CD Pipeline"]
+        GA["GitHub Actions&lt;br/&gt;Every 3 Hours"]
     end
 
     EIA --&gt; SCRAPE
@@ -502,7 +502,7 @@ graph LR
     OP --&gt; SCRAPE
     FX --&gt; SCRAPE
     RSS --&gt; SCRAPE
-    NAPI --&gt; SCRAPE
+    GNEWS --&gt; SCRAPE
     SCRAPE --&gt; DB
     DB --&gt; LLM
     LLM --&gt; DB
@@ -594,13 +594,13 @@ graph TD
 <h2 style="font-size:1.1rem;">Scenario Scoring Engine</h2>
 <div class="mermaid">
 graph LR
-    ART["150 News&lt;br/&gt;Articles"] --&gt; LLM["Claude Haiku&lt;br/&gt;Score [-1, +1]&lt;br/&gt;per scenario"]
+    ART["1000+ News&lt;br/&gt;Articles"] --&gt; LLM["Claude Haiku 4.5&lt;br/&gt;Score [-1, +1]&lt;br/&gt;per scenario"]
     LLM --&gt; SIG["5 Signals&lt;br/&gt;per article"]
     SIG --&gt; AVG["Average Signal&lt;br/&gt;per scenario"]
-    AVG --&gt; SOFT["Softmax&lt;br/&gt;temp=3"]
+    AVG --&gt; SOFT["Softmax&lt;br/&gt;temp=0.5"]
     SOFT --&gt; PROB["Probabilities&lt;br/&gt;sum = 100%"]
-    PROB --&gt; EV_OIL["EV Brent&lt;br/&gt;= &amp;Sigma; prob &amp;times; price"]
-    PROB --&gt; EV_GRM["EV GRM&lt;br/&gt;= &amp;Sigma; prob &amp;times; margin"]
+    PROB --&gt; EV_OIL["EV Brent (1m/3m/6m)&lt;br/&gt;= &amp;Sigma; prob &amp;times; price"]
+    PROB --&gt; EV_GRM["EV GRM (1m/3m/6m)&lt;br/&gt;= &amp;Sigma; prob &amp;times; margin"]
 
     CONSENSUS["Analyst Consensus&lt;br/&gt;GS, JPM, MS, Citi&lt;br/&gt;WoodMac, Rystad"] --&gt; EV_OIL
     CRISIS["Crisis Crack&lt;br/&gt;Spread Data"] --&gt; EV_GRM

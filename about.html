@@ -79,10 +79,96 @@ pre code { background: none; padding: 0; }
     font-size: 0.72rem; color: #4B5563; text-align: center;
 }
 
+/* Tabs */
+.tab-bar {
+    display: flex; gap: 0; margin-bottom: 1.5rem;
+    border-bottom: 2px solid rgba(255,255,255,0.08);
+}
+.tab-btn {
+    background: none; border: none; color: #6B7280; padding: 10px 20px;
+    font-size: 0.82rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+    border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;
+    font-family: inherit;
+}
+.tab-btn:hover { color: #D1D5DB; }
+.tab-btn.active { color: #00D4AA; border-bottom-color: #00D4AA; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Terminal */
+.terminal {
+    background: #0a0a0a; border: 1px solid #333; border-radius: 10px;
+    overflow: hidden; margin: 1rem 0; font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+}
+.terminal-bar {
+    background: #1a1a1a; padding: 8px 14px; display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid #333;
+}
+.terminal-dot {
+    width: 12px; height: 12px; border-radius: 50%;
+}
+.terminal-title {
+    font-size: 0.72rem; color: #666; margin-left: 8px; flex: 1; text-align: center;
+}
+.terminal-body {
+    padding: 16px 20px; min-height: 400px; max-height: 600px; overflow-y: auto;
+    font-size: 0.78rem; line-height: 1.7;
+}
+.term-line {
+    opacity: 0; transform: translateY(4px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    margin-bottom: 2px;
+}
+.term-line.visible {
+    opacity: 1; transform: translateY(0);
+}
+.term-prompt { color: #00D4AA; }
+.term-cmd { color: #F9FAFB; font-weight: 600; }
+.term-comment { color: #4B5563; font-style: italic; }
+.term-output { color: #9CA3AF; }
+.term-success { color: #10B981; }
+.term-warn { color: #F59E0B; }
+.term-info { color: #60A5FA; }
+.term-error { color: #EF4444; }
+.term-highlight { color: #00D4FF; font-weight: 600; }
+.term-section {
+    color: #8B5CF6; font-weight: 700; margin-top: 12px;
+    border-bottom: 1px solid rgba(139,92,246,0.2); padding-bottom: 4px;
+}
+.term-cursor {
+    display: inline-block; width: 8px; height: 16px;
+    background: #00D4AA; animation: blink 1s step-end infinite;
+    vertical-align: text-bottom; margin-left: 2px;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+.term-controls {
+    display: flex; gap: 10px; margin: 12px 0; align-items: center;
+}
+.term-btn {
+    background: linear-gradient(135deg, #00D4AA, #00B894); color: #0E1117;
+    border: none; padding: 8px 18px; border-radius: 6px; font-weight: 700;
+    font-size: 0.78rem; cursor: pointer; font-family: inherit;
+}
+.term-btn:hover { box-shadow: 0 4px 12px rgba(0,212,170,0.3); }
+.term-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.term-btn.secondary {
+    background: #1A1F2E; color: #9CA3AF; border: 1px solid rgba(255,255,255,0.1);
+}
+.term-speed {
+    font-size: 0.72rem; color: #6B7280; margin-left: auto;
+}
+.term-speed select {
+    background: #1A1F2E; color: #9CA3AF; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 4px; padding: 4px 8px; font-size: 0.72rem; font-family: inherit;
+}
+
 @media (max-width: 768px) {
     body { padding: 0.8rem; }
     h1 { font-size: 1.3rem; }
     .tech-grid { grid-template-columns: 1fr; }
+    .terminal-body { font-size: 0.7rem; padding: 12px 14px; min-height: 300px; }
+    .tab-btn { padding: 8px 14px; font-size: 0.75rem; }
 }
 </style>
 </head>
@@ -93,10 +179,46 @@ pre code { background: none; padding: 0; }
 <h1>How the Oil Scenario Engine Was Built</h1>
 <div class="subtitle">A technical deep-dive into an AI-powered geopolitical intelligence platform for Indian refinery strategy</div>
 
+<div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('terminal')">Interactive Build View</button>
+    <button class="tab-btn" onclick="switchTab('deepdive')">Technical Deep Dive</button>
+</div>
+
+<!-- ==================== TAB 1: INTERACTIVE TERMINAL ==================== -->
+<div id="tab-terminal" class="tab-panel active">
+
+<div class="term-controls">
+    <button class="term-btn" id="playBtn" onclick="startTerminal()">&#9654; Play Build</button>
+    <button class="term-btn secondary" id="skipBtn" onclick="skipToEnd()">Skip to End</button>
+    <button class="term-btn secondary" id="resetBtn" onclick="resetTerminal()" style="display:none;">Reset</button>
+    <div class="term-speed">
+        Speed: <select id="speedSelect" onchange="updateSpeed()">
+            <option value="80">Normal</option>
+            <option value="40">Fast</option>
+            <option value="15">Instant</option>
+        </select>
+    </div>
+</div>
+
+<div class="terminal">
+    <div class="terminal-bar">
+        <div class="terminal-dot" style="background:#FF5F57;"></div>
+        <div class="terminal-dot" style="background:#FFBD2E;"></div>
+        <div class="terminal-dot" style="background:#28C840;"></div>
+        <div class="terminal-title">oil-scenario-engine &mdash; build walkthrough</div>
+    </div>
+    <div class="terminal-body" id="termBody"></div>
+</div>
+
+</div>
+
+<!-- ==================== TAB 2: TECHNICAL DEEP DIVE ==================== -->
+<div id="tab-deepdive" class="tab-panel">
+
 <!-- ===== OVERVIEW ===== -->
 <h2>The Problem</h2>
 <p>Indian oil refiners face a complex decision environment: crude prices are driven by geopolitical events (Hormuz disruption, OPEC politics, regional conflict), and refining margins depend on a basket of 6+ product crack spreads across Singapore benchmarks.</p>
-<p>This system was built to <strong>continuously ingest news, score it against geopolitical scenarios using an LLM, and compute probability-weighted expected values</strong> for Brent crude and refinery gross margins &mdash; deployed as a static page that auto-refreshes every 6 hours.</p>
+<p>This system was built to <strong>continuously ingest news, score it against geopolitical scenarios using an LLM, and compute probability-weighted expected values</strong> for Brent crude and refinery gross margins &mdash; deployed as a static page that auto-refreshes every 3 hours.</p>
 
 <!-- ===== TECH STACK ===== -->
 <h2>Tech Stack</h2>
@@ -105,7 +227,7 @@ pre code { background: none; padding: 0; }
     <div class="tech-item"><div class="name">Claude Haiku 4.5</div><div class="role">LLM &mdash; article scoring, narratives, assessments</div></div>
     <div class="tech-item"><div class="name">SQLite (WAL)</div><div class="role">Database &mdash; 11 tables, concurrent reads</div></div>
     <div class="tech-item"><div class="name">Streamlit</div><div class="role">Interactive dashboard (local use)</div></div>
-    <div class="tech-item"><div class="name">GitHub Actions</div><div class="role">CI/CD &mdash; 6-hourly auto-refresh pipeline</div></div>
+    <div class="tech-item"><div class="name">GitHub Actions</div><div class="role">CI/CD &mdash; 3-hourly auto-refresh pipeline</div></div>
     <div class="tech-item"><div class="name">GitHub Pages</div><div class="role">Static HTML hosting via CDN</div></div>
     <div class="tech-item"><div class="name">Cloudflare Workers</div><div class="role">Token proxy for manual refresh button</div></div>
     <div class="tech-item"><div class="name">Plotly + Mermaid</div><div class="role">Charts &amp; architecture diagrams</div></div>
@@ -240,7 +362,7 @@ pre code { background: none; padding: 0; }
 <!-- ===== CI/CD ===== -->
 <h2>CI/CD Pipeline</h2>
 <div class="card">
-    <div class="label" style="color:#F59E0B;">GitHub Actions &mdash; Every 6 Hours</div>
+    <div class="label" style="color:#F59E0B;">GitHub Actions &mdash; Every 3 Hours</div>
     <ol>
         <li><strong>Checkout</strong> main branch</li>
         <li><strong>Setup</strong> Python 3.12 with pip cache</li>
@@ -298,16 +420,16 @@ pre code { background: none; padding: 0; }
         SQLite WAL (11 tables)
              |
         Claude Haiku 4.5
-        ├── Score articles [-1, +1] per scenario
-        ├── Softmax → probabilities
-        ├── Expected values (EV)
-        └── Strategic narratives
+        |-- Score articles [-1, +1] per scenario
+        |-- Softmax -> probabilities
+        |-- Expected values (EV)
+        '-- Strategic narratives
              |
-        export_html.py → scenario_report.html
+        export_html.py -> scenario_report.html
              |
-        GitHub Actions (6h cron)
+        GitHub Actions (3h cron)
              |
-        GitHub Pages CDN → parthreddy123.github.io/oil-dashboard
+        GitHub Pages CDN -> parthreddy123.github.io/oil-dashboard
 </code></pre>
 
 <!-- ===== KEY DECISIONS ===== -->
@@ -322,12 +444,263 @@ pre code { background: none; padding: 0; }
     <li><strong>3 horizons (1m, 3m, 6m)</strong> &mdash; 1-month captures immediate shock pricing; 3-month for tactical planning; 6-month for strategic decisions.</li>
 </ul>
 
+</div><!-- end tab-deepdive -->
+
 <!-- ===== FOOTER ===== -->
 <div class="footer">
     Built by Parth Reddy &middot; Powered by Claude (Anthropic) &middot;
     <a href="./">View Dashboard</a> &middot;
     <a href="https://github.com/parthreddy123/oil-dashboard">GitHub</a>
 </div>
+
+<script>
+// Tab switching
+function switchTab(id) {
+    document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+    document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.getElementById('tab-' + id).classList.add('active');
+    var btns = document.querySelectorAll('.tab-btn');
+    var map = {'terminal': 0, 'deepdive': 1};
+    if (map[id] !== undefined) btns[map[id]].classList.add('active');
+}
+
+// Terminal build lines
+var LINES = [
+    {type:'section', text:'PHASE 1: PROJECT SETUP'},
+    {type:'prompt', text:'mkdir oil-dashboard && cd oil-dashboard'},
+    {type:'prompt', text:'python -m venv venv && pip install streamlit plotly pandas sqlite3'},
+    {type:'output', text:'Successfully installed 47 packages'},
+    {type:'prompt', text:'touch database/db_manager.py'},
+    {type:'comment', text:'# SQLite with WAL mode for concurrent reads during scraping'},
+    {type:'output', text:'Created 11 tables: crude_prices, product_prices, crack_spreads,'},
+    {type:'output', text:'  refinery_data, trade_flows, global_events, news_articles,'},
+    {type:'output', text:'  article_signals, scenario_narratives, scenario_accuracy, fx_rates'},
+    {type:'success', text:'Database initialized: data/oil_dashboard.db (WAL mode)'},
+    {type:'blank'},
+
+    {type:'section', text:'PHASE 2: DATA SCRAPERS (9 PARALLEL)'},
+    {type:'prompt', text:'python scrapers/eia_scraper.py'},
+    {type:'output', text:'EIA API v2 connected (key: UOsa...EyG)'},
+    {type:'info', text:'  Brent (RBRTE): 730 daily prices fetched'},
+    {type:'info', text:'  WTI (RWTC): 730 daily prices fetched'},
+    {type:'info', text:'  Products: petrol, diesel, ATF, propane (USD/gal x 42 = USD/bbl)'},
+    {type:'info', text:'  OPEC production: 11 countries, 132 records'},
+    {type:'prompt', text:'python scrapers/oilprice_scraper.py'},
+    {type:'info', text:'  Dubai/Oman: $77.30/bbl (live scrape)'},
+    {type:'prompt', text:'python scrapers/news_aggregator.py'},
+    {type:'info', text:'  Google News: 24 search queries dispatched'},
+    {type:'info', text:'  RSS feeds: Reuters, Al Jazeera, Bloomberg, Rigzone, S&P Global...'},
+    {type:'success', text:'  1,082 articles ingested, deduplicated by URL'},
+    {type:'prompt', text:'python scrapers/fx_scraper.py'},
+    {type:'info', text:'  USD/INR: 83.12 (ExchangeRate API)'},
+    {type:'output', text:'All 9 scrapers completed via ThreadPoolExecutor(max_workers=6)'},
+    {type:'blank'},
+
+    {type:'section', text:'PHASE 3: SCENARIO ENGINE'},
+    {type:'comment', text:'# 5 geopolitical scenarios with preconditions & invalidators'},
+    {type:'prompt', text:'cat processing/scenario_analyzer.py | grep "SCENARIOS ="'},
+    {type:'warn',  text:'  Managed Escalation  -> Brent: $100/$97/$95 (1m/3m/6m)'},
+    {type:'warn',  text:'  Prolonged Standoff   -> Brent: $92/$90/$85'},
+    {type:'error', text:'  Conflagration        -> Brent: $140/$130/$120'},
+    {type:'highlight', text:'  Ceasefire & Talks    -> Brent: $72/$68/$63'},
+    {type:'info',  text:'  Regime Change        -> Brent: $88/$85/$80'},
+    {type:'comment', text:'# Prices from analyst consensus: GS, JPM, MS, Citi, WoodMac, Rystad'},
+    {type:'blank'},
+
+    {type:'section', text:'PHASE 4: LLM SCORING (CLAUDE HAIKU 4.5)'},
+    {type:'prompt', text:'python -c "from processing.scenario_analyzer import analyze_articles; analyze_articles()"'},
+    {type:'output', text:'Scoring unscored articles in batches of 10...'},
+    {type:'info', text:'  Batch 1/108: 10 articles -> 50 signals (5 per article)'},
+    {type:'info', text:'  Signal range: [-1.0, +1.0] per scenario'},
+    {type:'output', text:'  +0.3 to +0.6 = confirms precondition'},
+    {type:'output', text:'  -0.7 to -1.0 = matches invalidator'},
+    {type:'success', text:'  1,082 articles scored -> 5,410 signals stored'},
+    {type:'blank'},
+
+    {type:'section', text:'PHASE 5: PROBABILITY COMPUTATION'},
+    {type:'prompt', text:'python -c "from processing.scenario_analyzer import compute_weights; compute_weights(\'1m\')"'},
+    {type:'comment', text:'# Softmax with temperature=0.5'},
+    {type:'output', text:'  score[s] = AVG(signal) per scenario'},
+    {type:'output', text:'  weight[s] = exp(score[s] / 0.5) / sum(exp(scores / 0.5))'},
+    {type:'success', text:'  Prolonged Standoff:  35%'},
+    {type:'warn',    text:'  Conflagration:       24%'},
+    {type:'info',    text:'  Regime Change:       20%'},
+    {type:'highlight', text:'  Ceasefire & Talks:   11%'},
+    {type:'output', text:'  Managed Escalation:  10%'},
+    {type:'blank'},
+
+    {type:'section', text:'PHASE 6: EXPECTED VALUES'},
+    {type:'output', text:'EV(Brent 1m) = 0.35*92 + 0.24*140 + 0.20*88 + 0.11*72 + 0.10*100'},
+    {type:'success', text:'  = $100.60/bbl'},
+    {type:'output', text:'EV(GRM 1m) = weighted product revenue - Indian basket'},
+    {type:'output', text:'  Indian Basket = 0.72 * Dubai($77.30) + 0.28 * Brent($85.45)'},
+    {type:'success', text:'  = $79.59/bbl'},
+    {type:'output', text:'  GRM weights: diesel 42%, petrol 22%, naphtha 12%, ATF 10%, fuel oil 8%, LPG 6%'},
+    {type:'blank'},
+
+    {type:'section', text:'PHASE 7: STRATEGIC NARRATIVE (LLM)'},
+    {type:'prompt', text:'# Claude Haiku generates McKinsey-style 3-bullet narrative'},
+    {type:'output', text:'System prompt: "You are a McKinsey senior partner. Ultra-concise."'},
+    {type:'output', text:'  - Max 15 words per bullet'},
+    {type:'output', text:'  - No alarmist language (force majeure, catastrophic, collapse)'},
+    {type:'output', text:'  - Lead with insight, cite countries and %'},
+    {type:'success', text:'Narrative + per-scenario assessments stored in scenario_narratives table'},
+    {type:'blank'},
+
+    {type:'section', text:'PHASE 8: STATIC HTML EXPORT'},
+    {type:'prompt', text:'python export_html.py'},
+    {type:'output', text:'Reading latest data from SQLite...'},
+    {type:'info', text:'  Rendering 3 horizons: 1-Month, 3-Month, 6-Month'},
+    {type:'info', text:'  Mermaid diagrams: architecture, GRM calculation, scoring flow'},
+    {type:'info', text:'  Breaking news feed: last 36 hours with signal tags'},
+    {type:'info', text:'  Scenario cards: probability bars, top articles, LLM assessments'},
+    {type:'success', text:'Generated: scenario_report.html (812 lines)'},
+    {type:'blank'},
+
+    {type:'section', text:'PHASE 9: CI/CD & DEPLOYMENT'},
+    {type:'prompt', text:'cat .github/workflows/refresh.yml'},
+    {type:'output', text:'  schedule: cron \'0 */3 * * *\'    # every 3 hours'},
+    {type:'output', text:'  steps:'},
+    {type:'output', text:'    1. checkout main'},
+    {type:'output', text:'    2. setup python 3.12 (pip cache)'},
+    {type:'output', text:'    3. full_refresh() -> 9 scrapers + scenario engine'},
+    {type:'output', text:'    4. export_html.py -> scenario_report.html'},
+    {type:'output', text:'    5. cp scenario_report.html deploy/index.html'},
+    {type:'output', text:'    6. peaceiris/actions-gh-pages -> gh-pages branch'},
+    {type:'prompt', text:'# Manual refresh via Cloudflare Worker proxy'},
+    {type:'output', text:'  Button -> POST oil-dashboard-refresh.parthreddy.workers.dev'},
+    {type:'output', text:'  -> repository_dispatch -> GitHub Actions -> deploy'},
+    {type:'output', text:'  Auto-poll: HEAD request with ETag, reload on change'},
+    {type:'blank'},
+
+    {type:'section', text:'PHASE 10: DAILY EMAIL DIGEST'},
+    {type:'prompt', text:'python email_sender/daily_email.py'},
+    {type:'output', text:'  SMTP: Gmail (striderparth@gmail.com) via App Password'},
+    {type:'output', text:'  To: parth.reddy@live.com'},
+    {type:'output', text:'  Content: narrative + probability table + top 5 articles + accuracy'},
+    {type:'success', text:'Daily digest sent successfully'},
+    {type:'blank'},
+
+    {type:'section', text:'BUILD COMPLETE'},
+    {type:'success', text:'Live at: https://parthreddy123.github.io/oil-dashboard/'},
+    {type:'output', text:'  9 scrapers | 1,082 articles | 5 scenarios | 3 horizons'},
+    {type:'output', text:'  Claude Haiku 4.5 | Softmax probabilities | GitHub Pages CDN'},
+    {type:'output', text:'  Auto-refresh every 3 hours | Daily email digest'},
+    {type:'success', text:'Built with Claude Code'},
+];
+
+var _lineIdx = 0;
+var _timer = null;
+var _speed = 80;
+
+function updateSpeed() {
+    _speed = parseInt(document.getElementById('speedSelect').value);
+}
+
+function addLine(line) {
+    var body = document.getElementById('termBody');
+    var div = document.createElement('div');
+    div.className = 'term-line';
+
+    if (line.type === 'blank') {
+        div.innerHTML = '&nbsp;';
+    } else if (line.type === 'section') {
+        div.className += ' term-section';
+        div.textContent = '=== ' + line.text + ' ===';
+    } else if (line.type === 'prompt') {
+        div.innerHTML = '<span class="term-prompt">$ </span><span class="term-cmd">' + line.text + '</span>';
+    } else if (line.type === 'comment') {
+        div.innerHTML = '<span class="term-comment">' + line.text + '</span>';
+    } else {
+        var cls = 'term-' + line.type;
+        div.innerHTML = '<span class="' + cls + '">' + line.text + '</span>';
+    }
+
+    // Remove old cursor
+    var old = body.querySelector('.term-cursor');
+    if (old) old.remove();
+
+    body.appendChild(div);
+
+    // Add cursor to last line
+    var cursor = document.createElement('span');
+    cursor.className = 'term-cursor';
+    div.appendChild(cursor);
+
+    // Animate in
+    requestAnimationFrame(function() {
+        div.classList.add('visible');
+    });
+
+    // Auto-scroll
+    body.scrollTop = body.scrollHeight;
+}
+
+function playNext() {
+    if (_lineIdx >= LINES.length) {
+        // Remove cursor at end
+        var body = document.getElementById('termBody');
+        var cursor = body.querySelector('.term-cursor');
+        if (cursor) cursor.remove();
+        document.getElementById('playBtn').disabled = true;
+        document.getElementById('skipBtn').style.display = 'none';
+        document.getElementById('resetBtn').style.display = '';
+        return;
+    }
+    addLine(LINES[_lineIdx]);
+    _lineIdx++;
+
+    var delay = _speed;
+    // Sections and prompts get a slightly longer pause
+    if (_lineIdx < LINES.length) {
+        var next = LINES[_lineIdx - 1];
+        if (next.type === 'section') delay = _speed * 3;
+        else if (next.type === 'prompt') delay = _speed * 2;
+        else if (next.type === 'blank') delay = _speed * 0.5;
+    }
+
+    _timer = setTimeout(playNext, delay);
+}
+
+function startTerminal() {
+    document.getElementById('playBtn').disabled = true;
+    document.getElementById('playBtn').textContent = 'Playing...';
+    playNext();
+}
+
+function skipToEnd() {
+    if (_timer) clearTimeout(_timer);
+    var body = document.getElementById('termBody');
+    body.innerHTML = '';
+    for (var i = 0; i < LINES.length; i++) {
+        _lineIdx = i;
+        var line = LINES[i];
+        var div = document.createElement('div');
+        div.className = 'term-line visible';
+        if (line.type === 'blank') { div.innerHTML = '&nbsp;'; }
+        else if (line.type === 'section') { div.className += ' term-section'; div.textContent = '=== ' + line.text + ' ==='; }
+        else if (line.type === 'prompt') { div.innerHTML = '<span class="term-prompt">$ </span><span class="term-cmd">' + line.text + '</span>'; }
+        else if (line.type === 'comment') { div.innerHTML = '<span class="term-comment">' + line.text + '</span>'; }
+        else { div.innerHTML = '<span class="term-' + line.type + '">' + line.text + '</span>'; }
+        body.appendChild(div);
+    }
+    _lineIdx = LINES.length;
+    body.scrollTop = body.scrollHeight;
+    document.getElementById('playBtn').disabled = true;
+    document.getElementById('skipBtn').style.display = 'none';
+    document.getElementById('resetBtn').style.display = '';
+}
+
+function resetTerminal() {
+    if (_timer) clearTimeout(_timer);
+    _lineIdx = 0;
+    document.getElementById('termBody').innerHTML = '';
+    document.getElementById('playBtn').disabled = false;
+    document.getElementById('playBtn').textContent = '\u25B6 Play Build';
+    document.getElementById('skipBtn').style.display = '';
+    document.getElementById('resetBtn').style.display = 'none';
+}
+</script>
 
 </body>
 </html>
