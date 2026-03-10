@@ -487,7 +487,8 @@ Rules:
 - KPI explanations: 1 sentence, max 12 words. State the causal mechanism only.
 - No filler. No hedging. No "it is worth noting" or "given that".
 - Lead with the insight. Be specific: name countries, %, mechanisms.
-- Bullet 1: What's happening now. Bullet 2: Key risk/driver. Bullet 3: So-what for Indian refiners."""
+- Bullet 1: What's happening now. Bullet 2: Key risk/driver. Bullet 3: So-what for Indian refiners.
+- No alarmist language: avoid "force majeure", "catastrophic", "collapse", "existential", "unprecedented". State facts and mechanisms only."""
 
 _NARRATIVE_USER = """Scenario probabilities: {weights}
 Expected values: Brent ${oil_ev:.0f}/bbl (range {oil_range}), GRM ${grm_ev:.1f}/bbl (range {grm_range})
@@ -556,7 +557,8 @@ def generate_strategic_narrative(horizon, weights, ev, ranges, scenarios):
 # ---------------------------------------------------------------------------
 
 _ASSESSMENT_SYSTEM = """You are a McKinsey senior partner. For each scenario, write exactly 1 sentence explaining
-the probability — cite the specific signal or event driving it. No filler. Every word earns its place."""
+the probability — cite the specific signal or event driving it. No filler. Every word earns its place.
+No alarmist language: avoid "force majeure", "catastrophic", "collapse", "existential", "unprecedented". State facts and mechanisms only."""
 
 _ASSESSMENT_USER = """Scenarios with probabilities and evidence:
 {scenario_details}
