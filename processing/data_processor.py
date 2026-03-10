@@ -102,6 +102,18 @@ def run_post_processing():
         results["narrative"] = {"status": "failed", "error": str(e)}
         logger.warning(f"Narrative generation failed (non-fatal): {e}")
 
+    # Update scenario oil prices from analyst consensus in recent articles
+    try:
+        from processing.scenario_analyzer import update_scenario_prices_from_consensus
+        price_updates = update_scenario_prices_from_consensus()
+        if price_updates:
+            results["consensus_prices"] = {"status": "success", "count": len(price_updates)}
+        else:
+            results["consensus_prices"] = {"status": "skipped", "count": 0}
+    except Exception as e:
+        results["consensus_prices"] = {"status": "failed", "error": str(e)}
+        logger.warning(f"Consensus price update failed (non-fatal): {e}")
+
     # Scenario Engine — score articles and generate scenario narratives
     try:
         from processing.scenario_analyzer import analyze_articles, compute_weights, HORIZONS
@@ -113,6 +125,14 @@ def run_post_processing():
     except Exception as e:
         results["scenario_engine"] = {"status": "failed", "error": str(e)}
         logger.warning(f"Scenario engine failed (non-fatal): {e}")
+
+    # Score past predictions against actual prices
+    try:
+        from database.db_manager import score_past_predictions
+        scored = score_past_predictions()
+        results["accuracy"] = {"status": "success", "count": scored}
+    except Exception as e:
+        results["accuracy"] = {"status": "failed", "error": str(e)}
 
     return results
 
@@ -136,6 +156,16 @@ def full_refresh():
     log_scrape("full_refresh", status, total_records, error_msg, duration)
 
     logger.info(f"Full refresh complete: {total_records} records in {duration:.1f}s")
+
+    # Send daily email digest (non-fatal)
+    try:
+        from email_sender.daily_email import send_daily_digest
+        sent = send_daily_digest()
+        all_results["email"] = {"status": "success" if sent else "skipped", "count": 1 if sent else 0}
+    except Exception as e:
+        all_results["email"] = {"status": "failed", "error": str(e)}
+        logger.warning(f"Email digest failed (non-fatal): {e}")
+
     return all_results
 
 

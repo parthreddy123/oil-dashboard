@@ -35,7 +35,7 @@ def job_daily_prices():
 
 
 def job_news():
-    """Every 6 hours: Google News + OilPrice RSS + impact tagging."""
+    """Every 3 hours: Google News + OilPrice RSS + impact tagging."""
     logger.info("Running news scrape...")
     try:
         from scrapers.news_aggregator import run as run_news
@@ -72,6 +72,20 @@ def job_monthly_opec():
         logger.error(f"Monthly OPEC job failed: {e}")
 
 
+def job_daily_email():
+    """Daily: Send email digest with scenario analysis."""
+    logger.info("Running daily email digest...")
+    try:
+        from email_sender.daily_email import send_daily_digest
+        result = send_daily_digest()
+        if result:
+            logger.info("Daily email digest sent successfully")
+        else:
+            logger.warning("Daily email digest skipped (no data or no credentials)")
+    except Exception as e:
+        logger.error(f"Daily email job failed: {e}")
+
+
 def main():
     init_db()
     scheduler = BlockingScheduler()
@@ -80,9 +94,9 @@ def main():
     scheduler.add_job(job_daily_prices, IntervalTrigger(hours=24),
                       id="daily_prices", next_run_time=datetime.now())
 
-    # News every 6 hours
-    scheduler.add_job(job_news, IntervalTrigger(hours=6),
-                      id="news_6h", next_run_time=datetime.now())
+    # News every 3 hours
+    scheduler.add_job(job_news, IntervalTrigger(hours=3),
+                      id="news_3h", next_run_time=datetime.now())
 
     # Weekly government data on Mondays at 9:00 AM
     scheduler.add_job(job_weekly_gov, IntervalTrigger(weeks=1),
@@ -92,8 +106,12 @@ def main():
     scheduler.add_job(job_monthly_opec, IntervalTrigger(days=30),
                       id="monthly_opec", next_run_time=datetime.now())
 
+    # Daily email digest at 7:00 AM UTC
+    scheduler.add_job(job_daily_email, IntervalTrigger(hours=24),
+                      id="daily_email", next_run_time=datetime.now().replace(hour=7, minute=0, second=0))
+
     logger.info("Scheduler started. Press Ctrl+C to exit.")
-    logger.info("Jobs: daily_prices (24h), news_6h (6h), weekly_gov (7d), monthly_opec (30d)")
+    logger.info("Jobs: daily_prices (24h), news_3h (3h), weekly_gov (7d), monthly_opec (30d), daily_email (24h)")
 
     try:
         scheduler.start()

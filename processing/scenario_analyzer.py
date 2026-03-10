@@ -37,18 +37,29 @@ MODEL = "claude-haiku-4-5-20251001"
 # ---------------------------------------------------------------------------
 
 SCENARIOS = {
-    "quick_resolution": {
-        "name": "Quick Resolution",
-        "short": "Quick",
-        "description": "Diplomatic breakthrough leads to rapid de-escalation within weeks. "
-                       "Strait of Hormuz fully reopens, insurance premiums drop.",
+    "managed_escalation": {
+        "name": "Managed Escalation",
+        "short": "Managed",
+        "description": "Controlled tit-for-tat strikes calibrated to avoid full war. "
+                       "Limited Hormuz disruption with periodic flare-ups, elevated insurance.",
+        "preconditions": [
+            "Both sides maintain back-channel communication or intermediary contact",
+            "Strikes remain limited to military/infrastructure targets, no population centers",
+            "No independent escalation by proxy forces (Hezbollah, Houthis) beyond current levels",
+            "US maintains naval presence in Gulf without direct combat engagement",
+        ],
+        "invalidators": [
+            "Direct strike on civilian population center causing mass casualties (-> Conflagration)",
+            "Full Hormuz blockade announced by IRGC Navy (-> Conflagration)",
+            "Formal ceasefire agreement signed by both parties (-> Ceasefire)",
+        ],
         "horizons": {
-            "3m":  {"oil": 72, "grm": 11.5, "stock": 8},
-            "6m":  {"oil": 67, "grm": 12.0, "stock": 12},
+            "3m":  {"oil": 97, "grm": 5.5, "stock": -18},
+            "6m":  {"oil": 95, "grm": 6.0, "stock": -14},
         },
         "products": {
-            "3m":  {"diesel": 94, "petrol": 68, "atf": 93, "naphtha": 61, "fuel_oil": 47, "lpg": 25},
-            "6m":  {"diesel": 88, "petrol": 64, "atf": 87, "naphtha": 57, "fuel_oil": 44, "lpg": 23},
+            "3m":  {"diesel": 145, "petrol": 92, "atf": 140, "naphtha": 78, "fuel_oil": 68, "lpg": 30},
+            "6m":  {"diesel": 138, "petrol": 88, "atf": 135, "naphtha": 74, "fuel_oil": 65, "lpg": 28},
         },
     },
     "prolonged_standoff": {
@@ -56,6 +67,17 @@ SCENARIOS = {
         "short": "Prolong",
         "description": "Neither escalation nor resolution. Partial Hormuz disruption persists "
                        "with naval escort corridors. Elevated premiums, rerouted tankers.",
+        "preconditions": [
+            "No direct military strikes between principal parties for 30+ days",
+            "Hormuz transit reduced 20-40% but not fully closed",
+            "At least 2 OPEC members publicly oppose further escalation",
+            "Insurance premiums for Gulf tankers exceed 3% of cargo value",
+        ],
+        "invalidators": [
+            "Resumption of direct strikes between principals (-> Managed Escalation or Conflagration)",
+            "Full Hormuz closure or mining of shipping lanes (-> Conflagration)",
+            "Formal ceasefire signed (-> Ceasefire)",
+        ],
         "horizons": {
             "3m":  {"oil": 90, "grm": 7.0, "stock": -12},
             "6m":  {"oil": 85, "grm": 7.5, "stock": -8},
@@ -70,6 +92,17 @@ SCENARIOS = {
         "short": "Conflag",
         "description": "Full regional war with complete Hormuz closure, refinery attacks, "
                        "and global supply chain disruption.",
+        "preconditions": [
+            "Direct military engagement between at least 2 state actors (not just proxies)",
+            "Hormuz transit fully blocked or mined, tanker traffic halted",
+            "Multiple Gulf state oil facilities targeted or damaged",
+            "UN Security Council emergency session convened",
+        ],
+        "invalidators": [
+            "UN-brokered ceasefire accepted by all parties (-> Ceasefire)",
+            "Unilateral withdrawal by one principal (-> Prolonged Standoff)",
+            "Internal regime collapse in aggressor state (-> Regime Change)",
+        ],
         "horizons": {
             "3m":  {"oil": 130, "grm": -2.0, "stock": -35},
             "6m":  {"oil": 120, "grm": 0.0,  "stock": -28},
@@ -84,6 +117,17 @@ SCENARIOS = {
         "short": "Ceasefire",
         "description": "Formal ceasefire with ongoing negotiations. Markets normalize "
                        "rapidly, crude flows resume, risk premiums evaporate.",
+        "preconditions": [
+            "Both parties publicly agree to cessation of hostilities",
+            "Third-party mediator actively engaged (US, China, UN, or Gulf state)",
+            "No major military action by either side for 7+ consecutive days",
+            "Tanker insurance premiums declining week-over-week",
+        ],
+        "invalidators": [
+            "Major military strike by either party breaking ceasefire (-> Managed Escalation)",
+            "Proxy forces launch significant attack undermining talks (-> Prolonged Standoff)",
+            "Collapse of mediator credibility or withdrawal (-> Prolonged Standoff)",
+        ],
         "horizons": {
             "3m":  {"oil": 68, "grm": 13.0, "stock": 18},
             "6m":  {"oil": 63, "grm": 12.5, "stock": 15},
@@ -98,6 +142,17 @@ SCENARIOS = {
         "short": "Regime",
         "description": "Internal power shift in key state creates unpredictable transition. "
                        "Temporary disruption followed by uncertain new equilibrium.",
+        "preconditions": [
+            "Credible reports of internal power struggle or military faction split",
+            "Breakdown of command-and-control in at least one principal state",
+            "International intelligence agencies signal imminent leadership change",
+            "Capital flight or currency collapse in target state",
+        ],
+        "invalidators": [
+            "Regime consolidates power and resumes normal operations (-> Prolonged Standoff)",
+            "New regime immediately sues for peace (-> Ceasefire)",
+            "Power vacuum triggers regional intervention (-> Conflagration)",
+        ],
         "horizons": {
             "3m":  {"oil": 85, "grm": 9.0,  "stock": -5},
             "6m":  {"oil": 80, "grm": 9.5,  "stock": 0},
@@ -211,12 +266,18 @@ def _get_client():
 _SIGNAL_SYSTEM = """You are a geopolitical intelligence analyst. You assess how news articles
 affect the probability of 5 Middle East/Hormuz crisis scenarios for Indian oil markets.
 
-Scenarios:
+Scenarios (with preconditions that must hold and invalidators that eliminate the scenario):
 {scenarios}
+
+SCORING RULES:
+- If an article CONFIRMS a precondition, assign moderate positive signal (+0.3 to +0.6)
+- If an article UNDERMINES a precondition, assign moderate negative signal (-0.3 to -0.6)
+- If an article matches an INVALIDATOR, assign strong negative signal (-0.7 to -1.0)
+- If an article is neutral to a scenario, assign near-zero signal (-0.1 to +0.1)
 
 For each article, return a JSON object with scenario_id keys and objects containing:
 - "signal": float from -1.0 (strongly reduces probability) to +1.0 (strongly increases)
-- "reasoning": 1 sentence explaining why
+- "reasoning": 1 sentence citing which precondition/invalidator is affected
 
 Return ONLY valid JSON, no markdown fences."""
 
@@ -235,7 +296,9 @@ def analyze_articles(horizon=DEFAULT_HORIZON, batch_size=10):
         return 0
 
     scenario_desc = "\n".join(
-        f"- {sid}: {s['name']} — {s['description']}"
+        f"- {sid}: {s['name']} — {s['description']}\n"
+        f"  Preconditions: {'; '.join(s.get('preconditions', []))}\n"
+        f"  Invalidators: {'; '.join(s.get('invalidators', []))}"
         for sid, s in SCENARIOS.items()
     )
 
@@ -335,6 +398,20 @@ def compute_weights(horizon=DEFAULT_HORIZON, generate_narratives=True):
 
     # Compute expected values
     ev = _compute_ev(SCENARIOS, weights, horizon)
+
+    # Record prediction for accuracy tracking
+    try:
+        from database.db_manager import insert_accuracy_snapshot
+        insert_accuracy_snapshot(
+            snapshot_date=datetime.utcnow().strftime("%Y-%m-%d"),
+            horizon=horizon,
+            weights=weights,
+            ev_oil=ev["oil"],
+            ev_grm=ev["grm"],
+        )
+    except Exception as e:
+        logger.warning(f"Accuracy snapshot failed (non-fatal): {e}")
+
     ranges = _compute_ranges(SCENARIOS, horizon)
 
     if generate_narratives:
@@ -518,6 +595,127 @@ def generate_scenario_assessments(weights, scenarios, horizon=DEFAULT_HORIZON):
     except json.JSONDecodeError:
         logger.error(f"Could not parse assessments JSON: {text[:200]}")
         return {}
+
+
+# ---------------------------------------------------------------------------
+# Dynamic scenario price update — LLM extracts analyst consensus from recent news
+# ---------------------------------------------------------------------------
+
+_PRICE_SYSTEM = """You are a commodity pricing analyst. Given recent news articles about oil markets,
+extract any mentioned analyst price targets, bank forecasts, or consensus estimates for Brent crude.
+
+For each of the 5 scenarios below, estimate what the current analyst consensus Brent price would be,
+based on the evidence in these articles. Use the BASE prices as defaults if articles provide no
+relevant update for a scenario.
+
+Scenarios and current base prices:
+{scenario_prices}
+
+Rules:
+- Only adjust a scenario's price if articles contain SPECIFIC evidence (bank forecast, analyst quote, price target)
+- Adjustments should be within +/-15% of the base price
+- If no relevant evidence, keep the base price
+- Return prices as integers (USD/bbl)"""
+
+_PRICE_USER = """Recent articles (last 12-18 hours):
+{articles}
+
+Current Brent spot: ${current_brent}/bbl
+
+Return ONLY valid JSON with this exact structure:
+{{
+    "scenario_id": {{"oil_3m": int, "oil_6m": int, "reasoning": "1 sentence"}},
+    ...for each scenario...
+}}
+No markdown fences."""
+
+
+def update_scenario_prices_from_consensus():
+    """Use LLM to extract analyst consensus and update scenario oil prices.
+
+    Reads recent articles, asks LLM to extract any price targets/forecasts,
+    and adjusts scenario oil prices accordingly. Returns dict of updated prices.
+    """
+    from database.db_manager import get_recent_articles_with_signals
+
+    recent = get_recent_articles_with_signals(hours=18, limit=30)
+    if not recent:
+        logger.info("No recent articles for price consensus update")
+        return None
+
+    articles_text = "\n".join(
+        f"- {a['title']}" + (f" — {a.get('summary', '')[:150]}" if a.get('summary') else "")
+        for a in recent
+    )
+
+    basket, _, brent = get_indian_basket_price()
+
+    scenario_prices_text = "\n".join(
+        f"- {sid} ({s['name']}): 3m=${s['horizons']['3m']['oil']}, 6m=${s['horizons']['6m']['oil']}"
+        for sid, s in SCENARIOS.items()
+    )
+
+    try:
+        client = _get_client()
+        response = client.messages.create(
+            model=MODEL,
+            max_tokens=2048,
+            system=_PRICE_SYSTEM.format(scenario_prices=scenario_prices_text),
+            messages=[{"role": "user", "content": _PRICE_USER.format(
+                articles=articles_text,
+                current_brent=brent or 80,
+            )}],
+        )
+
+        text = response.content[0].text.strip()
+        if "```" in text:
+            text = text.split("```")[1]
+            if text.lower().startswith("json"):
+                text = text[4:]
+            text = text.strip()
+
+        updates = json.loads(text)
+        applied = {}
+
+        for sid, data in updates.items():
+            if sid not in SCENARIOS:
+                continue
+            base_3m = SCENARIOS[sid]["horizons"]["3m"]["oil"]
+            base_6m = SCENARIOS[sid]["horizons"]["6m"]["oil"]
+
+            new_3m = data.get("oil_3m", base_3m)
+            new_6m = data.get("oil_6m", base_6m)
+
+            # Clamp to +/-15% of base to prevent hallucinated extremes
+            new_3m = max(int(base_3m * 0.85), min(int(base_3m * 1.15), int(new_3m)))
+            new_6m = max(int(base_6m * 0.85), min(int(base_6m * 1.15), int(new_6m)))
+
+            SCENARIOS[sid]["horizons"]["3m"]["oil"] = new_3m
+            SCENARIOS[sid]["horizons"]["6m"]["oil"] = new_6m
+
+            # Recalculate GRM based on updated oil price for each horizon
+            for h in ["3m", "6m"]:
+                crude = SCENARIOS[sid]["horizons"][h]["oil"]
+                products = SCENARIOS[sid]["products"][h]
+                grm = sum(
+                    GRM_WEIGHTS.get(p, 0) * (products.get(p, 0) - crude)
+                    for p in _PRODUCT_LIST
+                )
+                SCENARIOS[sid]["horizons"][h]["grm"] = round(grm, 1)
+
+            applied[sid] = {
+                "oil_3m": new_3m, "oil_6m": new_6m,
+                "reasoning": data.get("reasoning", ""),
+                "grm_3m": SCENARIOS[sid]["horizons"]["3m"]["grm"],
+                "grm_6m": SCENARIOS[sid]["horizons"]["6m"]["grm"],
+            }
+
+        logger.info(f"Updated scenario prices from consensus: {len(applied)} scenarios adjusted")
+        return applied
+
+    except Exception as e:
+        logger.error(f"Consensus price update failed: {e}")
+        return None
 
 
 # ---------------------------------------------------------------------------

@@ -209,10 +209,32 @@ def init_db():
             model_used TEXT DEFAULT 'claude-haiku-4-5-20251001'
         );
 
+        CREATE TABLE IF NOT EXISTS scenario_accuracy (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            snapshot_date TEXT NOT NULL,
+            horizon TEXT NOT NULL,
+            weight_snapshot TEXT,
+            predicted_ev_oil REAL,
+            predicted_ev_grm REAL,
+            actual_brent REAL,
+            actual_grm REAL,
+            oil_error REAL,
+            grm_error REAL,
+            winning_scenario TEXT,
+            scored_at TEXT,
+            created_at TEXT DEFAULT (datetime('now')),
+            UNIQUE(snapshot_date, horizon)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_scenario_accuracy_date ON scenario_accuracy(snapshot_date DESC);
+
         CREATE INDEX IF NOT EXISTS idx_article_signals_article ON article_signals(article_id);
         CREATE INDEX IF NOT EXISTS idx_article_signals_scenario ON article_signals(scenario_id, created_at);
         CREATE INDEX IF NOT EXISTS idx_scenario_narratives_horizon ON scenario_narratives(horizon, generated_at DESC);
         """)
+
+        # Migrate old scenario IDs
+        conn.execute("UPDATE article_signals SET scenario_id='managed_escalation' WHERE scenario_id='quick_resolution'")
 
 
 # --- CRUD Methods ---
@@ -675,6 +697,102 @@ def get_signals_for_window(hours):
                ORDER BY s.created_at DESC""",
             (cutoff, cutoff),
         ).fetchall()]
+
+
+def insert_accuracy_snapshot(snapshot_date, horizon, weights, ev_oil, ev_grm):
+    """Record a scenario prediction for later accuracy scoring."""
+    with get_connection() as conn:
+        conn.execute(
+            """INSERT INTO scenario_accuracy (snapshot_date, horizon, weight_snapshot,
+               predicted_ev_oil, predicted_ev_grm)
+               VALUES (?, ?, ?, ?, ?)
+               ON CONFLICT(snapshot_date, horizon) DO UPDATE SET
+                 weight_snapshot=excluded.weight_snapshot,
+                 predicted_ev_oil=excluded.predicted_ev_oil,
+                 predicted_ev_grm=excluded.predicted_ev_grm""",
+            (str(snapshot_date), horizon,
+             json.dumps(weights) if isinstance(weights, dict) else weights,
+             ev_oil, ev_grm),
+        )
+
+
+def score_past_predictions():
+    """Score predictions whose horizon has expired against actual prices."""
+    scored = 0
+    with get_connection() as conn:
+        # Find unscored predictions older than 90 days (3m horizon)
+        unscored = conn.execute(
+            """SELECT id, snapshot_date, horizon, predicted_ev_oil, predicted_ev_grm
+               FROM scenario_accuracy
+               WHERE scored_at IS NULL
+               AND snapshot_date <= date('now', '-90 days')
+               AND horizon = '3m'"""
+        ).fetchall()
+
+        for row in unscored:
+            # Find actual Brent price around the target date (90 days after snapshot)
+            target_date = row["snapshot_date"]  # approximate
+            actual = conn.execute(
+                """SELECT price FROM crude_prices
+                   WHERE benchmark='brent' AND date >= date(?, '+80 days')
+                   AND date <= date(?, '+100 days')
+                   ORDER BY date LIMIT 1""",
+                (target_date, target_date),
+            ).fetchone()
+
+            if actual:
+                actual_brent = actual["price"]
+                oil_error = row["predicted_ev_oil"] - actual_brent
+                conn.execute(
+                    """UPDATE scenario_accuracy
+                       SET actual_brent=?, oil_error=?, scored_at=datetime('now')
+                       WHERE id=?""",
+                    (actual_brent, oil_error, row["id"]),
+                )
+                scored += 1
+
+    return scored
+
+
+def get_accuracy_history(limit=52):
+    """Get scored predictions for accuracy display."""
+    with get_connection(readonly=True) as conn:
+        rows = conn.execute(
+            """SELECT * FROM scenario_accuracy
+               WHERE scored_at IS NOT NULL
+               ORDER BY snapshot_date DESC LIMIT ?""",
+            (limit,),
+        ).fetchall()
+        result = []
+        for r in rows:
+            d = dict(r)
+            if d.get("weight_snapshot"):
+                try:
+                    d["weight_snapshot"] = json.loads(d["weight_snapshot"])
+                except (json.JSONDecodeError, TypeError):
+                    pass
+            result.append(d)
+        return result
+
+
+def get_previous_day_weights(horizon="3m"):
+    """Get the most recent scenario narrative from before today for comparison."""
+    with get_connection(readonly=True) as conn:
+        row = conn.execute(
+            """SELECT weight_snapshot, generated_at FROM scenario_narratives
+               WHERE horizon = ? AND date(generated_at) < date('now')
+               ORDER BY generated_at DESC LIMIT 1""",
+            (horizon,),
+        ).fetchone()
+        if not row:
+            return None
+        d = dict(row)
+        if d.get("weight_snapshot"):
+            try:
+                d["weight_snapshot"] = json.loads(d["weight_snapshot"])
+            except (json.JSONDecodeError, TypeError):
+                pass
+        return d
 
 
 def get_unscored_articles(horizon="3m", limit=50):

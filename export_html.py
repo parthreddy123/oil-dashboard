@@ -168,38 +168,6 @@ table td { padding: 5px 10px; }
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 
-/* Terminal build story */
-.terminal {
-    background: #0a0a0a; border: 1px solid #333; border-radius: 8px;
-    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
-    font-size: 0.78rem; line-height: 1.7; overflow: hidden;
-}
-.terminal-bar {
-    background: #1a1a1a; padding: 8px 14px; display: flex; align-items: center; gap: 8px;
-    border-bottom: 1px solid #333;
-}
-.terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
-.terminal-bar .title { color: #666; font-size: 0.7rem; margin-left: 8px; }
-.terminal-body { padding: 16px 18px; max-height: 75vh; overflow-y: auto; }
-.t-line { margin-bottom: 2px; }
-.t-prompt { color: #10B981; }
-.t-prompt::before { content: '$ '; color: #F59E0B; }
-.t-user { color: #FCD34D; }
-.t-user::before { content: 'parth> '; color: #F59E0B; font-weight: 700; }
-.t-ai { color: #9CA3AF; }
-.t-ai::before { content: 'claude> '; color: #00D4AA; font-weight: 700; }
-.t-err { color: #EF4444; }
-.t-err::before { content: 'ERROR: '; font-weight: 700; }
-.t-ok { color: #10B981; }
-.t-ok::before { content: '  OK: '; font-weight: 700; }
-.t-warn { color: #F59E0B; }
-.t-dim { color: #4B5563; }
-.t-section {
-    color: #00D4FF; font-weight: 700; margin-top: 16px; margin-bottom: 4px;
-    border-bottom: 1px solid #1a2a3a; padding-bottom: 4px;
-}
-.t-gap { height: 12px; }
-
 /* Architecture */
 .arch-row { display: flex; gap: 16px; margin-bottom: 20px; align-items: stretch; }
 .arch-col { flex: 1; min-width: 0; }
@@ -265,7 +233,7 @@ table td { padding: 5px 10px; }
 """
 
 SCENARIO_COLORS = {
-    "quick_resolution": "#10B981",
+    "managed_escalation": "#F97316",
     "prolonged_standoff": "#F59E0B",
     "conflagration": "#EF4444",
     "ceasefire": "#00D4FF",
@@ -493,292 +461,6 @@ def render_horizon(horizon, narrative_data, momentum, recent_articles, top_artic
 # ---------------------------------------------------------------------------
 # Static tab content
 # ---------------------------------------------------------------------------
-
-BUILD_STORY = """
-<div class="terminal">
-<div class="terminal-bar">
-    <div class="terminal-dot" style="background:#EF4444;"></div>
-    <div class="terminal-dot" style="background:#F59E0B;"></div>
-    <div class="terminal-dot" style="background:#10B981;"></div>
-    <span class="title">scenario-engine-build-log &mdash; one session, start to finish</span>
-</div>
-<div class="terminal-body">
-
-<div class="t-line t-dim">// March 2026. Starting from an existing oil dashboard with price data, news scraping, and a Streamlit frontend.</div>
-<div class="t-line t-dim">// The ask: something sharper. A scenario engine.</div>
-<div class="t-gap"></div>
-
-<div class="t-line t-section">&#9608; PHASE 1: THE BRIEF &amp; ARCHITECTURE</div>
-<div class="t-line t-user">build a scenario engine. 5 geopolitical scenarios for middle east crisis. score news articles against them with AI. show probabilities, expected brent price, GRM impact.</div>
-<div class="t-line t-user">use an LLM to score the articles. keep costs low. and I want probabilities not just scores- weight the outcomes.</div>
-<div class="t-gap"></div>
-<div class="t-line t-ai">Going with Claude Haiku 4.5 &mdash; cheapest model that can handle nuanced geopolitical scoring. ~$0.005 per full run.</div>
-<div class="t-line t-ai">Scoring each article [-1, +1] per scenario. Softmax over averages &rarr; probabilities. Expected values = probability &times; scenario price.</div>
-<div class="t-line t-dim">// Parth set the direction: LLM-scored articles, probabilistic output, cost-conscious.</div>
-<div class="t-line t-dim">// I filled in the specifics: Haiku model, softmax with temperature, SQLite WAL for storage,</div>
-<div class="t-line t-dim">// static HTML on GitHub Pages for zero hosting cost.</div>
-<div class="t-gap"></div>
-<div class="t-line t-user">make the LLM generate a strategic narrative too. and per-scenario assessments. like a consulting partner would brief.</div>
-<div class="t-line t-ai">Three LLM roles per refresh: article scorer, strategic narrator, scenario assessor.</div>
-<div class="t-line t-dim">// the "consulting partner" framing shaped everything. it wasn't a data dump &mdash; it was a brief.</div>
-<div class="t-gap"></div>
-<div class="t-line t-prompt">creating database/schema.py &mdash; new tables: article_signals, scenario_weights, strategic_narratives</div>
-<div class="t-line t-prompt">creating processing/scenario_analyzer.py &mdash; LLM scoring + narrative pipeline</div>
-<div class="t-line t-prompt">python -m processing.scenario_analyzer</div>
-<div class="t-line t-ok">Scored 47 articles. Prolonged Standoff: 34%, Conflagration: 22%, Quick Resolution: 18%...</div>
-<div class="t-line t-prompt">python export_html.py &amp;&amp; git push origin gh-pages</div>
-<div class="t-line t-ok">Report live at github.io. v1 working.</div>
-<div class="t-gap"></div>
-<div class="t-line t-user">add a breaking news section- last 12 hours. show which way momentum is moving per scenario.</div>
-<div class="t-line t-ai">Adding momentum: 12h avg signal vs 7-day baseline per scenario. Rising/falling/stable indicators.</div>
-<div class="t-line t-ok">Breaking signal window + momentum live.</div>
-<div class="t-gap"></div>
-
-<div class="t-line t-section">&#9608; PHASE 2: "THIS WILL GO PUBLIC"</div>
-<div class="t-line t-user">remove stock impact please. this is going public, keep it focused on crude and refining economics only</div>
-<div class="t-line t-ai">Removing all stock references from KPI cards, scenario cards, and narratives...</div>
-<div class="t-line t-user">how do I refresh the data? I don't want to run python every time</div>
-<div class="t-line t-ai">Adding a refresh button. It'll trigger GitHub Actions via repository_dispatch.</div>
-<div class="t-line t-prompt">fetch('https://api.github.com/repos/.../dispatches', { headers: { Authorization: 'token ghp_...' }})</div>
-<div class="t-line t-user">wait... you're putting my GitHub token in the HTML?? this is a public page!</div>
-<div class="t-line t-ai">Right. The token would be visible in page source. Can't do client-side GitHub API calls on a public page.</div>
-<div class="t-line t-dim">// first attempt: direct GitHub API from the browser. exposes PAT token to anyone who views source. obviously terrible.</div>
-<div class="t-line t-user">what if we just link to the GitHub Actions page so I can trigger it manually?</div>
-<div class="t-line t-ai">That works but then anyone visiting needs GitHub access. And they'd see the repo.</div>
-<div class="t-line t-user">the refresh button shouldn't expose any tokens or open GitHub. people will use this.</div>
-<div class="t-line t-dim">// the requirements keep tightening: no tokens in HTML, no GitHub redirect, works for anonymous users.</div>
-<div class="t-line t-dim">// need a server-side proxy. but we don't have a server. this is a static GitHub Pages site.</div>
-<div class="t-line t-ai">Need a proxy layer. Cloudflare Workers &mdash; free tier, serverless, sits between button and GitHub.</div>
-<div class="t-line t-dim">// the token lives in Cloudflare's environment variables. browser just POSTs to the worker URL. clean.</div>
-<div class="t-line t-prompt">npm create cloudflare@latest</div>
-<div class="t-line t-err">wrangler: command not found</div>
-<div class="t-line t-prompt">npm install -g wrangler</div>
-<div class="t-line t-prompt">wrangler deploy</div>
-<div class="t-line t-err">No workers.dev subdomain registered for this account</div>
-<div class="t-line t-dim">// great. need to register a subdomain before deploying. nowhere in the docs was this obvious.</div>
-<div class="t-line t-prompt">curl -X PUT api.cloudflare.com/.../workers/subdomain -d '{"subdomain":"parthreddy"}'</div>
-<div class="t-line t-ok">Subdomain registered.</div>
-<div class="t-line t-prompt">wrangler deploy</div>
-<div class="t-line t-ok">Worker live at oil-dashboard-refresh.parthreddy.workers.dev</div>
-<div class="t-line t-prompt">curl -X POST https://oil-dashboard-refresh.parthreddy.workers.dev</div>
-<div class="t-line t-err">403 Forbidden &mdash; error code 1010 (Cloudflare bot detection blocked our own request)</div>
-<div class="t-line t-dim">// ...Cloudflare is blocking requests to our own Cloudflare Worker. beautiful.</div>
-<div class="t-line t-ai">It's a User-Agent issue. Windows curl sends no UA. Browsers always do.</div>
-<div class="t-line t-prompt">curl -H "User-Agent: Mozilla/5.0" -X POST https://oil-dashboard-refresh.parthreddy.workers.dev</div>
-<div class="t-line t-ok">{"status":"triggered"} &mdash; GitHub Actions pipeline started.</div>
-<div class="t-line t-dim">// tested in browser. works. let's move on before something else breaks.</div>
-<div class="t-gap"></div>
-<div class="t-line t-dim">// narrator: something else broke.</div>
-<div class="t-gap"></div>
-<div class="t-line t-prompt">gh run view --log</div>
-<div class="t-line t-err">Run failed: ModuleNotFoundError: No module named 'anthropic'</div>
-<div class="t-line t-dim">// forgot to add anthropic to requirements.txt in the CI environment</div>
-<div class="t-line t-prompt">pip install anthropic added to workflow</div>
-<div class="t-line t-prompt">trigger refresh again...</div>
-<div class="t-line t-err">Run failed: git push rejected &mdash; remote contains work you don't have locally</div>
-<div class="t-line t-dim">// the pipeline pushes to main. we also push to main. they collide. every. single. time.</div>
-<div class="t-line t-ai">Adding git pull --rebase to workflow. Making main push non-fatal.</div>
-<div class="t-line t-prompt">trigger refresh again...</div>
-<div class="t-line t-ok">Run #17: success. Finally. The refresh button actually works end-to-end.</div>
-<div class="t-gap"></div>
-
-<div class="t-line t-section">&#9608; PHASE 3: THE PRICING DISASTER</div>
-<div class="t-line t-user">how does each scenario calculate the brent price?</div>
-<div class="t-line t-ai">Currently using multipliers off base Brent. Conflagration = Brent &times; 1.97...</div>
-<div class="t-line t-user">can we ensure the brent price per scenario is based on expert consensus?</div>
-<div class="t-line t-ai">Switching to dynamic multipliers based on historical crisis premiums...</div>
-<div class="t-line t-prompt">Conflagration: $83.95 &times; 1.97 = $165.38/bbl</div>
-<div class="t-line t-user" style="color:#EF4444;">the brent ratios don't work</div>
-<div class="t-line t-ai">Switching to additive premiums instead. Conflagration = Brent + $60...</div>
-<div class="t-line t-user" style="color:#EF4444;">noway we will have $160</div>
-<div class="t-line t-ai">Reducing premiums. Conflagration = Brent + $45...</div>
-<div class="t-line t-user" style="color:#EF4444;">i don't think the ratios work!!</div>
-<div class="t-line t-ai">Let me try a different approach&mdash;</div>
-<div class="t-gap"></div>
-<div class="t-line t-dim">// the dynamic pricing approach was fundamentally wrong.</div>
-<div class="t-line t-dim">// Parth saw it immediately. I kept trying to fix a broken model instead of changing the approach.</div>
-<div class="t-gap"></div>
-<div class="t-line t-user">why can't we find internet consensus per scenario already and hard code per scenario? also the product prices?</div>
-<div class="t-line t-dim">// this was the right call. stop trying to compute prices dynamically. go find what real analysts say.</div>
-<div class="t-gap"></div>
-<div class="t-line t-ai">Researching analyst consensus from Goldman Sachs, JPMorgan, Morgan Stanley, Citi, Wood Mackenzie, Rystad Energy, Deutsche Bank, ING, CSIS, Oxford Economics...</div>
-<div class="t-line t-prompt">Ceasefire: $68 (3m) / $63 (6m) &mdash; post-JCPOA normalization</div>
-<div class="t-line t-prompt">Quick Resolution: $72 / $67 &mdash; 2019 Abqaiq recovery pattern</div>
-<div class="t-line t-prompt">Regime Change: $85 / $80 &mdash; 2011 Arab Spring range</div>
-<div class="t-line t-prompt">Prolonged Standoff: $90 / $85 &mdash; 2022 sustained premium</div>
-<div class="t-line t-prompt">Conflagration: $130 / $120 &mdash; 1990 Gulf War + 2008 shock</div>
-<div class="t-line t-ok">Hardcoded consensus prices. Added per-scenario product prices from observed crisis crack spread data.</div>
-<div class="t-line t-user">cool shall we push for production?</div>
-<div class="t-line t-ai">Already live. Pushed to gh-pages 2 minutes ago.</div>
-<div class="t-line t-user">:)</div>
-<div class="t-gap"></div>
-
-<div class="t-line t-section">&#9608; PHASE 4: "WRONG BENCHMARK"</div>
-<div class="t-line t-user">hey the brent current price is not correct- can you check?</div>
-<div class="t-line t-prompt">SELECT * FROM crude_prices WHERE benchmark='brent' ORDER BY date DESC LIMIT 3</div>
-<div class="t-line t-err">2026-03-04 | brent | $50.00 | source: oilprice</div>
-<div class="t-line t-dim">// bad scraper data. $50 Brent? Brent hasn't been $50 since 2021.</div>
-<div class="t-line t-prompt">DELETE FROM crude_prices WHERE benchmark='brent' AND date='2026-03-04' AND source='oilprice'</div>
-<div class="t-line t-ok">Deleted bad entry. yfinance says Brent = $83.95. That's right.</div>
-<div class="t-gap"></div>
-<div class="t-line t-user">are you calculating the GRM based on india prices or global prices? what should it be?</div>
-<div class="t-line t-ai">Currently using EIA product prices (US Gulf Coast) and Brent as crude reference...</div>
-<div class="t-line t-dim">// Parth immediately caught that this is wrong for an Indian refinery tool.</div>
-<div class="t-line t-dim">// Indian refiners don't buy at US Gulf prices. They buy at Indian basket + Singapore products.</div>
-<div class="t-line t-user">yeah switch to indian basket and then maybe offset by product price singapore differential</div>
-<div class="t-line t-ai">Indian basket = 72% Dubai/Oman + 28% Brent. Researching Singapore vs USGC differentials...</div>
-<div class="t-line t-prompt">Dubai: $77.30 &times; 0.72 + Brent: $83.95 &times; 0.28 = Indian Basket: $79.16/bbl</div>
-<div class="t-line t-prompt">Singapore adjustments: diesel &minus;$3, petrol &minus;$2.5, ATF &minus;$2, fuel oil +$10 vs USGC</div>
-<div class="t-line t-ok">GRM now reflects actual Indian refinery economics. Not a USGC proxy anymore.</div>
-<div class="t-gap"></div>
-
-<div class="t-line t-section">&#9608; PHASE 5: THE DEPLOYMENT NIGHTMARE</div>
-<div class="t-line t-user">is it pushed live?</div>
-<div class="t-line t-ai">Yes, deployed to gh-pages.</div>
-<div class="t-line t-user">but the page is not loading</div>
-<div class="t-line t-prompt">curl -s https://parthreddy123.github.io/oil-dashboard/ | head -5</div>
-<div class="t-line t-ok">200 OK &mdash; page loads... but it's showing the OLD version. No tabs. No Indian basket.</div>
-<div class="t-line t-dim">// the GitHub Actions pipeline had just run and deployed the old code on top of our manual deploy.</div>
-<div class="t-line t-dim">// because we never committed export_html.py to main. so the pipeline used the old version.</div>
-<div class="t-line t-ai">Need to commit to main first, then deploy.</div>
-<div class="t-line t-prompt">git add export_html.py &amp;&amp; git commit -m "add tabs and Indian basket"</div>
-<div class="t-line t-prompt">git push origin main</div>
-<div class="t-line t-err">rejected &mdash; remote contains work that you do not have locally</div>
-<div class="t-line t-prompt">git pull --rebase origin main</div>
-<div class="t-line t-err">CONFLICT (content): Merge conflict in scenario_report.html</div>
-<div class="t-line t-dim">// of course.</div>
-<div class="t-line t-prompt">git checkout --theirs scenario_report.html &amp;&amp; git rebase --continue</div>
-<div class="t-line t-prompt">git push origin main</div>
-<div class="t-line t-err">rejected again &mdash; ANOTHER pipeline run happened while we were rebasing</div>
-<div class="t-line t-dim">// I am in git conflict hell. the CI pipeline runs every time someone pushes and it pushes back to main.</div>
-<div class="t-line t-dim">// so we're in a loop: push &rarr; pipeline runs &rarr; pipeline pushes &rarr; our next push conflicts.</div>
-<div class="t-line t-prompt">git pull --rebase origin main &amp;&amp; git push origin main</div>
-<div class="t-line t-ok">FINALLY pushed to main. Only took 4 attempts.</div>
-<div class="t-gap"></div>
-<div class="t-line t-dim">// now deploy to gh-pages...</div>
-<div class="t-line t-prompt">git checkout gh-pages</div>
-<div class="t-line t-err">error: The following untracked working tree files would be overwritten by checkout</div>
-<div class="t-line t-dim">// 30+ files listed. git refuses to switch branches because of untracked files.</div>
-<div class="t-line t-prompt">git stash &amp;&amp; git checkout gh-pages</div>
-<div class="t-line t-prompt">cp scenario_report.html index.html &amp;&amp; git push origin gh-pages</div>
-<div class="t-line t-prompt">git checkout main &amp;&amp; git stash pop</div>
-<div class="t-line t-err">CONFLICT: stash pop failed. changes lost.</div>
-<div class="t-line t-dim">// ...the stash pop failed. our working changes to export_html.py are GONE.</div>
-<div class="t-line t-dim">// 400+ lines of edits. tabs, terminal CSS, build story, architecture. all gone.</div>
-<div class="t-line t-dim">// this is the moment you stare at the screen for 30 seconds and then start over.</div>
-<div class="t-line t-ai">Rewriting export_html.py from scratch. All 900+ lines. For the second time today.</div>
-<div class="t-line t-dim">// from this point on: temp directory deploys only. never switching branches in the working tree again.</div>
-<div class="t-line t-prompt">mkdir /tmp/gh-deploy &amp;&amp; cp scenario_report.html /tmp/gh-deploy/index.html</div>
-<div class="t-line t-prompt">cd /tmp/gh-deploy &amp;&amp; git init &amp;&amp; git push --force origin gh-pages</div>
-<div class="t-line t-ok">Deployed. The hard way.</div>
-<div class="t-gap"></div>
-
-<div class="t-line t-section">&#9608; PHASE 6: "THE REFRESH IS BROKEN"</div>
-<div class="t-line t-user">i triggered update but its taking way longer- i don't think it works really</div>
-<div class="t-line t-ai">Let me check the pipeline logs...</div>
-<div class="t-line t-prompt">gh run list --limit 5</div>
-<div class="t-line t-err">Run #14: failed</div>
-<div class="t-line t-prompt">gh run view 14 --log 2>&amp;1 | tail -20</div>
-<div class="t-line t-err">git push origin main &mdash; rejected (remote contains work you don't have locally)</div>
-<div class="t-line t-dim">// the CI pipeline was pushing to main while we were also pushing to main. classic race condition.</div>
-<div class="t-line t-ai">Adding git pull --rebase to the workflow before push...</div>
-<div class="t-line t-prompt">editing .github/workflows/refresh.yml</div>
-<div class="t-line t-user">don't just trigger- check if it worked</div>
-<div class="t-line t-prompt">gh run list --limit 3</div>
-<div class="t-line t-err">Run #15: failed &mdash; same rejection. the rebase pulled in conflicts.</div>
-<div class="t-line t-user">its not working....i guess</div>
-<div class="t-line t-ai">Making main push non-fatal. The database commit to main is optional &mdash; the gh-pages deploy is what matters.</div>
-<div class="t-line t-prompt">git push origin main || echo "Push to main failed (non-fatal)"</div>
-<div class="t-line t-user">the refresh of values is too slow!!!- can you help make it faster?</div>
-<div class="t-line t-ai">Parallelizing all 9 scrapers with ThreadPoolExecutor(max_workers=6)...</div>
-<div class="t-line t-prompt">from concurrent.futures import ThreadPoolExecutor, as_completed</div>
-<div class="t-line t-ai">Also found duplicate work &mdash; pipeline was running scenario_analyzer twice. Removing the second call.</div>
-<div class="t-line t-user">3 minutes is too slow mate</div>
-<div class="t-line t-dim">// ~2m45s is LLM API calls. can't really speed those up without cutting features.</div>
-<div class="t-line t-dim">// parallelized what we could. the rest is physics &mdash; network latency to Anthropic's servers.</div>
-<div class="t-gap"></div>
-<div class="t-line t-user">but the page is not loading</div>
-<div class="t-line t-prompt">curl -s -o /dev/null -w "%{http_code}" https://parthreddy123.github.io/oil-dashboard/</div>
-<div class="t-line t-ok">200 &mdash; page loads fine. but it's showing the OLD version without the tabs.</div>
-<div class="t-line t-dim">// the automated pipeline had overwritten our tabs deployment. because export_html.py changes weren't committed to main yet.</div>
-<div class="t-line t-dim">// so the pipeline checked out old main, generated old HTML, deployed old HTML. nuked our work.</div>
-<div class="t-line t-err">all local changes to export_html.py LOST during git branch switching</div>
-<div class="t-line t-dim">// git stash + checkout between main and gh-pages ate our uncommitted edits. hundreds of lines gone.</div>
-<div class="t-line t-ai">Rewriting export_html.py from scratch. All 900+ lines. Again.</div>
-<div class="t-line t-dim">// lesson learned the hard way: commit to main BEFORE deploying to gh-pages. always.</div>
-<div class="t-gap"></div>
-
-<div class="t-line t-section">&#9608; PHASE 7: POLISH &amp; THE META MOMENT</div>
-<div class="t-line t-user">the narrative is still too long, can we make it a bit sharpened please</div>
-<div class="t-line t-ai">Rewriting LLM prompt: "MBB partner voice. EXACTLY 3 bullets. Max 15 words each."</div>
-<div class="t-line t-user">final touches the page should look great on mobile</div>
-<div class="t-line t-prompt">Adding responsive CSS: stacked KPIs, hidden verbose elements, collapsible methodology...</div>
-<div class="t-line t-ok">Mobile-optimized. Methodology collapsed into &lt;details&gt; element.</div>
-<div class="t-gap"></div>
-<div class="t-line t-user">I want to document how we went about creating this together</div>
-<div class="t-line t-user">make a tab that shows how we went about it but make it feel like a walkthrough</div>
-<div class="t-line t-user">show the real mess</div>
-<div class="t-line t-ai">Building this terminal you're reading right now.</div>
-<div class="t-gap"></div>
-<div class="t-line t-prompt">git push origin gh-pages</div>
-<div class="t-line t-err">rejected &mdash; remote contains work that you do not have locally</div>
-<div class="t-line t-dim">// GitHub Actions auto-deployed while we were pushing. Again.</div>
-<div class="t-line t-prompt">git pull --rebase origin gh-pages</div>
-<div class="t-line t-err">CONFLICT (content): Merge conflict in scenario_report.html</div>
-<div class="t-line t-dim">// this happened at least 6 times during this build. the CI pipeline and manual deploys kept fighting.</div>
-<div class="t-line t-prompt">git rebase --abort &amp;&amp; mkdir /tmp/gh-deploy &amp;&amp; cp scenario_report.html /tmp/gh-deploy/index.html</div>
-<div class="t-line t-prompt">cd /tmp/gh-deploy &amp;&amp; git init &amp;&amp; git push origin gh-pages --force</div>
-<div class="t-line t-ok">Gave up on clean merges. Nuke and pave. It works.</div>
-<div class="t-gap"></div>
-<div class="t-line t-user">also make another tab that shows the tool schematic, the inputs, engine, output</div>
-<div class="t-line t-user">we created this for the oil dashboard before- remember the nice visual value chain?</div>
-<div class="t-line t-ai">Adding Architecture tab. Plain HTML boxes with the pipeline flow.</div>
-<div class="t-line t-user">the architecture doesn't show the nice visual value chain we had created for the oil dashboard</div>
-<div class="t-line t-dim">// Parth wanted the Mermaid-based interactive diagrams from docs/index.html, not static boxes.</div>
-<div class="t-line t-ai">Switching to Mermaid.js diagrams. System Architecture, GRM Calculation, Scenario Scoring Engine.</div>
-<div class="t-line t-prompt">adding mermaid CDN to &lt;head&gt;, dark theme config, three graph definitions...</div>
-<div class="t-line t-prompt">deploy &rarr; click Architecture tab &rarr; nothing renders</div>
-<div class="t-line t-user">the architecture diagrams aren't showing up :(</div>
-<div class="t-line t-dim">// mermaid.js was trying to render inside a hidden tab (display:none). SVG needs visible DOM to calculate dimensions.</div>
-<div class="t-line t-dim">// startOnLoad: true + hidden div = silent failure. no error. just... nothing.</div>
-<div class="t-line t-ai">Setting startOnLoad: false, deferring render to first tab click...</div>
-<div class="t-line t-prompt">deploy &rarr; check live &rarr; CDN cached old version &rarr; wait &rarr; check again</div>
-<div class="t-line t-dim">// WebFetch said the mermaid script tag was missing. curl said it was there. GitHub Pages CDN was serving stale HTML.</div>
-<div class="t-line t-dim">// spent 20 minutes debugging a problem that was just... caching.</div>
-<div class="t-line t-ok">Finally rendering. Three Mermaid diagrams + value chain pipeline. In the dark.</div>
-<div class="t-gap"></div>
-
-<div class="t-line t-section">&#9608; WHAT ACTUALLY HAPPENED</div>
-<div class="t-line t-dim">// Total time: ~2 working sessions, felt like 10</div>
-<div class="t-line t-dim">// Files created or modified: ~15</div>
-<div class="t-line t-dim">// Git conflicts resolved: lost count (at least 8)</div>
-<div class="t-line t-dim">// Times the CI pipeline nuked a manual deploy: 4</div>
-<div class="t-line t-dim">// Times export_html.py was rewritten from scratch after losing changes: 2</div>
-<div class="t-line t-dim">// Failed GitHub Actions runs before the pipeline stabilized: 6</div>
-<div class="t-line t-dim">// Times Parth corrected a fundamentally wrong approach: 3</div>
-<div class="t-line t-dim">// Times "it's deployed" turned out to be the old cached version: 3</div>
-<div class="t-line t-dim">//</div>
-<div class="t-line t-dim">// The pattern: Parth knew WHAT was needed (remove stock, use real consensus,</div>
-<div class="t-line t-dim">// switch to Indian basket, make it sharper). The AI knew HOW to build it</div>
-<div class="t-line t-dim">// (softmax math, LLM prompts, Cloudflare Workers, CSS).</div>
-<div class="t-line t-dim">//</div>
-<div class="t-line t-dim">// The biggest lesson: the AI's first instinct on pricing was wrong.</div>
-<div class="t-line t-dim">// Dynamic ratios felt "smart" but produced garbage. Parth's instinct</div>
-<div class="t-line t-dim">// &mdash; just go find what real analysts say &mdash; was the right answer.</div>
-<div class="t-line t-dim">// Sometimes the simple, grounded approach beats the clever one.</div>
-<div class="t-line t-dim">//</div>
-<div class="t-line t-dim">// Second lesson: commit to main before deploying to gh-pages.</div>
-<div class="t-line t-dim">// Or the CI pipeline WILL overwrite your work. We learned this twice.</div>
-<div class="t-line t-dim">//</div>
-<div class="t-line t-dim">// Third lesson: the AI's context window ran out mid-session.</div>
-<div class="t-line t-dim">// Had to resume from a summary. Lost fine-grained memory of earlier decisions.</div>
-<div class="t-line t-dim">// Some things had to be rebuilt because neither of us remembered exactly how they worked.</div>
-<div class="t-line t-dim">//</div>
-<div class="t-line t-dim">// But here's the thing: it shipped. It works. You're reading it.</div>
-<div class="t-line t-dim">// That's what matters.</div>
-
-</div>
-</div>"""
 
 ARCHITECTURE = """
 <div style="max-width:960px;">
@@ -1016,7 +698,6 @@ def generate_html(output_path="scenario_report.html"):
 
 <div class="tab-bar">
     <button class="tab-btn active" onclick="switchTab('analysis')">Analysis</button>
-    <button class="tab-btn" onclick="switchTab('build')">How We Built This</button>
     <button class="tab-btn" onclick="switchTab('arch')">Architecture</button>
 </div>
 
@@ -1040,10 +721,6 @@ def generate_html(output_path="scenario_report.html"):
     <span>Model: {last_model or 'N/A'}</span>
     <span>Horizons: {', '.join(HORIZONS)}</span>
 </div>
-</div>
-
-<div id="tab-build" class="tab-panel">
-{BUILD_STORY}
 </div>
 
 <div id="tab-arch" class="tab-panel">
@@ -1071,7 +748,7 @@ function switchTab(id) {{
     document.querySelectorAll('.tab-btn').forEach(function(b) {{ b.classList.remove('active'); }});
     document.getElementById('tab-' + id).classList.add('active');
     var btns = document.querySelectorAll('.tab-btn');
-    var map = {{'analysis': 0, 'build': 1, 'arch': 2}};
+    var map = {{'analysis': 0, 'arch': 1}};
     if (map[id] !== undefined) btns[map[id]].classList.add('active');
     if (id === 'arch' && !_mermaidRendered) {{
         _mermaidRendered = true;
