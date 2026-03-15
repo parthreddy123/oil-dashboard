@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How It Was Built &mdash; Oil Scenario Engine</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0E1117; color: #E5E7EB; line-height: 1.7; padding: 2rem;
+    max-width: 900px; margin: 0 auto;
+}
+h1 { font-size: 1.8rem; font-weight: 800; color: #F9FAFB; margin-bottom: 0.3rem; }
+h2 {
+    color: #00D4AA; font-weight: 700; font-size: 1.2rem;
+    border-bottom: 2px solid rgba(0, 212, 170, 0.3); padding-bottom: 0.4rem;
+    margin: 2rem 0 1rem;
+}
+h3 { color: #F59E0B; font-size: 1rem; margin: 1.2rem 0 0.5rem; }
+a { color: #00D4FF; text-decoration: none; }
+a:hover { text-decoration: underline; }
+p { margin-bottom: 0.8rem; font-size: 0.88rem; }
+ul, ol { margin: 0.5rem 0 1rem 1.5rem; font-size: 0.85rem; }
+li { margin-bottom: 0.4rem; }
+code {
+    background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px;
+    font-size: 0.82rem; color: #00D4AA;
+}
+pre {
+    background: #151A28; border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px; padding: 16px; overflow-x: auto;
+    font-size: 0.78rem; line-height: 1.5; margin: 0.8rem 0 1.2rem;
+}
+pre code { background: none; padding: 0; }
+.subtitle { font-size: 0.78rem; color: #6B7280; margin-bottom: 1.5rem; }
+.back-link { font-size: 0.82rem; margin-bottom: 1.5rem; display: inline-block; }
+
+.story-block {
+    background: linear-gradient(135deg, #1A1F2E, #151A28);
+    border: 1px solid rgba(255,255,255,0.06); border-radius: 12px;
+    padding: 20px 24px; margin-bottom: 18px;
+}
+.story-block .chapter-label {
+    font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.12em; margin-bottom: 8px;
+}
+.story-block p { margin-bottom: 0.6rem; }
+.story-block p:last-child { margin-bottom: 0; }
+
+.tension {
+    background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2);
+    border-left: 3px solid #EF4444; border-radius: 8px;
+    padding: 12px 16px; margin: 0.8rem 0; font-size: 0.82rem;
+}
+.tension .tension-label {
+    font-size: 0.62rem; font-weight: 700; color: #EF4444;
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;
+}
+
+.win {
+    background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.2);
+    border-left: 3px solid #10B981; border-radius: 8px;
+    padding: 12px 16px; margin: 0.8rem 0; font-size: 0.82rem;
+}
+.win .win-label {
+    font-size: 0.62rem; font-weight: 700; color: #10B981;
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;
+}
+
+.pivot {
+    background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.2);
+    border-left: 3px solid #F59E0B; border-radius: 8px;
+    padding: 12px 16px; margin: 0.8rem 0; font-size: 0.82rem;
+}
+.pivot .pivot-label {
+    font-size: 0.62rem; font-weight: 700; color: #F59E0B;
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;
+}
+
+.card {
+    background: linear-gradient(135deg, #1A1F2E, #151A28);
+    border: 1px solid rgba(255,255,255,0.06); border-radius: 12px;
+    padding: 18px 22px; margin-bottom: 16px;
+}
+.card .label {
+    font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; margin-bottom: 8px;
+}
+
+.tech-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px; margin: 1rem 0;
+}
+.tech-item {
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px; padding: 12px 14px;
+}
+.tech-item .name { font-weight: 700; color: #F9FAFB; font-size: 0.85rem; }
+.tech-item .role { color: #6B7280; font-size: 0.72rem; margin-top: 2px; }
+
+.formula {
+    background: rgba(0,212,170,0.06); border: 1px solid rgba(0,212,170,0.2);
+    border-radius: 8px; padding: 12px 16px; margin: 0.8rem 0;
+    font-family: 'Courier New', monospace; font-size: 0.82rem; color: #00D4AA;
+}
+
+.footer {
+    margin-top: 3rem; padding: 14px 18px; background: #151A28;
+    border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);
+    font-size: 0.72rem; color: #4B5563; text-align: center;
+}
+
+/* Tabs */
+.tab-bar {
+    display: flex; gap: 0; margin-bottom: 1.5rem;
+    border-bottom: 2px solid rgba(255,255,255,0.08);
+}
+.tab-btn {
+    background: none; border: none; color: #6B7280; padding: 10px 20px;
+    font-size: 0.82rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+    border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;
+    font-family: inherit;
+}
+.tab-btn:hover { color: #D1D5DB; }
+.tab-btn.active { color: #00D4AA; border-bottom-color: #00D4AA; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Terminal */
+.terminal {
+    background: #0a0a0a; border: 1px solid #333; border-radius: 10px;
+    overflow: hidden; margin: 1rem 0; font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+}
+.terminal-bar {
+    background: #1a1a1a; padding: 8px 14px; display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid #333;
+}
+.terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+.terminal-title {
+    font-size: 0.72rem; color: #666; margin-left: 8px; flex: 1; text-align: center;
+}
+.terminal-body {
+    padding: 16px 20px; min-height: 400px; max-height: 600px; overflow-y: auto;
+    font-size: 0.78rem; line-height: 1.7;
+}
+.term-line {
+    opacity: 0; transform: translateY(4px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    margin-bottom: 2px;
+}
+.term-line.visible { opacity: 1; transform: translateY(0); }
+.term-prompt { color: #00D4AA; }
+.term-cmd { color: #F9FAFB; font-weight: 600; }
+.term-comment { color: #4B5563; font-style: italic; }
+.term-output { color: #9CA3AF; }
+.term-success { color: #10B981; }
+.term-warn { color: #F59E0B; }
+.term-info { color: #60A5FA; }
+.term-error { color: #EF4444; }
+.term-highlight { color: #00D4FF; font-weight: 600; }
+.term-section {
+    color: #8B5CF6; font-weight: 700; margin-top: 12px;
+    border-bottom: 1px solid rgba(139,92,246,0.2); padding-bottom: 4px;
+}
+.term-cursor {
+    display: inline-block; width: 8px; height: 16px;
+    background: #00D4AA; animation: blink 1s step-end infinite;
+    vertical-align: text-bottom; margin-left: 2px;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+.term-controls {
+    display: flex; gap: 10px; margin: 12px 0; align-items: center;
+}
+.term-btn {
+    background: linear-gradient(135deg, #00D4AA, #00B894); color: #0E1117;
+    border: none; padding: 8px 18px; border-radius: 6px; font-weight: 700;
+    font-size: 0.78rem; cursor: pointer; font-family: inherit;
+}
+.term-btn:hover { box-shadow: 0 4px 12px rgba(0,212,170,0.3); }
+.term-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.term-btn.secondary {
+    background: #1A1F2E; color: #9CA3AF; border: 1px solid rgba(255,255,255,0.1);
+}
+.term-speed {
+    font-size: 0.72rem; color: #6B7280; margin-left: auto;
+}
+.term-speed select {
+    background: #1A1F2E; color: #9CA3AF; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 4px; padding: 4px 8px; font-size: 0.72rem; font-family: inherit;
+}
+
+@media (max-width: 768px) {
+    body { padding: 0.8rem; }
+    h1 { font-size: 1.3rem; }
+    .tech-grid { grid-template-columns: 1fr; }
+    .terminal-body { font-size: 0.7rem; padding: 12px 14px; min-height: 300px; }
+    .tab-btn { padding: 8px 14px; font-size: 0.75rem; }
+}
+</style>
+</head>
+<body>
+
+<a href="./" class="back-link">&larr; Back to Dashboard</a>
+
+<h1>How the Oil Scenario Engine Was Built</h1>
+<div class="subtitle">A vibe coding journey &mdash; from "build me an oil dashboard" to an AI-powered geopolitical intelligence platform</div>
+
+<div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('story')">The Story</button>
+    <button class="tab-btn" onclick="switchTab('terminal')">Interactive Build View</button>
+    <button class="tab-btn" onclick="switchTab('deepdive')">Technical Reference</button>
+</div>
+
+<!-- ==================== TAB 1: THE STORY ==================== -->
+<div id="tab-story" class="tab-panel active">
+
+<h2>The Prompt That Started It All</h2>
+<div class="story-block">
+    <p>It started with a single prompt to Claude Code: <strong>"Build me an oil and gas intelligence dashboard. Streamlit. Dark theme. Real data."</strong></p>
+    <p>No spec. No wireframes. No architecture document. Just a vibe and a direction. The kind of thing that either produces something incredible or collapses under its own ambiguity.</p>
+    <p>What followed was a multi-week conversation between a human with domain intuition and an AI that could write production code &mdash; iterating through failures, pivots, and breakthroughs until the system you see today emerged.</p>
+</div>
+
+<h2>Chapter 1: The Foundation (Days 1-2)</h2>
+<div class="story-block">
+    <div class="chapter-label" style="color:#00D4AA;">Getting the scaffolding right</div>
+    <p>Claude set up a Streamlit multi-page app with 8 pages, a SQLite backend in WAL mode, and a dark theme. The initial architecture was clean: scrapers, processing, database, dashboard. Simple separation of concerns.</p>
+    <p>The EIA API was the first real data source. Brent and WTI crude prices flowed in &mdash; 730 daily records stretching back two years. Then product prices: petrol, diesel, ATF, propane. The conversion from USD/gallon to USD/bbl (multiply by 42) seems obvious but getting it wrong would cascade through every calculation downstream.</p>
+</div>
+
+<div class="win">
+    <div class="win-label">First win</div>
+    Real data on screen within hours. Brent price chart rendering in dark theme. The dopamine hit that keeps you going.
+</div>
+
+<h2>Chapter 2: The Indian Basket Problem</h2>
+<div class="story-block">
+    <div class="chapter-label" style="color:#F59E0B;">Where things got complicated</div>
+    <p>Indian refiners don't buy Brent. They buy a basket: <strong>72% Dubai/Oman + 28% Brent</strong>. This is the PPAC official methodology. But Dubai crude doesn't have a free API. It's not on EIA. It's not on yfinance.</p>
+</div>
+
+<div class="tension">
+    <div class="tension-label">Failure #1 &mdash; Dubai crude pricing</div>
+    First attempt: scrape OilPrice.com. Hit with Cloudflare protection. Second attempt: different User-Agent headers and request patterns. Finally got through, but the data was spotty &mdash; sometimes the page structure changed and the scraper broke silently, returning stale prices for days before anyone noticed.
+</div>
+
+<div class="story-block">
+    <p>Added yfinance as a backup for Brent (BZ=F futures) since EIA data has a 1-day lag. Now the dashboard showed live-ish prices. The Indian basket formula finally worked, and the GRM calculation could use the right crude cost.</p>
+</div>
+
+<h2>Chapter 3: The GRM Rabbit Hole</h2>
+<div class="story-block">
+    <div class="chapter-label" style="color:#8B5CF6;">Six products, six problems</div>
+    <p>Gross Refining Margin sounds simple: product revenue minus crude cost. But Indian complex refineries produce 6 products with different yield weights: diesel (42%), petrol (22%), naphtha (12%), ATF (10%), fuel oil (8%), LPG (6%).</p>
+    <p>And the prices aren't US Gulf Coast &mdash; they're Singapore-benchmarked. Diesel is $3/bbl cheaper in Singapore. Fuel oil is $10/bbl more expensive. Every product needs a regional adjustment.</p>
+</div>
+
+<div class="tension">
+    <div class="tension-label">Failure #2 &mdash; Missing price series</div>
+    EIA has no naphtha price series. No fuel oil series for Singapore. Had to estimate: naphtha at 90% of petrol, fuel oil at 65% of crude. These are approximations. The GRM was showing $13.49/bbl &mdash; realistic for an Indian complex refinery, but the uncertainty in the inputs was uncomfortable.
+</div>
+
+<h2>Chapter 4: The PPAC Wall</h2>
+<div class="story-block">
+    <div class="chapter-label" style="color:#EF4444;">When government data fights back</div>
+    <p>India's Petroleum Planning & Analysis Cell (PPAC) publishes monthly reports with refinery throughput, utilization rates, and trade flows. Perfect data source. One problem: the PDFs are image-based. Not text. Not OCR-friendly. Just scanned tables.</p>
+</div>
+
+<div class="tension">
+    <div class="tension-label">Failure #3 &mdash; PDF extraction dead end</div>
+    pdfplumber couldn't extract anything meaningful from the image-based tables. Built a Claude API PDF extractor that could read the images &mdash; but it needed API credits. Meanwhile, IOCL's website (for retail prices) used Sucuri WAF that blocked every scraping attempt. UN Comtrade for trade data required paid registration. Three data sources, three walls.
+</div>
+
+<div class="pivot">
+    <div class="pivot-label">Pivot</div>
+    Shipped with sample data for refinery throughput and trade flows. Not ideal, but the dashboard was usable. The real data pipeline was ready &mdash; just needed the API credits to unlock it. Sometimes shipping beats perfection.
+</div>
+
+<h2>Chapter 5: News Intelligence</h2>
+<div class="story-block">
+    <div class="chapter-label" style="color:#60A5FA;">Teaching the system to read</div>
+    <p>Built a news aggregator pulling from Google News (24 search queries) and 9 direct RSS feeds: Reuters, Al Jazeera, Bloomberg, Rigzone, S&P Global, Hellenic Shipping, Middle East Eye. Hundreds of articles flowing in every few hours.</p>
+    <p>The impact tagger used a 250+ keyword taxonomy across 10 categories with negation detection. "Oil prices fell" is bearish. "Oil prices did not fall" isn't. Getting this right required handling context per text segment, not just keyword matching.</p>
+</div>
+
+<h2>Chapter 6: The Big Pivot &mdash; Scenario Engine</h2>
+<div class="story-block">
+    <div class="chapter-label" style="color:#00D4AA;">From dashboard to intelligence platform</div>
+    <p>The dashboard was good. But it was passive &mdash; showing data, not generating insight. The prompt that changed everything: <strong>"Can we add geopolitical scenario analysis? Like, what happens to Indian refiners if Hormuz closes?"</strong></p>
+    <p>This turned a data dashboard into an <em>intelligence platform</em>. Five scenarios emerged, each grounded in analyst consensus from Goldman Sachs, JPMorgan, Morgan Stanley, Citi, Wood Mackenzie, and Rystad Energy:</p>
+</div>
+
+<div class="card">
+    <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+        <tr style="border-bottom:2px solid rgba(255,255,255,0.1);">
+            <th style="text-align:left;padding:6px 10px;color:#6B7280;">Scenario</th>
+            <th style="text-align:center;padding:6px 10px;color:#6B7280;">1m</th>
+            <th style="text-align:center;padding:6px 10px;color:#6B7280;">3m</th>
+            <th style="text-align:center;padding:6px 10px;color:#6B7280;">6m</th>
+            <th style="text-align:left;padding:6px 10px;color:#6B7280;">What it means</th>
+        </tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+            <td style="padding:6px 10px;color:#F97316;font-weight:600;">Managed Escalation</td>
+            <td style="padding:6px 10px;text-align:center;">$100</td>
+            <td style="padding:6px 10px;text-align:center;">$97</td>
+            <td style="padding:6px 10px;text-align:center;">$95</td>
+            <td style="padding:6px 10px;color:#6B7280;font-size:0.75rem;">Tit-for-tat strikes, limited Hormuz disruption</td>
+        </tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+            <td style="padding:6px 10px;color:#F59E0B;font-weight:600;">Prolonged Standoff</td>
+            <td style="padding:6px 10px;text-align:center;">$92</td>
+            <td style="padding:6px 10px;text-align:center;">$90</td>
+            <td style="padding:6px 10px;text-align:center;">$85</td>
+            <td style="padding:6px 10px;color:#6B7280;font-size:0.75rem;">Neither war nor peace, elevated premiums</td>
+        </tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+            <td style="padding:6px 10px;color:#EF4444;font-weight:600;">Conflagration</td>
+            <td style="padding:6px 10px;text-align:center;">$140</td>
+            <td style="padding:6px 10px;text-align:center;">$130</td>
+            <td style="padding:6px 10px;text-align:center;">$120</td>
+            <td style="padding:6px 10px;color:#6B7280;font-size:0.75rem;">Full regional war, Hormuz closed</td>
+        </tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+            <td style="padding:6px 10px;color:#00D4FF;font-weight:600;">Ceasefire &amp; Talks</td>
+            <td style="padding:6px 10px;text-align:center;">$72</td>
+            <td style="padding:6px 10px;text-align:center;">$68</td>
+            <td style="padding:6px 10px;text-align:center;">$63</td>
+            <td style="padding:6px 10px;color:#6B7280;font-size:0.75rem;">Formal ceasefire, markets normalize</td>
+        </tr>
+        <tr>
+            <td style="padding:6px 10px;color:#8B5CF6;font-weight:600;">Regime Change</td>
+            <td style="padding:6px 10px;text-align:center;">$88</td>
+            <td style="padding:6px 10px;text-align:center;">$85</td>
+            <td style="padding:6px 10px;text-align:center;">$80</td>
+            <td style="padding:6px 10px;color:#6B7280;font-size:0.75rem;">Internal power shift, unpredictable transition</td>
+        </tr>
+    </table>
+</div>
+
+<div class="story-block">
+    <p>The key innovation: each scenario has <strong>preconditions</strong> (things that must be true for it to hold) and <strong>invalidators</strong> (events that would eliminate it). This gave the LLM structured criteria instead of open-ended vibes. Huge difference in output quality.</p>
+</div>
+
+<h2>Chapter 7: Teaching an LLM to Score News</h2>
+<div class="story-block">
+    <div class="chapter-label" style="color:#8B5CF6;">The scoring algorithm</div>
+    <p>Claude Haiku 4.5 reads every news article and scores it against all 5 scenarios on a [-1.0, +1.0] scale. Confirms a precondition? +0.3 to +0.6. Matches an invalidator? -0.7 to -1.0. Neutral? Near zero.</p>
+    <p>The signals feed into a softmax function (temperature=0.5) that converts average scores into probabilities summing to 100%. Then probability-weighted expected values for Brent crude and GRM across three horizons: 1-month, 3-month, 6-month.</p>
+</div>
+
+<div class="tension">
+    <div class="tension-label">Failure #4 &mdash; LLM tone control</div>
+    Early narratives were dramatic. "Forces Indian refiners to declare force majeure." "Catastrophic supply chain collapse imminent." The LLM was writing thriller fiction, not intelligence briefs. Had to add explicit guardrails: no "force majeure", no "catastrophic", no "collapse", no "existential", no "unprecedented". State facts and mechanisms only. McKinsey tone, not CNN breaking news.
+</div>
+
+<div class="win">
+    <div class="win-label">Breakthrough</div>
+    Prompted the narrative generator as a "McKinsey senior partner" &mdash; ultra-concise, 3 bullets max, 15 words per bullet, no hedging. The output quality jumped dramatically. Every word had to earn its place.
+</div>
+
+<h2>Chapter 8: The Deployment Puzzle</h2>
+<div class="story-block">
+    <div class="chapter-label" style="color:#F59E0B;">Making it live without a server</div>
+    <p>The Streamlit app worked locally but needed a server to run. Deployed to Streamlit Community Cloud first, then Render.com. Both had cold start issues and the free tiers were slow.</p>
+</div>
+
+<div class="pivot">
+    <div class="pivot-label">Pivot &mdash; Go static</div>
+    The insight: the dashboard only updates every few hours. Why run a server 24/7? Export the scenario analysis as a standalone HTML file. Deploy to GitHub Pages. Free, fast, globally cached CDN. The "backend" only runs during GitHub Actions &mdash; no server to maintain.
+</div>
+
+<div class="story-block">
+    <p>Built <code>export_html.py</code> &mdash; 800+ lines that read the database, compute EVs, render Mermaid diagrams, and output a responsive dark-mode HTML report. Added a refresh button that triggers via a Cloudflare Worker proxy (to hide the GitHub token), which dispatches a GitHub Actions run. The page auto-polls for updates and reloads when new content is detected.</p>
+</div>
+
+<h2>Chapter 9: The Accuracy Question</h2>
+<div class="story-block">
+    <div class="chapter-label" style="color:#EF4444;">Can you trust the numbers?</div>
+    <p>The system produces expected values, not forecasts. But the question kept nagging: are the probabilities any good?</p>
+    <p>Built an accuracy tracking system. Every refresh, the current prediction is snapshotted. When actual prices come in, the error is computed. A 10-day rolling average shows how far off the EV was. The daily email includes this &mdash; radical transparency about the system's limitations.</p>
+</div>
+
+<div class="tension">
+    <div class="tension-label">Ongoing tension</div>
+    The softmax temperature is a magic number. Too high (T=3) and all scenarios get ~20%. Too low (T=0.1) and one scenario dominates at 90%+. Settled on T=0.5 as a balance between decisiveness and humility. But it's a judgment call, not a derivation.
+</div>
+
+<h2>Chapter 10: The Current State</h2>
+<div class="story-block">
+    <div class="chapter-label" style="color:#10B981;">What's running right now</div>
+    <p>Every 3 hours, GitHub Actions fires:</p>
+    <ol>
+        <li>9 parallel scrapers pull data from EIA, yfinance, OilPrice, ExchangeRate, Google News, 9 RSS feeds, PPAC, OPEC, and company press releases</li>
+        <li>1,000+ articles are scored against 5 scenarios by Claude Haiku 4.5</li>
+        <li>Softmax converts signals to probabilities across 3 horizons (1m, 3m, 6m)</li>
+        <li>LLM generates strategic narratives and per-scenario assessments</li>
+        <li>Static HTML is exported and deployed to GitHub Pages</li>
+        <li>Daily email digest sent with probability shifts and top signals</li>
+    </ol>
+    <p>The whole pipeline runs in ~90 seconds. No server. No infra costs beyond the Anthropic API.</p>
+</div>
+
+<h2>What I Learned</h2>
+<div class="story-block">
+    <ul>
+        <li><strong>Vibe coding works for ambitious projects</strong> &mdash; but you need domain intuition. The AI writes the code; you need to know what to ask for and when the output smells wrong.</li>
+        <li><strong>Ship with sample data</strong> &mdash; don't let missing data sources block the whole project. The PPAC PDFs are still image-based, but the dashboard shipped anyway.</li>
+        <li><strong>LLMs need guardrails</strong> &mdash; left unconstrained, Claude wrote thriller fiction. Explicit tone controls and word bans transformed the output.</li>
+        <li><strong>Static > dynamic when updates are periodic</strong> &mdash; GitHub Pages with CI/CD is simpler and faster than maintaining a server for data that refreshes every 3 hours.</li>
+        <li><strong>Preconditions + invalidators > open-ended prompts</strong> &mdash; giving the LLM structured scoring criteria massively improved signal quality.</li>
+        <li><strong>Show your uncertainty</strong> &mdash; the accuracy tracker and the EV framing (not "forecast") keep the system honest.</li>
+    </ul>
+</div>
+
+<h2>Tech Stack</h2>
+<div class="tech-grid">
+    <div class="tech-item"><div class="name">Python 3.12</div><div class="role">Core language &mdash; scrapers, processing, engine</div></div>
+    <div class="tech-item"><div class="name">Claude Haiku 4.5</div><div class="role">LLM &mdash; article scoring, narratives, assessments</div></div>
+    <div class="tech-item"><div class="name">Claude Code</div><div class="role">Vibe coding &mdash; built the entire codebase</div></div>
+    <div class="tech-item"><div class="name">SQLite (WAL)</div><div class="role">Database &mdash; 11 tables, concurrent reads</div></div>
+    <div class="tech-item"><div class="name">GitHub Actions</div><div class="role">CI/CD &mdash; 3-hourly auto-refresh</div></div>
+    <div class="tech-item"><div class="name">GitHub Pages</div><div class="role">Static HTML hosting via CDN</div></div>
+    <div class="tech-item"><div class="name">Cloudflare Workers</div><div class="role">Token proxy for refresh button</div></div>
+    <div class="tech-item"><div class="name">Streamlit</div><div class="role">Interactive dashboard (local use)</div></div>
+</div>
+
+</div><!-- end tab-story -->
+
+<!-- ==================== TAB 2: INTERACTIVE TERMINAL ==================== -->
+<div id="tab-terminal" class="tab-panel">
+
+<div class="term-controls">
+    <button class="term-btn" id="playBtn" onclick="startTerminal()">&#9654; Play Build</button>
+    <button class="term-btn secondary" id="skipBtn" onclick="skipToEnd()">Skip to End</button>
+    <button class="term-btn secondary" id="resetBtn" onclick="resetTerminal()" style="display:none;">Reset</button>
+    <div class="term-speed">
+        Speed: <select id="speedSelect" onchange="updateSpeed()">
+            <option value="80">Normal</option>
+            <option value="40">Fast</option>
+            <option value="15">Instant</option>
+        </select>
+    </div>
+</div>
+
+<div class="terminal">
+    <div class="terminal-bar">
+        <div class="terminal-dot" style="background:#FF5F57;"></div>
+        <div class="terminal-dot" style="background:#FFBD2E;"></div>
+        <div class="terminal-dot" style="background:#28C840;"></div>
+        <div class="terminal-title">oil-scenario-engine &mdash; build walkthrough</div>
+    </div>
+    <div class="terminal-body" id="termBody"></div>
+</div>
+
+</div>
+
+<!-- ==================== TAB 3: TECHNICAL REFERENCE ==================== -->
+<div id="tab-deepdive" class="tab-panel">
+
+<h2>Scoring Algorithm</h2>
+<div class="formula">
+    1. LLM scores each article against 5 scenarios: signal in [-1.0, +1.0]<br>
+    2. score[s] = AVG(signal) for scenario s across all articles<br>
+    3. weight[s] = exp(score[s] / T) / &Sigma; exp(score[i] / T) &nbsp;&nbsp; [T = 0.5]<br>
+    4. EV(Brent) = &Sigma; weight[s] &times; scenario_price[s]<br>
+    5. EV(GRM) = &Sigma; weight[s] &times; scenario_grm[s]
+</div>
+
+<h2>Indian Refinery GRM</h2>
+<div class="formula">
+    Indian Basket = 0.72 &times; Dubai/Oman + 0.28 &times; Brent<br><br>
+    GRM = (0.42&times;Diesel + 0.22&times;Petrol + 0.12&times;Naphtha + 0.10&times;ATF + 0.08&times;FuelOil + 0.06&times;LPG) &minus; Basket<br><br>
+    Singapore adjustments: Diesel &minus;$3, Petrol &minus;$2.5, ATF &minus;$2, FuelOil +$10, LPG +$5<br>
+    Estimates: Naphtha = 90% of Petrol, Fuel Oil = 65% of Crude
+</div>
+
+<h2>Database Schema (11 tables)</h2>
+<div class="card">
+    <ul style="columns:2;column-gap:2rem;">
+        <li><code>crude_prices</code> &mdash; Brent, WTI, Dubai, Indian Basket</li>
+        <li><code>product_prices</code> &mdash; Diesel, petrol, ATF, LPG</li>
+        <li><code>crack_spreads</code> &mdash; Product-crude differentials</li>
+        <li><code>refinery_data</code> &mdash; Throughput, utilization</li>
+        <li><code>trade_flows</code> &mdash; Import/export volumes</li>
+        <li><code>global_events</code> &mdash; OPEC production, turnarounds</li>
+        <li><code>news_articles</code> &mdash; 1000+ articles, sentiment tagged</li>
+        <li><code>article_signals</code> &mdash; LLM scores per scenario</li>
+        <li><code>scenario_narratives</code> &mdash; LLM-generated insights</li>
+        <li><code>scenario_accuracy</code> &mdash; Prediction tracking</li>
+        <li><code>fx_rates</code> &mdash; USD/INR exchange rates</li>
+    </ul>
+</div>
+
+<h2>System Architecture</h2>
+<pre><code>
+  [EIA API]  [yfinance]  [OilPrice]  [FX API]  [Google News + 9 RSS]
+       \          |          |          |          /
+        +----+----+----+-----+----+-----+----+----+
+             |                                    |
+        ThreadPoolExecutor (6 workers)
+             |
+        SQLite WAL (11 tables)
+             |
+        Claude Haiku 4.5
+        |-- Score articles [-1, +1] per scenario
+        |-- Softmax (T=0.5) -> probabilities
+        |-- Expected values (1m, 3m, 6m)
+        '-- Strategic narratives (MBB tone)
+             |
+        export_html.py -> scenario_report.html
+             |
+        GitHub Actions (every 3 hours)
+             |
+        GitHub Pages CDN
+</code></pre>
+
+<h2>CI/CD Pipeline</h2>
+<div class="card">
+    <div class="label" style="color:#F59E0B;">GitHub Actions &mdash; Every 3 Hours</div>
+    <ol>
+        <li><strong>Checkout</strong> main branch</li>
+        <li><strong>Setup</strong> Python 3.12 with pip cache</li>
+        <li><strong>Run full pipeline</strong> &mdash; 9 parallel scrapers &rarr; impact tagging &rarr; scenario scoring &rarr; narrative generation &rarr; email digest</li>
+        <li><strong>Generate HTML</strong> via <code>export_html.py</code></li>
+        <li><strong>Deploy</strong> to <code>gh-pages</code> branch (force orphan)</li>
+    </ol>
+</div>
+
+</div><!-- end tab-deepdive -->
+
+<!-- ===== FOOTER ===== -->
+<div class="footer">
+    Built with Claude Code &middot;
+    <a href="./">View Dashboard</a>
+</div>
+
+<script>
+function switchTab(id) {
+    document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+    document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.getElementById('tab-' + id).classList.add('active');
+    var btns = document.querySelectorAll('.tab-btn');
+    var map = {'story': 0, 'terminal': 1, 'deepdive': 2};
+    if (map[id] !== undefined) btns[map[id]].classList.add('active');
+}
+
+var LINES = [
+    {type:'section', text:'CHAPTER 1: PROJECT SETUP'},
+    {type:'prompt', text:'mkdir oil-dashboard && cd oil-dashboard'},
+    {type:'prompt', text:'pip install streamlit plotly pandas yfinance anthropic feedparser'},
+    {type:'success', text:'47 packages installed'},
+    {type:'prompt', text:'python database/db_manager.py --init'},
+    {type:'comment', text:'# SQLite WAL mode for concurrent reads during scraping'},
+    {type:'success', text:'11 tables created: crude_prices, product_prices, crack_spreads, ...'},
+    {type:'blank'},
+
+    {type:'section', text:'CHAPTER 2: DATA SCRAPERS'},
+    {type:'prompt', text:'python scrapers/eia_scraper.py'},
+    {type:'info', text:'  Brent (RBRTE): 730 daily prices'},
+    {type:'info', text:'  WTI (RWTC): 730 daily prices'},
+    {type:'info', text:'  Products: USD/gal x 42 = USD/bbl'},
+    {type:'info', text:'  OPEC production: 11 countries, 132 records'},
+    {type:'prompt', text:'python scrapers/oilprice_scraper.py'},
+    {type:'warn', text:'  WARNING: Cloudflare protection detected...'},
+    {type:'warn', text:'  Retrying with alternate headers...'},
+    {type:'success', text:'  Dubai/Oman crude: fetched'},
+    {type:'prompt', text:'python scrapers/news_aggregator.py'},
+    {type:'info', text:'  Google News: 24 queries dispatched'},
+    {type:'info', text:'  RSS: Reuters, Al Jazeera, Bloomberg, Rigzone, S&P Global...'},
+    {type:'success', text:'  1,082 articles ingested'},
+    {type:'prompt', text:'python scrapers/ppac_scraper.py'},
+    {type:'error', text:'  ERROR: PDF tables are image-based, pdfplumber returned empty'},
+    {type:'error', text:'  ERROR: IOCL website blocked by Sucuri WAF'},
+    {type:'warn', text:'  Falling back to sample data for refinery throughput...'},
+    {type:'output', text:'All 9 scrapers completed (ThreadPoolExecutor, 6 workers)'},
+    {type:'blank'},
+
+    {type:'section', text:'CHAPTER 3: SCENARIO ENGINE'},
+    {type:'comment', text:'# The pivot: from dashboard to intelligence platform'},
+    {type:'prompt', text:'cat processing/scenario_analyzer.py'},
+    {type:'output', text:'5 scenarios with preconditions + invalidators:'},
+    {type:'warn',  text:'  Managed Escalation  -> $100 / $97 / $95  (1m/3m/6m)'},
+    {type:'warn',  text:'  Prolonged Standoff   -> $92  / $90 / $85'},
+    {type:'error', text:'  Conflagration        -> $140 / $130 / $120'},
+    {type:'highlight', text:'  Ceasefire & Talks    -> $72  / $68 / $63'},
+    {type:'info',  text:'  Regime Change        -> $88  / $85 / $80'},
+    {type:'comment', text:'# Prices from GS, JPM, MS, Citi, WoodMac, Rystad consensus'},
+    {type:'blank'},
+
+    {type:'section', text:'CHAPTER 4: LLM SCORING'},
+    {type:'prompt', text:'python -c "from processing.scenario_analyzer import analyze_articles"'},
+    {type:'output', text:'Sending articles to Claude Haiku 4.5 in batches of 10...'},
+    {type:'info', text:'  Each article scored against all 5 scenarios [-1.0, +1.0]'},
+    {type:'output', text:'  Confirms precondition:  +0.3 to +0.6'},
+    {type:'output', text:'  Matches invalidator:    -0.7 to -1.0'},
+    {type:'success', text:'  1,082 articles -> 5,410 signals stored'},
+    {type:'blank'},
+
+    {type:'section', text:'CHAPTER 5: THE TONE PROBLEM'},
+    {type:'prompt', text:'# First narrative attempt:'},
+    {type:'error', text:'  "Forces Indian refiners to declare force majeure"'},
+    {type:'error', text:'  "Catastrophic supply chain collapse imminent"'},
+    {type:'warn', text:'  LLM writing thriller fiction, not intelligence briefs...'},
+    {type:'prompt', text:'# Fix: add guardrails to system prompt'},
+    {type:'output', text:'  Banned words: force majeure, catastrophic, collapse, unprecedented'},
+    {type:'output', text:'  Tone: "McKinsey senior partner. Ultra-concise."'},
+    {type:'output', text:'  Rules: 3 bullets, max 15 words each, no hedging'},
+    {type:'success', text:'  Narrative quality transformed'},
+    {type:'blank'},
+
+    {type:'section', text:'CHAPTER 6: PROBABILITY COMPUTATION'},
+    {type:'prompt', text:'python -c "compute_weights(\'1m\')"'},
+    {type:'comment', text:'# Softmax with temperature=0.5'},
+    {type:'output', text:'  weight[s] = exp(score[s] / 0.5) / sum(exp(scores / 0.5))'},
+    {type:'success', text:'  Prolonged Standoff:  35%'},
+    {type:'warn',    text:'  Conflagration:       24%'},
+    {type:'info',    text:'  Regime Change:       20%'},
+    {type:'highlight', text:'  Ceasefire & Talks:   11%'},
+    {type:'output', text:'  Managed Escalation:  10%'},
+    {type:'blank'},
+
+    {type:'section', text:'CHAPTER 7: THE DEPLOYMENT PIVOT'},
+    {type:'prompt', text:'# v1: Streamlit Cloud (slow cold starts)'},
+    {type:'prompt', text:'# v2: Render.com (free tier too slow)'},
+    {type:'prompt', text:'# v3: Static HTML + GitHub Pages (the answer)'},
+    {type:'output', text:'  export_html.py: 800+ lines -> standalone scenario_report.html'},
+    {type:'output', text:'  GitHub Actions: cron every 3 hours'},
+    {type:'output', text:'  Cloudflare Worker: token proxy for refresh button'},
+    {type:'output', text:'  Auto-poll: HEAD request with ETag, reload on change'},
+    {type:'success', text:'  Zero server costs. CDN-fast globally.'},
+    {type:'blank'},
+
+    {type:'section', text:'CHAPTER 8: ACCURACY TRACKING'},
+    {type:'output', text:'  Every refresh: snapshot prediction to scenario_accuracy table'},
+    {type:'output', text:'  Compare EV vs actual Brent when prices come in'},
+    {type:'output', text:'  10-day rolling average error in daily email'},
+    {type:'warn', text:'  Radical transparency: show when the system is wrong'},
+    {type:'blank'},
+
+    {type:'section', text:'BUILD COMPLETE'},
+    {type:'success', text:'Live and auto-refreshing every 3 hours'},
+    {type:'output', text:'  9 scrapers | 1,082 articles | 5 scenarios | 3 horizons (1m/3m/6m)'},
+    {type:'output', text:'  Claude Haiku 4.5 | Softmax (T=0.5) | GitHub Pages CDN'},
+    {type:'output', text:'  Daily email digest | Accuracy tracking | Zero server costs'},
+    {type:'success', text:'Built entirely with Claude Code'},
+];
+
+var _lineIdx = 0;
+var _timer = null;
+var _speed = 80;
+
+function updateSpeed() { _speed = parseInt(document.getElementById('speedSelect').value); }
+
+function addLine(line) {
+    var body = document.getElementById('termBody');
+    var div = document.createElement('div');
+    div.className = 'term-line';
+    if (line.type === 'blank') { div.innerHTML = '&nbsp;'; }
+    else if (line.type === 'section') { div.className += ' term-section'; div.textContent = '=== ' + line.text + ' ==='; }
+    else if (line.type === 'prompt') { div.innerHTML = '<span class="term-prompt">$ </span><span class="term-cmd">' + line.text + '</span>'; }
+    else if (line.type === 'comment') { div.innerHTML = '<span class="term-comment">' + line.text + '</span>'; }
+    else { div.innerHTML = '<span class="term-' + line.type + '">' + line.text + '</span>'; }
+    var old = body.querySelector('.term-cursor');
+    if (old) old.remove();
+    body.appendChild(div);
+    var cursor = document.createElement('span');
+    cursor.className = 'term-cursor';
+    div.appendChild(cursor);
+    requestAnimationFrame(function() { div.classList.add('visible'); });
+    body.scrollTop = body.scrollHeight;
+}
+
+function playNext() {
+    if (_lineIdx >= LINES.length) {
+        var body = document.getElementById('termBody');
+        var cursor = body.querySelector('.term-cursor');
+        if (cursor) cursor.remove();
+        document.getElementById('playBtn').disabled = true;
+        document.getElementById('skipBtn').style.display = 'none';
+        document.getElementById('resetBtn').style.display = '';
+        return;
+    }
+    addLine(LINES[_lineIdx]);
+    _lineIdx++;
+    var delay = _speed;
+    if (_lineIdx > 0) {
+        var prev = LINES[_lineIdx - 1];
+        if (prev.type === 'section') delay = _speed * 3;
+        else if (prev.type === 'prompt') delay = _speed * 2;
+        else if (prev.type === 'blank') delay = _speed * 0.5;
+    }
+    _timer = setTimeout(playNext, delay);
+}
+
+function startTerminal() {
+    document.getElementById('playBtn').disabled = true;
+    document.getElementById('playBtn').textContent = 'Playing...';
+    playNext();
+}
+
+function skipToEnd() {
+    if (_timer) clearTimeout(_timer);
+    var body = document.getElementById('termBody');
+    body.innerHTML = '';
+    for (var i = 0; i < LINES.length; i++) {
+        var line = LINES[i];
+        var div = document.createElement('div');
+        div.className = 'term-line visible';
+        if (line.type === 'blank') { div.innerHTML = '&nbsp;'; }
+        else if (line.type === 'section') { div.className += ' term-section'; div.textContent = '=== ' + line.text + ' ==='; }
+        else if (line.type === 'prompt') { div.innerHTML = '<span class="term-prompt">$ </span><span class="term-cmd">' + line.text + '</span>'; }
+        else if (line.type === 'comment') { div.innerHTML = '<span class="term-comment">' + line.text + '</span>'; }
+        else { div.innerHTML = '<span class="term-' + line.type + '">' + line.text + '</span>'; }
+        body.appendChild(div);
+    }
+    _lineIdx = LINES.length;
+    body.scrollTop = body.scrollHeight;
+    document.getElementById('playBtn').disabled = true;
+    document.getElementById('skipBtn').style.display = 'none';
+    document.getElementById('resetBtn').style.display = '';
+}
+
+function resetTerminal() {
+    if (_timer) clearTimeout(_timer);
+    _lineIdx = 0;
+    document.getElementById('termBody').innerHTML = '';
+    document.getElementById('playBtn').disabled = false;
+    document.getElementById('playBtn').textContent = '\u25B6 Play Build';
+    document.getElementById('skipBtn').style.display = '';
+    document.getElementById('resetBtn').style.display = 'none';
+}
+</script>
+
+</body>
+</html>
